@@ -1,0 +1,102 @@
+<html>
+<head>
+  <link href="/css/bootstrap.min.css" rel="stylesheet">
+  <link href="/css/font-awesome-animation.min.css" rel="stylesheet">
+  <link href="/ferries.css?v=1.6" rel="stylesheet">
+  <script src="/js/jquery.min.js"></script>
+  <script src="https://npmcdn.com/tether@1.2.4/dist/js/tether.min.js"></script> 
+  <script src="/js/bootstrap.min.js"></script>
+  <script src="/js/mustache.min.js"></script>
+  <script src="/javascripts/dataloader.js?v=1.16"></script>
+  <script src="/javascripts/datarenderer.js?v=1.5"></script>
+  <script src="/javascripts/localizer.js?v=1"></script>
+  <script src="/javascripts/partialloader.js?v=1.4"></script>
+  <script src="https://use.fontawesome.com/aa44d9f2e6.js"></script>
+  <script src="/javascripts/txtol.js?v=1"></script>
+</head>
+<body>
+<div id="routelist">
+{{ #routes }}
+<div id="infocontenttemplate">
+	<div class="infocontent">
+
+		<div class="row">
+			<div class="col-12 col-sm-12">
+				<div class="infotitle" style="border-bottom: {{ style.weight }}px {{ style.style }} {{ style.color }};">
+					{{ name }}{{#specifier}}: {{/specifier}}<span class="specifier">{{ specifier }}</span>
+				</div>
+			</div>
+		</div>
+
+		<div class="row vesselrow spaceabove">
+			{{ #vessels }}
+			<div class="col-12 col-sm-6 col-md-12">
+				<div class="vesselbox">
+					<div class="vesselname">
+						{{ name }}
+					</div>
+					<div class="vesselfeatures">
+						{{ #features }}
+							<i class="fa fa-{{ icon }}" aria-hidden="true"></i> {{ value }} 
+						{{ /features }}
+					</div>
+				</div>
+			</div>
+			{{ /vessels }}
+		</div>
+		<div class="row spaceabove">
+			{{ #features }}
+			<div class="col-12 col-sm-4 col-md-11 routefeature {{ class }}">{{{ value }}}</div>
+			{{ /features}}
+		</div>
+		<div class="row spaceabove">
+			{{ #timetables }}
+			<div class="col-12 col-sm-12 col-md-12">
+				<button type="button" linktype="{{exttimetables}}" data-target="{{id}}" class="btn btn-info btn-md timetablebutton {{exttimetables}}" href="{{link}}">
+				{{#L}}timetables{{/L}} {{#buttonspecifier}}-{{/buttonspecifier}} {{buttonspecifier}}
+				</button>
+			</div>
+			{{ /timetables }}
+		</div>
+
+		<div class="spaceabove pierrow">
+			{{ #piers }}
+				<div data-target="{{ id }}" class="pierlink {{ class }}"><span class="pier">{{ name }}{{#name_local}}/{{/name_local}}{{name_local}}</span><span class="pierspecifier"> {{ specifier }}</span></div>
+			{{ /piers }}
+		</div>
+
+		<div class="spaceabove">
+			{{ #notes }}
+				{{{ content }}}
+			{{ /notes }}
+		</div>
+<!--
+  <a class="btn btn-primary" data-toggle="collapse" href="#collapse_{{ id }}" role="button" aria-expanded="false" aria-controls="collapse_{{ id }}">
+    Link with href
+  </a>
+  	<div class="collapse" id="collapse_{{ id }}">
+  		<div class="spaceabove"><h4>{{#L}}contactinfo{{/L}}</h4></div>
+
+		<div id="contactslist" class="">
+			<div class="contactsbox">
+				{{ #contacts }}
+				<div class="contactformheader">
+					{{{ name }}}
+				</div>
+				{{ #items }}
+				<a href="{{{uri}}}" target="{{ target }}">
+					<button type="button" class="btn btn-outline-info contactbutton {{class}}">{{ text }}{{ specifier }}</button>
+				</a>
+				{{ /items }}
+				{{ /contacts }}
+			</div>
+		</div>
+	</div>
+-->
+
+	</div>
+</div>
+{{ /routes }}
+</div>
+</body>
+</html>

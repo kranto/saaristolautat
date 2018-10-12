@@ -1,0 +1,38 @@
+<html>
+<head>
+  <link href="/css/bootstrap.min.css" rel="stylesheet">
+  <link href="/css/font-awesome-animation.min.css" rel="stylesheet">
+  <link href="/ferries.css?v=1.6" rel="stylesheet">
+  <script src="/js/jquery.min.js"></script>
+  <script src="https://npmcdn.com/tether@1.2.4/dist/js/tether.min.js"></script> 
+  <script src="/js/bootstrap.min.js"></script>
+  <script src="/js/mustache.min.js"></script>
+  <script src="/javascripts/dataloader.js?v=1.16"></script>
+  <script src="/javascripts/datarenderer.js?v=1.5"></script>
+  <script src="/javascripts/localizer.js?v=1"></script>
+  <script src="/javascripts/partialloader.js?v=1.4"></script>
+  <script src="https://use.fontawesome.com/aa44d9f2e6.js"></script>
+  <script src="/javascripts/txtol.js?v=1"></script>
+</head>
+<body>
+<div id="routelist">
+{{ #routes }}
+	<div>
+		<div>
+			{{ name }}{{#specifier}}: {{/specifier}} {{ specifier }}
+		</div>
+		<div>
+			{{ #vessels }}
+				{{{ name }}}
+			{{ /vessels }}
+		</div>
+		<div>
+			{{ #piers }}
+				{{ name }}{{#name_local}}/{{/name_local}}{{name_local}} {{ specifier }}
+			{{ /piers }}
+		</div>
+	</div>
+{{ /routes }}
+</div>
+</body>
+</html>

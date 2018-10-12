@@ -1,40 +1,167 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
   <head>
-    <meta charset="utf-8">
-    <link rel="shortcut icon" href="%PUBLIC_URL%/favicon.ico">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="theme-color" content="#000000">
-    <!--
-      manifest.json provides metadata used when your web app is added to the
-      homescreen on Android. See https://developers.google.com/web/fundamentals/engage-and-retain/web-app-manifest/
-    -->
-    <link rel="manifest" href="%PUBLIC_URL%/manifest.json">
-    <!--
-      Notice the use of %PUBLIC_URL% in the tags above.
-      It will be replaced with the URL of the `public` folder during the build.
-      Only files inside the `public` folder can be referenced from the HTML.
+    <title>Saaristolautat.fi (react)</title>
 
-      Unlike "/favicon.ico" or "favicon.ico", "%PUBLIC_URL%/favicon.ico" will
-      work correctly both with client-side routing and a non-root public URL.
-      Learn how to configure a non-root public URL by running `npm run build`.
-    -->
-    <title>React App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="HandheldFriendly" content="true" />
+    <meta charset="utf-8"/>
+
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+    <meta name="theme-color" content="#ffffff">  
+
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/font-awesome-animation.min.css" rel="stylesheet">
+    <link href="/ferries.css?v=1.8" rel="stylesheet">
+    <script src="/js/jquery.min.js"></script>
+    <script src="https://npmcdn.com/tether@1.2.4/dist/js/tether.min.js"></script> 
+    <script src="/js/bootstrap.min.js"></script>
+    <script src="/js/mustache.min.js"></script>
+    <script src="/javascripts/routes.js"></script>
+    <script src="/javascripts/objects.js"></script>
+    <script src="/javascripts/maptypes.js"></script>
+    <script src="/javascripts/live.js"></script>
+    <script src="/javascripts/dataloader.js?v=1.27"></script>
+    <script src="/javascripts/datarenderer.js?v=1.6"></script>
+    <script src="/javascripts/localizer.js?v=1"></script>
+    <script src="/javascripts/partialloader.js?v=1.4"></script>
+    <script src="https://use.fontawesome.com/aa44d9f2e6.js"></script>
+    <script src="/javascripts/txtol.js?v=1.2"></script>
   </head>
   <body>
-    <noscript>
-      You need to enable JavaScript to run this app.
-    </noscript>
-    <div id="root"></div>
-    <!--
-      This HTML file is a template.
-      If you open it directly in the browser, you will see an empty page.
 
-      You can add webfonts, meta tags, or analytics to this file.
-      The build step will place the bundled scripts into the <body> tag.
+  <div id="loader" style="display: none;">
+    <div id="loaderbox">
+      <div id="loaderheader">
+        <img src="/mstile-70x70.png"/>
+      </div>
+      <div id="loadercontent">
+        <h1>Saaristolautat.fi (react)</h1>
+        <p>
+          <span lang="fi">Turun saariston ja Ahvenanmaan lauttareitit</span><span lang="xx">. </span>
+          <span lang="sv">Skärgårdsfärjorna i Skärgårdshavet</span><span lang="xx">. </span>
+          <span lang="en">Ferry routes in the Finnish archipelago</span><span lang="xx">. </span>
+        </p>
+        <p lang="fi">40000 saarta<br/>50 lauttaa<br/>200 laituria</p>
+        <p lang="sv">40000 öar<br/>50 färjor<br/>200 bryggor</p>
+        <p lang="en">40000 islands<br/>50 ferries<br/>200 piers</p>
+      </div>
+    </div>
+    <div style="position: absolute;bottom: 30px;text-align: center;width: 100%;color: white;">
+      <i class="fa fa-cog fa-spin fa-3x fa-fw"></i>
+      <div style="font-size: 20px; display: inline-block; position: relative; top: -7px;">
+        <span lang="fi">Ladataan...</span>
+        <span lang="sv">Laddas...</span>
+        <span lang="en">Loading...</span>
+      </div>
+    </div>
+  </div>
 
-      To begin the development, run `npm start` or `yarn start`.
-      To create a production bundle, use `npm run build` or `yarn build`.
-    -->
+  <div id="keywords" lang="xx">
+    lautta lautat lossi lossit laiva laivat aikataulu aikataulut lautta-aikataulut saaristo reitti reitit risteily 
+    färja färjor tidtabell tidtabeller skärgård rutt kryssning
+    ferry schedule timetable finland finnish archipelago route cruise
+    ahvenanmaa åland islands nagu nauvo pargas parainen korpo korppoo gustavs kustavi velkua iniö rymättylä rimito houtskari houtskär utö jurmo hangö hanko kimitoön kemiönsaari kemiö kimito kasnäs högsåra pensar kumlinge föglö brändö kökar sottunga vårdö örö bengtskär turku åbo helsinki maarianhamina mariehamn eckerö naantali nådendal
+    gudingen skiftet ejdern knipan alfågeln skarven viggen doppingen frida satava aura aurora stella mergus elektra viken alva nordep isla kivimo fiskö falkö fanny norrskär aavatar eivor karolina odin summersea
+  </div>
+  
+  <div id="bannerModal" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <img src="/mstile-70x70.png" style="width: 40px; height: 40px;"/>
+          <h5 class="modal-title" style="position: relative; top: 10px; margin-left: 20px;">Saaristolautat.fi</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body" style="background-image: url('img/mapsample.png');">
+          <h5>
+          <span lang="fi">Klikkaa reittiä kartalla nähdäksesi reitin tiedot</span>
+          <span lang="sv">Klicka en rutt på kartan för information</span>
+          <span lang="en">Click a route on map to see route details</span>
+          </h5>
+          <i style="position: fixed; top: 50%; right: 20%; font-size: 30px; color: #304070;" class="fa fa-mouse-pointer faa-tada animated" aria-hidden="true"></i>
+          <ul style="position: relative; left: 30px;">
+          <li><span lang="fi">Reitit</span><span lang="sv">Rutter</span><span lang="en">Routes</span></li>
+          <li><span lang="fi">Aikataulut</span><span lang="sv">Tidtabeller</span><span lang="en">Schedules</span></li>
+          <li><span lang="fi">Yhteystiedot</span><span lang="sv">Kontaktuppgifter</span><span lang="en">Contact information</span></li>
+          </ul>
+    <div class="btn-group" style="width: 150px; margin-top: 20px;">
+      <button type="button" class="btn btn-secondary lang-button" setlang="fi" style="width:33%;">FI</button>
+      <button type="button" class="btn btn-secondary lang-button" setlang="sv" style="width:34%;">SV</button>
+      <button type="button" class="btn btn-secondary lang-button" setlang="en" style="width:33%;">EN</button>
+    </div>
+        </div>
+        <div class="modal-footer">
+          <div class="checkbox dont-show-again" id="dont-show-again">
+            <input id="dont-show-again-cb" type="checkbox" value="false" version="1"/>
+            <label for="dont-show-again-cb">
+              <span lang="fi">Älä näytä uudestaan</span>
+              <span lang="sv">Visa inte mer</span>
+              <span lang="en">Don't show again</span>
+            </label>
+          </div>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="wrapper">
+    <div id="wrapper2">
+
+      <div id="infopage" class="fmodal" style="display: none;"></div>
+      <div class="mapoverlay"></div>
+      <div class="info"></div>
+      
+    </div>
+
+    <div id="mapcontainer">
+      <div id="map" class="map"></div>
+    </div>
+
+    <div id="scrollIndicator"><i class="fa fa-ellipsis-h" aria-hidden="true"></i></div>
+
+
+    <div id="topbar">
+      <button id="menubutton" type="button" class="topbarbutton">
+        <i class="fa fa-bars" aria-hidden="true"></i>
+      </button>
+      <div id="topbartitle">
+        Saaristolautat.fi
+      </div>
+      <button id="settingsbutton" type="button" class="topbarbutton right">
+        <i class="fa fa-sliders" aria-hidden="true"></i>
+      </button>
+    </div>
+
+    <div id="liveindpos">
+      <div id="liveind">
+        <span id="liveindtxt"></span>
+      </div>
+    </div>
+
+    <div class="" id="menu"></div>
+
+    <div class="" id="settings"></div>
+
+    <div id="timetables" class="fmodal" style="display: none;"></div>
+
+  </div>
+
+  <div id="templates" style="display: none;">
+    <div id="infotemplateholder"></div>
+    <div id="infotemplate2holder"></div>
+    <div id="timetabletemplateholder"></div>
+  </div>
+
+  <canvas id="canvas" style="display: none;"></canvas>
+  <script src="/javascripts/ferries.js?v=1.22"></script>
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAX_N6yFjHfac6v9-xiwA31yg1twAMMyGA&callback=initMap" async defer></script>
   </body>
 </html>

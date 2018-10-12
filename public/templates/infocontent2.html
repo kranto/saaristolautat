@@ -1,0 +1,33 @@
+
+<div id="infocontent2template">
+	<div class="infocontent">
+
+		<button type="button" class="btn btn-secondary closeInfoButton"><i class="fa fa-times" aria-hidden="true"></i></button>
+
+		<div class="headerbox">
+			{{#names}}
+			<div class="routeheader">
+				{{.}}
+			</div>
+			{{/names}}
+		</div>
+		<div class="contentsbox">
+			{{#contents}}
+			<a href="{{operator.link}}" target="operator">
+				<div class="contentbox">
+					<div class="routename">
+						{{name}}
+					</div>
+					<div class="routedetails">
+						{{details}}
+					</div>
+					<div class="routeoperatorlogo">
+						<img tmplsrc="{{operator.logo}}" height="{{operator.height}}"/>
+					</div>
+				</div>
+			</a>
+			{{/contents}}
+		</div>
+
+	</div>
+</div>
