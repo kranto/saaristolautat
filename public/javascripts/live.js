@@ -8,7 +8,6 @@ function initLiveLayer(map) {
   map.addListener('idle', updateLiveInd);
 
   function toggleLiveLayer(enable) {
-    // console.log('toggleLiveLayer', enable);
 
     if (liveInterval) {
       clearInterval(liveInterval);
@@ -16,16 +15,11 @@ function initLiveLayer(map) {
     }
 
     if (enable) {
-      $("#liveind").show();
-      $("#liveind").animate({left: '0px'});
-      if (typeof L !== 'undefined') document.getElementById("liveindtxt").innerHTML = L(currentLang, "live.loading");
+      if (typeof liveIndicator !== 'undefined') liveIndicator.setText(L(currentLang, "live.loading"));
       loadLiveData(map);
       liveInterval = setInterval(function() { loadLiveData(map); }, 10000);
     } else {
-      $("#liveind").animate({left: '-100px'}, function() { 
-        document.getElementById("liveindtxt").innerHTML="";
-        $("#liveind").hide();
-      });
+      liveIndicator.setText("");
       map.data.forEach(function(feature) {
         map.data.remove(feature);
       });
@@ -71,9 +65,10 @@ function initLiveLayer(map) {
   }
 
   function updateLiveInd() {
+    if (typeof liveIndicator === 'undefined') return;
     if (!liveLoadCount) return;
     if (!layers || !layers.live) {
-      document.getElementById("liveindtxt").innerHTML = "";
+      liveIndicator.setText("");
       return;
     }
     var sumCurrentInBounds = 0;
@@ -120,7 +115,7 @@ function initLiveLayer(map) {
         msg = ["live.notvisible"];
       }
     }
-    document.getElementById("liveindtxt").innerHTML = L(currentLang, msg);
+    liveIndicator.setText(L(currentLang, msg));
   }
 
   function updateVesselLabel(map, feature, isVisible) {
