@@ -15,7 +15,7 @@ function initLiveLayer(map) {
     }
 
     if (enable) {
-      if (typeof liveIndicator !== 'undefined') liveIndicator.setText(L(currentLang, "live.loading"));
+      if (typeof liveIndicator !== 'undefined' && typeof L !== 'undefined') liveIndicator.setText(L(currentLang, "live.loading"));
       loadLiveData(map);
       liveInterval = setInterval(function() { loadLiveData(map); }, 10000);
     } else {
