@@ -377,7 +377,7 @@ function onMapIdle() {
 
 var dontShowAgainVersion = localStorage.getItem("dontShowAgainVersion");
 dontShowAgainVersion = dontShowAgainVersion? dontShowAgainVersion: 0;
-var currentBannerVersion = $("#dont-show-again-cb").attr("version");
+var currentBannerVersion = $("#dont-show-again-cb").attr("version") || 0;
 
 function hideLoader() {
   if (timeout && mapInitialized ) {
@@ -728,8 +728,8 @@ var layers = localStorgageLayers? JSON.parse(localStorgageLayers): {
   distances: true,
   roadferries: true,
   conn4: true,
-  conn5: true,
-  longdistanceferries: true,
+  conn5: false,
+  longdistanceferries: false,
   live: false,
 };
 
