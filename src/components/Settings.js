@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import SettingsLayers from './SettingsLayers';
 import MapTypeSelector from './MapTypeSelector';
+import LocaleSelector from './LocaleSelector';
 
 export default class Settings extends Component {
 
@@ -16,7 +17,7 @@ export default class Settings extends Component {
     return (
       <div className="menucontainer" id="settingscontent">
 
-        <MapTypeSelector className="boxs" />
+        <div className="boxs"><MapTypeSelector/></div>
 
         <div className="boxs">
           <button type="button" className="btn btn-secondary" id="toggleFullscreen" style={{width: "100%"}}>
@@ -24,15 +25,10 @@ export default class Settings extends Component {
           </button>
         </div>
 
-        <SettingsLayers className="boxs"/>
+        <div className="boxs"><SettingsLayers/></div>
 
-        <div className="boxs">
-          <div className="btn-group" style={{ width: "100%" }}>
-            <button type="button" className="btn btn-secondary lang-button" setlang="fi" style={{ width: "33%" }}>FI</button>
-            <button type="button" className="btn btn-secondary lang-button" setlang="sv" style={{ width: "34%" }}>SV</button>
-            <button type="button" className="btn btn-secondary lang-button" setlang="en" style={{ width: "33%" }}>EN</button>
-          </div>
-        </div>
+        <div  className="boxs"><LocaleSelector/></div>
+
       </div>
     );
   }
