@@ -308,6 +308,7 @@ function initLanguage() {
 }
 
 initLanguage();
+window.currentFerriesLang = currentLang; // pass to loader in index.js
 
 $(document).ready(function() {
   showLanguage(currentLang);
@@ -358,7 +359,7 @@ function addMapListeners(map) {
 var timeout = false;
 var mapInitialized = false;
 
-if (window.location.hostname == "localhost") $("#loader").fadeOut(500);
+// if (window.location.hostname == "localhost") $("#loader").fadeOut(500);
 
 setTimeout(function() { timeout = true; hideLoader(); }, 3000);
 
