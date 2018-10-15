@@ -377,9 +377,11 @@ function onMapIdle() {
 
 var dontShowAgainVersion = localStorage.getItem("dontShowAgainVersion");
 dontShowAgainVersion = dontShowAgainVersion? dontShowAgainVersion: 0;
-var currentBannerVersion = $("#dont-show-again-cb").attr("version") || 0;
+
+var currentBannerVersion;
 
 function hideLoader() {
+  currentBannerVersion = $("#dont-show-again-cb").attr("version") || 0;
   if (timeout && mapInitialized ) {
     rerender(map, true);
     $("#loader").fadeOut(1000);

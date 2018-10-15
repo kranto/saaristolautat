@@ -1,9 +1,6 @@
 import React, { Component } from 'react';
-import SettingsLayers from './SettingsLayers';
-import MapTypeSelector from './MapTypeSelector';
-import LocaleSelector from './LocaleSelector';
 
-export default class Settings extends Component {
+export default class TopBar extends Component {
 
   componentDidMount() {
     if (this.props.callback) this.props.callback();
