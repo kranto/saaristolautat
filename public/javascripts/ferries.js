@@ -493,6 +493,8 @@ function initPierLinks() {
 
 function setInfoContent(targets, dontPushState) {
 
+  window.unsetInfoContent2(data);
+
   var output;
   var route;
   $(".info .infocontent").addClass("removing");
@@ -504,16 +506,15 @@ function setInfoContent(targets, dontPushState) {
     var data = routeInfo(fdata.routes[route], currentLang);
     selectedRoute = data;
     output = Mustache.render(template, data);
+    output = output.replace(/tmplsrc/g, "src");
+    $(".info").append(output);
   } else {
-    var template = document.getElementById('infocontent2template').innerHTML;
     var uniqueNames = targets.map(function(target) { return target.name; }).filter(onlyUnique);
     var data = { names: uniqueNames, contents: targets };
-    output = Mustache.render(template, data);
+    window.setInfoContent2(data);
     if (!dontPushState) history.pushState({route: targets.map(function(r) { return r.id; }), timetables: null}, null, null);
   }
 
-  output = output.replace(/tmplsrc/g, "src");
-  $(".info").append(output);
   if ($(".infocontent.removing").length) $(".infocontent:not(.removing)").hide();
 
   if (targets[0].style) {
