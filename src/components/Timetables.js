@@ -10,6 +10,10 @@ export default class Timetables extends Component {
     return false;
   }
 
+  onCloseClicked() {
+    window.history.back();
+  }
+
   render() {
 
     const data = this.props.data;
@@ -46,10 +50,13 @@ export default class Timetables extends Component {
 
     const titleLine = data.specifier? 
       (<div className="infotitle">{ data.name }: <span className="specifier">{data.specifier}</span></div>):
-      (<div className="infotitle">{ data.name }</div>); 
+      (<div className="infotitle">{ data.name }</div>);
+
     return (
       <div className="fmodalcontent timetablescontent">
-        <button type="button" className="btn btn-secondary closeInfoButton" id="closeTimetablesButton"><i className="fa fa-times" aria-hidden="true"></i></button>
+        <button type="button" className="btn btn-secondary closeInfoButton" onClick={this.onCloseClicked} id="closeTimetablesButton">
+          <i className="fa fa-times" aria-hidden="true"></i>
+        </button>
         <div className="fmodalheader">
           {titleLine}
         </div>

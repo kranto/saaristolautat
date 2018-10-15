@@ -427,7 +427,6 @@ function openTimetable(id) {
   var timetable = selectedRoute.timetables.filter(function(tt) { return tt.id == id; })[0];
   window.setTimetables(timetable); // render react component via index.js
   $('#timetables').fadeIn();
-  $('#closeTimetablesButton').click(function() { history.back(); });
   hideMenu();
   hideSettings();
 }
@@ -485,14 +484,16 @@ function initPierLinks() {
   });
 }
 
+var lastInfoContentType2 = false;
 function setInfoContent(targets, dontPushState) {
 
-  window.unsetInfoContent2(data);
+  if (lastInfoContentType2) window.unsetInfoContent2(data);
 
   var output;
   var route;
   $(".info .infocontent").addClass("removing");
   if (targets[0].ref) {
+    lastInfoContentType2 = false;
     route = targets[0].ref;
     if (!dontPushState) history.pushState({route: route, timetables: null}, null, null);
 
@@ -503,6 +504,7 @@ function setInfoContent(targets, dontPushState) {
     output = output.replace(/tmplsrc/g, "src");
     $(".info").append(output);
   } else {
+    lastInfoContentType2 = true;
     var uniqueNames = targets.map(function(target) { return target.name; }).filter(onlyUnique);
     var data = { names: uniqueNames, contents: targets };
     window.setInfoContent2(data);
@@ -650,6 +652,15 @@ function latLng2Point(latLng, map) {
   return new google.maps.Point((worldPoint.x - bottomLeft.x) * scale, (worldPoint.y - topRight.y) * scale);
 }
 
+function removeInfoContent() {
+  if (lastInfoContentType2) {
+    window.unsetInfoContent2();
+  } else {
+    $(".info .infocontent").remove();
+  }
+  lastInfoContentType2 = false;
+}
+
 function unselectAll(pushState) {
   $("#wrapper2").css({pointerEvents: "none"});
   $(".mapverlay").css({pointerEvents: "none"});
@@ -664,7 +675,7 @@ function unselectAll(pushState) {
       $(".info").animate({left: -400}, 'fast', function() {
         $(".info").css({left: "" });
         $("#wrapper2").toggleClass("info-open", false);
-        $(".info .infocontent").remove();
+        removeInfoContent();
       });
     } else {
       $("#wrapper2").animate({scrollTop: 0}, 'fast', function() {
@@ -672,7 +683,7 @@ function unselectAll(pushState) {
           $(".info").css({top: "" }); 
         });
           $("#wrapper2").toggleClass("info-open", false);
-          $(".info .infocontent").remove();
+          removeInfoContent();
           toggleScrollIndicator();
       });
     }
