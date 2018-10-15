@@ -484,27 +484,26 @@ function initPierLinks() {
   });
 }
 
-var lastInfoContentType2 = false;
+var lastInfoContent = false;
 function setInfoContent(targets, dontPushState) {
 
-  if (lastInfoContentType2) window.unsetInfoContent2(data);
+  if (lastInfoContent) window.unsetInfoContent1();
+  lastInfoContent = true;
 
   var output;
   var route;
-  $(".info .infocontent").addClass("removing");
+  // $(".info .infocontent").addClass("removing");
   if (targets[0].ref) {
-    lastInfoContentType2 = false;
     route = targets[0].ref;
     if (!dontPushState) history.pushState({route: route, timetables: null}, null, null);
 
-    var template = document.getElementById('infocontenttemplate').innerHTML;
     var data = routeInfo(fdata.routes[route], currentLang);
     selectedRoute = data;
-    output = Mustache.render(template, data);
-    output = output.replace(/tmplsrc/g, "src");
-    $(".info").append(output);
+    // output = Mustache.render(template, data);
+    // output = output.replace(/tmplsrc/g, "src");
+    // $(".info").append(output);
+    window.setInfoContent1(data);
   } else {
-    lastInfoContentType2 = true;
     var uniqueNames = targets.map(function(target) { return target.name; }).filter(onlyUnique);
     var data = { names: uniqueNames, contents: targets };
     window.setInfoContent2(data);
@@ -652,15 +651,6 @@ function latLng2Point(latLng, map) {
   return new google.maps.Point((worldPoint.x - bottomLeft.x) * scale, (worldPoint.y - topRight.y) * scale);
 }
 
-function removeInfoContent() {
-  if (lastInfoContentType2) {
-    window.unsetInfoContent2();
-  } else {
-    $(".info .infocontent").remove();
-  }
-  lastInfoContentType2 = false;
-}
-
 function unselectAll(pushState) {
   $("#wrapper2").css({pointerEvents: "none"});
   $(".mapverlay").css({pointerEvents: "none"});
@@ -675,7 +665,7 @@ function unselectAll(pushState) {
       $(".info").animate({left: -400}, 'fast', function() {
         $(".info").css({left: "" });
         $("#wrapper2").toggleClass("info-open", false);
-        removeInfoContent();
+        window.unsetInfoContent1();
       });
     } else {
       $("#wrapper2").animate({scrollTop: 0}, 'fast', function() {
@@ -683,11 +673,12 @@ function unselectAll(pushState) {
           $(".info").css({top: "" }); 
         });
           $("#wrapper2").toggleClass("info-open", false);
-          removeInfoContent();
+          window.unsetInfoContent1();
           toggleScrollIndicator();
       });
     }
   });
+  lastInfoContent = false;
   selected.forEach(function(target) { target.highlight(false); if (target.rerender) target.rerender(map.getZoom(), map.getMapTypeId()); });
   selected = [];
 }
