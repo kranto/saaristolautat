@@ -7,6 +7,7 @@ import Menu from './components/Menu';
 import Banner from './components/Banner';
 import Loader  from './components/Loader';
 import InfoContent2  from './components/InfoContent2';
+import Timetables  from './components/Timetables';
 
 ReactDOM.render(<Loader lang={window.currentFerriesLang}/>, document.getElementById('loader'));	
 
@@ -24,3 +25,12 @@ window.setInfoContent2 = function(data) {
 window.unsetInfoContent2 = function() {
 	ReactDOM.unmountComponentAtNode(document.getElementById('infoholder'));
 }
+
+window.setTimetables = function(data) {
+	ReactDOM.render(<Timetables data={data} lang={window.currentFerriesLang} />, document.getElementById('timetables'));
+}
+
+window.unsetTimetables = function() {
+	ReactDOM.unmountComponentAtNode(document.getElementById('timetables'));
+}
+

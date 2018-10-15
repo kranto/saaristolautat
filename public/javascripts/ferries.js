@@ -417,22 +417,16 @@ $(document).keyup(function(e) {
 });
 
 function closeTimetables() {
-  $('#timetables').fadeOut();
+  $('#timetables').fadeOut(function() {
+    window.unsetTimetables();
+  });
   $('#timetables').scrollTop(0);
 }
 
 function openTimetable(id) {
   var timetable = selectedRoute.timetables.filter(function(tt) { return tt.id == id; })[0];
-  var tttemplate = document.getElementById('timetabletemplate').innerHTML;
-  tttemplate = tttemplate.replace(/tmplsrc/g, "src");
-  timetable.L = function () {
-    return function(val, render) {
-      return L(currentLang, render(val));
-    };
-  }
-  var ttoutput = Mustache.render(tttemplate, timetable);
+  window.setTimetables(timetable); // render react component via index.js
   $('#timetables').fadeIn();
-  $("#timetables").html(ttoutput);
   $('#closeTimetablesButton').click(function() { history.back(); });
   hideMenu();
   hideSettings();
