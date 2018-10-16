@@ -6,6 +6,7 @@ import Settings from './components/Settings';
 import Menu from './components/Menu';
 import Banner from './components/Banner';
 import Loader  from './components/Loader';
+import InfoPage  from './components/InfoPage';
 import InfoContent2  from './components/InfoContent2';
 import InfoContent  from './components/InfoContent';
 import Timetables  from './components/Timetables';
@@ -18,6 +19,7 @@ ReactDOM.render(<Banner callback={window.initSettings}/>, document.getElementByI
 ReactDOM.render(<TopBar />, document.getElementById('topbar'));
 ReactDOM.render(<Settings callback={window.initSettings}/>, document.getElementById('settings'));
 ReactDOM.render(<Menu callback={window.initMenu}/>, document.getElementById('menu'));
+ReactDOM.render(<InfoPage callback={window.initInfoPage}/>, document.getElementById('infopage'));
 
 window.setInfoContent1 = function(data) {
 	ReactDOM.render(<InfoContent data={data} lang={window.currentFerriesLang}/>, document.getElementById('infoholder'));
