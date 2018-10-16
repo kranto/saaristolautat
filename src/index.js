@@ -10,6 +10,22 @@ import InfoPage  from './components/InfoPage';
 import InfoContent2  from './components/InfoContent2';
 import InfoContent  from './components/InfoContent';
 import Timetables  from './components/Timetables';
+import txtol from './lib/txtol';
+
+window.txtol = txtol;
+
+window.initApplication = () => {
+	txtol.init();
+	window.initMap();
+}
+
+const loadGoogleMaps = () => {
+	const googleMapScript = document.createElement('script');
+	googleMapScript.setAttribute('src','https://maps.googleapis.com/maps/api/js?key=AIzaSyAX_N6yFjHfac6v9-xiwA31yg1twAMMyGA&callback=initApplication');
+	document.body.appendChild(googleMapScript);	
+}
+
+//--
 
 ReactDOM.render(<Loader lang={window.currentFerriesLang}/>, document.getElementById('loader'));	
 
@@ -45,3 +61,4 @@ window.unsetTimetables = function() {
 	ReactDOM.unmountComponentAtNode(document.getElementById('timetables'));
 }
 
+loadGoogleMaps();

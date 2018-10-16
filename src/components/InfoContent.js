@@ -22,7 +22,7 @@ export default class InfoContent extends Component {
 
     const vesselItems = data.vessels.map( vessel => {
       const features = vessel.features.map( feature => 
-        <span key={feature.icon}><i className={"fa fa-" + feature.icon } aria-hidden="true"></i> { feature.value }</span>
+        <span key={feature.icon}><i className={"fa fa-" + feature.icon } aria-hidden="true"></i> { feature.value } </span>
       );
       return (
         <div key={vessel.name} className="col-12 col-sm-6 col-md-12">
@@ -41,7 +41,7 @@ export default class InfoContent extends Component {
     const timetableItems = data.timetables.map( timetable =>
       <div key={timetable.id} className="col-12 col-sm-12 col-md-12">
         <button type="button" linktype={timetable.exttimetables.toString()} data-target={timetable.id} className={"btn btn-info btn-md timetablebutton " + timetable.exttimetables} href={timetable.link}>
-          {L('timetables')} {timetable.buttonspecifier? "-": ""} {timetable.buttonspecifier}
+          &nbsp;{L('timetables')} {timetable.buttonspecifier? "-": ""} {timetable.buttonspecifier}
         </button>
       </div>
     );

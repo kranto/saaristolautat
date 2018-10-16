@@ -32,10 +32,10 @@ txtol.init = function() {
     this.setMap(map);
   }
 
-  TxtOverlay.prototype = new google.maps.OverlayView();
+  TxtOverlay.prototype = new window.google.maps.OverlayView();
 
   TxtOverlay.prototype.setInnerHTML = function(innerHTML) {
-    if (this.div_ && this.div_.innerHTML != innerHTML) {
+    if (this.div_ && this.div_.innerHTML !== innerHTML) {
       this.div_.innerHTML = innerHTML;
       this.draw();
     }
@@ -91,3 +91,5 @@ txtol.init = function() {
 
   txtol.TxtOverlay = TxtOverlay;
 }
+
+export default txtol;

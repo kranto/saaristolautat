@@ -65,10 +65,6 @@ function keepCenter() {
 
 $(document).ready(function(){
 
-  // $("#infopage").load("templates/infopage.html?v=1.6 #infopagecontent", initInfoPage);
-  // $("#menu").load("templates/menucontent.html?v=1 #menucontent", initMenu);
-  // $("#settings").load("templates/settingscontent.html?v=1 #settingscontent", initSettings);
-
   $("#timetables").click(function(event) { if (event.target == this) {history.back(); }});
 
   if (window.location.hash) setTimeout(function() { onhashchange(); }, 2000);
@@ -863,7 +859,6 @@ var latestHandledMapClickAt = 0;
 
 function initMap() {
   var data = {};
-  txtol.init();
 
   map = new google.maps.Map(document.getElementById('map'), mapOptions);
   resetMap();
@@ -876,13 +871,6 @@ function initMap() {
   objectRenderer = initObjectRenderer(map);
   loadFerriesData(receiveFData);
 
-  var oldZoom = map.getZoom();
-  map.addListener('zoom_changed', function() {
-    var newZoom = map.getZoom();
-    // console.log('zoom_changed: ', oldZoom, newZoom);
-    oldZoom = newZoom;
-  });
-  
   map.addListener('zoom_changed',function() {
     cancelHeaderBarToggle();
     hideObjects(map);
@@ -907,6 +895,8 @@ function initMap() {
   liveLayer = initLiveLayer(map);
 
   initLayers(map);
+
+  return map;
 }
 
 function initLayers(map) {
