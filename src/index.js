@@ -12,6 +12,7 @@ import InfoContent  from './components/InfoContent';
 import Timetables  from './components/Timetables';
 import txtol from './lib/txtol';
 import { initMapTypes } from './lib/maptypes';
+import { initLiveLayer } from './lib/live';
 
 window.txtol = txtol;
 
@@ -20,6 +21,8 @@ window.initApplication = () => {
 	txtol.init();
 	map = window.initMap();
 	initMapTypes(map);
+	window.liveLayer = initLiveLayer(map, txtol, window.L2);
+	window.initLayers();
 }
 
 const loadGoogleMaps = () => {

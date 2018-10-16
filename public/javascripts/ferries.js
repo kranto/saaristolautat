@@ -265,9 +265,10 @@ function showLanguage(lang) {
     else
       $(this).hide();      
   });
-  if (liveLayer) liveLayer.updateLiveInd();
+  if (typeof liveLayer !== 'undefined') liveLayer.updateLiveInd();
 }
 var currentLang;
+var L2;
 
 function setLanguage(lang) {
   if (typeof Storage !== 'undefined') {
@@ -277,6 +278,7 @@ function setLanguage(lang) {
   $(".lang-button").toggleClass('active', false);
   $(".lang-button[setlang=" + lang +"]").toggleClass('active', true);
   currentLang = lang;
+  L2 = function(msg) { return (typeof L !== 'undefined')? L(currentLang, msg): msg; }
 
   if (objects) {
     objects.forEach(function(object){ if (object.init) object.init(); });
@@ -729,12 +731,10 @@ var layers = localStorgageLayers? JSON.parse(localStorgageLayers): {
   live: false,
 };
 
-var liveLayer;
-
 localStorage.setItem("layers", JSON.stringify(layers));
 
 var onLayersChange = {
-  live: function(layer, enable) { liveLayer.toggleLiveLayer(enable); }
+  live: function(layer, enable) { if (typeof liveLayer !== 'undefined') liveLayer.toggleLiveLayer(enable); }
 };
 
 var map;
@@ -890,7 +890,7 @@ function initMap() {
     disableAutoPan: true
   });
 
-  liveLayer = initLiveLayer(map);
+//  liveLayer = initLiveLayer(map);
 
   initLayers(map);
 
