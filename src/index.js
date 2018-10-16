@@ -14,9 +14,11 @@ import txtol from './lib/txtol';
 import { initMapTypes } from './lib/maptypes';
 import { initLiveLayer } from './lib/live';
 import { initObjectRenderer } from './lib/objects';
+import { routeInfo } from './lib/datarenderer';
 
 window.initApplication = () => {
 	txtol.init();
+	window.routeInfo = routeInfo;
 	const map = window.initMap();
 	initMapTypes(map);
 	const objectRenderer = initObjectRenderer(map, txtol);

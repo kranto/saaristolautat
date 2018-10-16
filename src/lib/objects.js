@@ -31,11 +31,6 @@ export function initObjectRenderer(map, txtol) {
     });
   }
 
-  function getLabelColor(mapTypeId) {
-    return mapTypeId === 'hybrid' || mapTypeId === 'satellite'? '#aaaa00': '#002080';
-  }
-
-
   // object renderers
 
   function road(feature, map) {

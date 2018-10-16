@@ -24,11 +24,12 @@ function getPhones(item) {
 function getLocalizedItem(item, lang) {
     
     if (!(item instanceof Object)) {
-        if (typeof item === 'string' && item.indexOf("ref_") == 0) {
-            var parts = item.split("_");
-            var sub = ferrydata[parts[1]][parts[2]];
-            sub.id = parts[2];
-            return getLocalizedItem(deepCopy(sub), lang);
+        if (typeof item === 'string' && item.indexOf("ref_") === 0) {
+            console.error('should not come here');
+            // var parts = item.split("_");
+            // var sub = ferrydata[parts[1]][parts[2]];
+            // sub.id = parts[2];
+            // return getLocalizedItem(deepCopy(sub), lang);
         } else {
             return item;
         }
@@ -43,10 +44,10 @@ function getLocalizedItem(item, lang) {
     for (let index in keys) {
         var key = keys[index];
         if (ew(key, "_L")) {
-            var key1 = key.substring(0, key.length - 2);
-            result[key1] = L(lang, item[key]);
+            let key1 = key.substring(0, key.length - 2);
+            result[key1] = window.L(lang, item[key]);
         } else if (ew(key, "_" + lang)) {
-            var key1 = key.substring(0, key.length - 3);
+            let key1 = key.substring(0, key.length - 3);
             if (result[key1]) result[key1 + "_local"] = result[key1];
             result[key1] = item[key];
         } else if (!RegExp('_..$').test(key)) {
@@ -62,7 +63,7 @@ function getLocalizedItem(item, lang) {
 
 function ew(target, needle) {
     if (target.endsWith) return target.endsWith(needle);
-    return target.length >= needle.length && target.lastIndexOf(needle) == target.length - needle.length;
+    return target.length >= needle.length && target.lastIndexOf(needle) === target.length - needle.length;
 }
 
 function getWww(item) {
@@ -74,7 +75,7 @@ function getEmail(item) {
 }
 
 function getFb(item) {
-    fb = item.fb;
+    const fb = item.fb;
     if (typeof fb === 'object') {
         return [{ class: "facebook", text: fb.name || item.name, specifier: "", uri: fb.uri, target: "facebook"}];
     } else if (fb) {
@@ -111,7 +112,7 @@ function filterTimetables(tables) {
     return tables.length? tables: null;
 }
 
-routeInfo = function(route, lang) {
+export function routeInfo(route, lang) {
     route = getLocalizedItem(deepCopy(route), lang);
     var info = {};
     var contacts = [];
@@ -141,8 +142,8 @@ routeInfo = function(route, lang) {
 
     var piers = route.piers;
     piers.forEach(function(pier) {
-        pier.class = pier.type == 1? "mainpier": "";
-        pier.specifier = pier.type == 1 && pier.mun.name != pier.name ? "(" + pier.mun.name  + ")": "";
+        pier.class = pier.type === 1? "mainpier": "";
+        pier.specifier = pier.type === 1 && pier.mun.name !== pier.name ? "(" + pier.mun.name  + ")": "";
     });
     piers[piers.length - 1].last = true;
     info.piers = piers;
@@ -156,7 +157,6 @@ routeInfo = function(route, lang) {
 
     var timetables = route.timetables;
 
-    var index = 0;
     timetables.forEach(function(timetable) {
         timetable.buttonspecifier = timetables.length > 1? timetable.name? timetable.name: timetable.specifier: "";
         timetable.name = timetable.name? timetable.name: route.name;
@@ -189,12 +189,6 @@ routeInfo = function(route, lang) {
     });
 
     info.contacts = contacts;
-
-    info.L = function () {
-        return function(val, render) {
-            return L(lang, render(val));
-        };
-    }
 
     return info;
 }
