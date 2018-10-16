@@ -351,7 +351,6 @@ function addMapListeners(map) {
 
   map.addListener('click', toggleHeaderbar);
   map.addListener('idle', rememberCenter);
-
 }
 
 var timeout = false;
@@ -829,6 +828,9 @@ function renderData(data, map) {
 }
 
 var fdata;
+var objectRenderer;
+var tooltip;
+
 function receiveFData(data, geojson, messages) {
   fdata = data;
   L = initLocalizer(messages);
@@ -868,7 +870,16 @@ function initMap() {
   updateMapStyles();
   map.addListener('zoom_changed', updateMapStyles);
 
-  objectRenderer = initObjectRenderer(map);
+  tooltip = new google.maps.InfoWindow({
+    content: "",
+    disableAutoPan: true
+  });
+
+  return map;
+}
+
+function initMap2(map, objectRenderer1) {
+  objectRenderer = objectRenderer1;
   loadFerriesData(receiveFData);
 
   map.addListener('zoom_changed',function() {
@@ -885,20 +896,10 @@ function initMap() {
 
   addMapListeners(map);
 
-  tooltip = new google.maps.InfoWindow({
-    content: "",
-    disableAutoPan: true
-  });
-
-//  liveLayer = initLiveLayer(map);
-
-  initLayers(map);
-
   return map;
 }
 
 function initLayers(map) {
-  // console.log(layers);
   for (var layer in layers) {
     if (layers.hasOwnProperty(layer) && layers[layer] && onLayersChange[layer]) onLayersChange[layer](map, true);
   }

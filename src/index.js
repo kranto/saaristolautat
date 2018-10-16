@@ -13,14 +13,14 @@ import Timetables  from './components/Timetables';
 import txtol from './lib/txtol';
 import { initMapTypes } from './lib/maptypes';
 import { initLiveLayer } from './lib/live';
+import { initObjectRenderer } from './lib/objects';
 
-window.txtol = txtol;
-
-let map = null;
 window.initApplication = () => {
 	txtol.init();
-	map = window.initMap();
+	const map = window.initMap();
 	initMapTypes(map);
+	const objectRenderer = initObjectRenderer(map, txtol);
+	window.initMap2(map, objectRenderer);
 	window.liveLayer = initLiveLayer(map, txtol, window.L2);
 	window.initLayers();
 }

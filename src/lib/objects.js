@@ -1,4 +1,14 @@
-function initObjectRenderer(map) {
+export function initObjectRenderer(map, txtol) {
+
+  const google = window.google;
+  const shortName = window.shortName;
+  const longName = window.longName;
+  const description = window.description;
+  const tooltip = window.tooltip;
+  const roadColor = window.roadColor;
+  const roadColorSatellite = window.roadColorSatellite;
+  const layers = window.layers;
+  const select = window.select;
 
   function createCircleIcon(color, opacity, scale, labelOrigin) {
     return {
@@ -22,7 +32,7 @@ function initObjectRenderer(map) {
   }
 
   function getLabelColor(mapTypeId) {
-    return mapTypeId == 'hybrid' || mapTypeId == 'satellite'? '#aaaa00': '#002080';
+    return mapTypeId === 'hybrid' || mapTypeId === 'satellite'? '#aaaa00': '#002080';
   }
 
 
@@ -44,9 +54,9 @@ function initObjectRenderer(map) {
     var maxZ = feature.properties.maxZ || 8;
     return {
       rerender: function(zoom, mapTypeId) {
-        var addZ = mapTypeId == 'hybrid'? 2: 0;
+        var addZ = mapTypeId === 'hybrid'? 2: 0;
         roadObject.setVisible(zoom >= minZ + addZ && zoom <= maxZ + addZ);
-        roadObject.setOptions({strokeColor: mapTypeId == google.maps.MapTypeId.ROADMAP? roadColor: roadColorSatellite});
+        roadObject.setOptions({strokeColor: mapTypeId === google.maps.MapTypeId.ROADMAP? roadColor: roadColorSatellite});
       }
     };
   }
@@ -187,7 +197,6 @@ function initObjectRenderer(map) {
       ref = feature.properties.ref;
       dataObject = data.piers[ref];    
     }
-    var shortName_ = shortName(dataObject);
     var longName_ = longName(dataObject).replace('/', '<br/>');
     var label = new txtol.TxtOverlay(position, longName_, "pier pier-" + feature.properties.ssubtype, map, feature.properties.labelAnchor);
 
@@ -200,12 +209,11 @@ function initObjectRenderer(map) {
       }
     }
 
-    marker.addListener('click', function() { latestHandledMapClickAt = new Date().getTime(); showTooltip(); });
-    label.addEventListener('click', function(event) { event.stopPropagation(); event.preventDefault(); latestHandledMapClickAt = new Date().getTime(); showTooltip(); });
+    marker.addListener('click', function() { window.latestHandledMapClickAt = new Date().getTime(); showTooltip(); });
+    label.addEventListener('click', function(event) { event.stopPropagation(); event.preventDefault(); window.latestHandledMapClickAt = new Date().getTime(); showTooltip(); });
     return {
       ref: ref,
       init: function() {
-        shortName_ = shortName(dataObject);
         longName_ = longName(dataObject).replace('/', '<br/>');
         label.setInnerHTML(longName_);
       },
