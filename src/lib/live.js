@@ -1,6 +1,5 @@
-export function initLiveLayer(map, txtol, L2) {
+export function initLiveLayer(map, txtol, L2, liveIndicator) {
 
-  const liveIndicator = window.liveIndicator;
   const layers = window.layers;
 
   var LIVE_MIN_ZOOM = 8;

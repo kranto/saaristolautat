@@ -10,6 +10,7 @@ import InfoPage  from './components/InfoPage';
 import InfoContent2  from './components/InfoContent2';
 import InfoContent  from './components/InfoContent';
 import Timetables  from './components/Timetables';
+import Wrapper from './components/Wrapper';
 import txtol from './lib/txtol';
 import { initMapTypes } from './lib/maptypes';
 import { initLiveLayer } from './lib/live';
@@ -23,7 +24,7 @@ window.initApplication = () => {
 	initMapTypes(map);
 	const objectRenderer = initObjectRenderer(map, txtol);
 	window.initMap2(map, objectRenderer);
-	window.liveLayer = initLiveLayer(map, txtol, window.L2);
+	window.liveLayer = initLiveLayer(map, txtol, window.L2, liveIndicator);
 	window.initLayers();
 }
 
@@ -36,14 +37,14 @@ const loadGoogleMaps = () => {
 //--
 
 ReactDOM.render(<Loader lang={window.currentFerriesLang}/>, document.getElementById('loader'));	
-
-window.liveIndicator = ReactDOM.render(<LiveIndicator />, document.getElementById('liveindpos'));
-
 ReactDOM.render(<Banner callback={window.initSettings}/>, document.getElementById('bannerModal'));
+
+ReactDOM.render(<Wrapper />, document.getElementById('wrapper'));
 ReactDOM.render(<TopBar />, document.getElementById('topbar'));
 ReactDOM.render(<Settings callback={window.initSettings}/>, document.getElementById('settings'));
 ReactDOM.render(<Menu callback={window.initMenu}/>, document.getElementById('menu'));
 ReactDOM.render(<InfoPage callback={window.initInfoPage}/>, document.getElementById('infopage'));
+const liveIndicator = ReactDOM.render(<LiveIndicator />, document.getElementById('liveindpos'));
 
 window.setInfoContent1 = function(data) {
 	ReactDOM.render(<InfoContent data={data} lang={window.currentFerriesLang}/>, document.getElementById('infoholder'));
