@@ -890,8 +890,6 @@ function initMap() {
     disableAutoPan: true
   });
 
-  initMapTypes(map);
-
   liveLayer = initLiveLayer(map);
 
   initLayers(map);

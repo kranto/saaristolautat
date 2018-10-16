@@ -11,12 +11,15 @@ import InfoContent2  from './components/InfoContent2';
 import InfoContent  from './components/InfoContent';
 import Timetables  from './components/Timetables';
 import txtol from './lib/txtol';
+import { initMapTypes } from './lib/maptypes';
 
 window.txtol = txtol;
 
+let map = null;
 window.initApplication = () => {
 	txtol.init();
-	window.initMap();
+	map = window.initMap();
+	initMapTypes(map);
 }
 
 const loadGoogleMaps = () => {

@@ -1,16 +1,18 @@
 
-function initMapTypes(map) {
+export function initMapTypes(map) {
 
+  const google = window.google;
+  
   function createGetMMLTileUrl(tileDir) {
     return function(coord, zoom) {
       var tilesPerGlobe = 1 << zoom;
       var x = coord.x % tilesPerGlobe;
       if (x < 0) x = tilesPerGlobe+x;
 
-      x0 = ((x+1) << (15-zoom)) - 1
-      x1 = x << (15-zoom)
-      y0 = ((coord.y+1) << (15 - zoom)) - 1
-      y1 = coord.y << (15 - zoom)
+      var x0 = ((x+1) << (15-zoom)) - 1
+      var x1 = x << (15-zoom)
+      var y0 = ((coord.y+1) << (15 - zoom)) - 1
+      var y1 = coord.y << (15 - zoom)
 
       if (zoom < 8 || x0 < 18154 || x1 >= 18528 || y0 < 9376 || y1 >= 9568)
         return "http://tile.openstreetmap.org/" + zoom + "/" + x + "/" + coord.y + ".png";
