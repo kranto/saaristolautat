@@ -155,7 +155,7 @@ function doToggleHeaderbar() {
     unselectAll();
   } else if ($("#topbar").is(":hidden")) {
     showHeaderbar();
-  } else if (!inIframe()) {
+  } else {
     hideHeaderbar();
   }
 }
@@ -173,7 +173,6 @@ function cancelHeaderBarToggle() {
 
 function closeInfoPage() {
   $('#infopage').fadeOut();
-  // select(wasSelected);
 }
 
 function openInfoPage(target) {
@@ -201,17 +200,12 @@ function initInfoPage() {
   showLanguage(currentLang);
 }
 
-function initMenu() {
 
-  $('.box').click(function() {
-    var infoPage = this.getAttribute("data-target");
-    if (history.state && history.state.infoPage == infoPage) return;
-    var newState = {infoPage: infoPage, depth: history.state && history.state.depth? history.state.depth + 1: 1};
-    history.pushState(newState, null, null);
-    navigateTo(newState);
-  });
-
-  showLanguage(currentLang);
+function menuItemClicked(infoPage) {
+  if (history.state && history.state.infoPage == infoPage) return;
+  var newState = {infoPage: infoPage, depth: history.state && history.state.depth? history.state.depth + 1: 1};
+  history.pushState(newState, null, null);
+  navigateTo(newState);
 }
 
 function initSettings() {
@@ -220,13 +214,9 @@ function initSettings() {
     map.setMapTypeId(newValue);
   });
 
-  $("#toggleFullscreen").click(toggleFullscreen);
-
   for (var key in layers) {
     $("input[type=checkbox][data-target=" +  key +"]").prop("checked", layers[key]);
   }
-
-  $(".boxs input[type=checkbox]:not([data-target])").prop("disabled", true);
 
   $("input[type=checkbox]").change(function() {
     var layer = this.getAttribute("data-target");
@@ -237,22 +227,10 @@ function initSettings() {
   });
 
   $(".lang-button[setlang=" + currentLang +"]").toggleClass('active', true);
-  $('.lang-button').click(function(event) {
-    setLanguage(event.currentTarget.getAttribute("setlang"));
-  });
-
   showLanguage(currentLang);
 }
 
 var wasSelected = [];
-
-function inIframe () {
-    try {
-        return window.self !== window.top;
-    } catch (e) {
-        return true;
-    }
-}
 
 function showLanguage(lang) {
   $("[lang]").each(function () {
@@ -326,12 +304,6 @@ function longName(props) {
 function description(props) {
   return props["description_" + currentLang] || props.description;
 }
-
-$(document).ready(function() {
-  var hostname = window.location.hostname;
-  var framed = inIframe();
-  var title = framed? '<a href="https://' + hostname + '" target="saaristolautat">' + hostname + '</a>': hostname;
-});
 
 function addMapListeners(map) {
   google.maps.event.addListener(map,'maptypeid_changed',function () {
@@ -825,7 +797,6 @@ function renderData(data, map) {
 
 var fdata;
 var objectRenderer;
-var tooltip;
 
 function receiveFData(data, geojson, messages) {
   fdata = data;
@@ -846,24 +817,16 @@ var mapOptions = {
   styles: [],
 };
 
-function resetMap() {
-  unselectAll();
-  map.setMapTypeId(google.maps.MapTypeId.ROADMAP);
-  map.setOptions(mapOptions);
-  map.fitBounds({south: 60, north: 60.5, west: 20, east: 22.3});
-}
-
 var latestHandledMapClickAt = 0;
 
 function initMap() {
-  var data = {};
-
   map = new google.maps.Map(document.getElementById('map'), mapOptions);
-  resetMap();
+  map.setMapTypeId(google.maps.MapTypeId.ROADMAP);
+  map.fitBounds({south: 60, north: 60.5, west: 20, east: 22.3});
+  updateMapStyles();
 
   google.maps.event.addListenerOnce(map, 'idle', onMapIdle);
 
-  updateMapStyles();
   map.addListener('zoom_changed', updateMapStyles);
 
   tooltip = new google.maps.InfoWindow({

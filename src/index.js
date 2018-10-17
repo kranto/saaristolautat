@@ -30,7 +30,6 @@ const loadGoogleMaps = () => {
 }
 
 const initElements = () => {
-	window.initMenu();
 	window.initSettings();
 	window.initInfoPage();
 }
