@@ -648,44 +648,6 @@ function unselectAll(pushState) {
   selected = [];
 }
 
-function toggleFullscreen() {
-  if (
-    document.fullscreenElement ||
-    document.webkitFullscreenElement ||
-    document.mozFullScreenElement ||
-    document.msFullscreenElement
-    ) {
-    if (document.exitFullscreen) {
-      document.exitFullscreen();
-    } else if (document.mozCancelFullScreen) {
-      document.mozCancelFullScreen();
-    } else if (document.webkitExitFullscreen) {
-      document.webkitExitFullscreen();
-    } else if (document.msExitFullscreen) {
-      document.msExitFullscreen();
-    }
-  } else {
-    element = $('#wrapper').get(0);
-    if (element.requestFullscreen) {
-      element.requestFullscreen();
-    } else if (element.mozRequestFullScreen) {
-      element.mozRequestFullScreen();
-    } else if (element.webkitRequestFullscreen) {
-      element.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
-    } else if (element.msRequestFullscreen) {
-      element.msRequestFullscreen();
-    }
-  }
-}
-
-function fullscreenchange(event) {
-  var isFullScreen = (document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement)? true: false;
-  $('#toggleFullscreen').toggleClass('active', isFullScreen);
-}
-
-document.onfullscreenchange = fullscreenchange;
-document.onwebkitfullscreenchange = fullscreenchange;
-
 var localStorgageLayers = localStorage.getItem("layers");
 
 var layers = localStorgageLayers? JSON.parse(localStorgageLayers): {

@@ -10,6 +10,7 @@ import { initMapTypes } from './lib/maptypes';
 import { initLiveLayer } from './lib/live';
 import { initObjectRenderer } from './lib/objects';
 import { routeInfo } from './lib/datarenderer';
+import { initFullscreen } from './lib/fullscreen';
 
 
 window.initApplication = () => {
@@ -63,5 +64,12 @@ window.unsetTimetables = function() {
 	ReactDOM.unmountComponentAtNode(document.getElementById('timetables'));
 }
 
+const toggleFullscreen = initFullscreen(document.getElementById('wrapper'), (isFullScreen) => {
+	window.$('#toggleFullscreen').toggleClass('active', isFullScreen);
+});
+
+window.toggleFullscreen = toggleFullscreen;
+
 initElements();
 loadGoogleMaps();
+
