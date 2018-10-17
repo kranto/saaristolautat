@@ -16,7 +16,7 @@ export default class Wrapper extends Component {
 
   render() {
     return (
-      <div>
+      <div id="wrapper">
         <div id="wrapper2">
           <InfoPage />
           <div className="mapoverlay"></div>

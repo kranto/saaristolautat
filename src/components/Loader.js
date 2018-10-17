@@ -32,7 +32,7 @@ export default class Loader extends Component {
     const lang = this.props.lang || "fi";
     const texts = this.textsAll[lang];
     return (
-      <div>
+      <div id="loader">
         <div id="loaderbox">
           <div id="loaderheader">
             <img src="/mstile-70x70.png" alt="Saaristolautat.fi"/>

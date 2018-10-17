@@ -1,12 +1,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import LiveIndicator from './components/LiveIndicator';
-import Banner from './components/Banner';
-import Loader  from './components/Loader';
+import App from './App';
 import InfoContent2  from './components/InfoContent2';
 import InfoContent  from './components/InfoContent';
 import Timetables  from './components/Timetables';
-import Wrapper from './components/Wrapper';
 import txtol from './lib/txtol';
 import { initMapTypes } from './lib/maptypes';
 import { initLiveLayer } from './lib/live';
@@ -39,10 +37,7 @@ const initElements = () => {
 
 //--
 
-ReactDOM.render(<Loader lang={window.currentFerriesLang}/>, document.getElementById('loader'));	
-ReactDOM.render(<Banner />, document.getElementById('bannerModal'));
-
-ReactDOM.render(<Wrapper />, document.getElementById('wrapper'));
+ReactDOM.render(<App />, document.getElementById('app'));	
 const liveIndicator = ReactDOM.render(<LiveIndicator />, document.getElementById('liveindpos'));
 
 window.setInfoContent1 = function(data) {
