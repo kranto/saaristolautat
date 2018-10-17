@@ -1,12 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import LiveIndicator from './components/LiveIndicator';
-import TopBar from './components/TopBar';
-import Settings from './components/Settings';
-import Menu from './components/Menu';
 import Banner from './components/Banner';
 import Loader  from './components/Loader';
-import InfoPage  from './components/InfoPage';
 import InfoContent2  from './components/InfoContent2';
 import InfoContent  from './components/InfoContent';
 import Timetables  from './components/Timetables';
@@ -16,6 +12,7 @@ import { initMapTypes } from './lib/maptypes';
 import { initLiveLayer } from './lib/live';
 import { initObjectRenderer } from './lib/objects';
 import { routeInfo } from './lib/datarenderer';
+
 
 window.initApplication = () => {
 	txtol.init();
@@ -34,16 +31,18 @@ const loadGoogleMaps = () => {
 	document.body.appendChild(googleMapScript);	
 }
 
+const initElements = () => {
+	window.initMenu();
+	window.initSettings();
+	window.initInfoPage();
+}
+
 //--
 
 ReactDOM.render(<Loader lang={window.currentFerriesLang}/>, document.getElementById('loader'));	
-ReactDOM.render(<Banner callback={window.initSettings}/>, document.getElementById('bannerModal'));
+ReactDOM.render(<Banner />, document.getElementById('bannerModal'));
 
 ReactDOM.render(<Wrapper />, document.getElementById('wrapper'));
-ReactDOM.render(<TopBar />, document.getElementById('topbar'));
-ReactDOM.render(<Settings callback={window.initSettings}/>, document.getElementById('settings'));
-ReactDOM.render(<Menu callback={window.initMenu}/>, document.getElementById('menu'));
-ReactDOM.render(<InfoPage callback={window.initInfoPage}/>, document.getElementById('infopage'));
 const liveIndicator = ReactDOM.render(<LiveIndicator />, document.getElementById('liveindpos'));
 
 window.setInfoContent1 = function(data) {
@@ -70,4 +69,5 @@ window.unsetTimetables = function() {
 	ReactDOM.unmountComponentAtNode(document.getElementById('timetables'));
 }
 
+initElements();
 loadGoogleMaps();

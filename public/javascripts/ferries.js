@@ -109,25 +109,21 @@ function hideMenuAndSettings() {
   return $("#menu").is(":visible") || $("#settings").is(":visible");
 }
 
-$(document).ready(function(){
-  $('#menubutton').click(function() {
-    if ($("#menu").is(":hidden")) {
-      showMenu();
-    } else {
-      hideMenu();
-    }
-  });
+function toggleMenu() {
+  if ($("#menu").is(":hidden")) {
+    showMenu();
+  } else {
+    hideMenu();
+  }
+}
 
-  $('#settingsbutton').click(function() {
-    if ($("#settings").is(":hidden")) {
-      showSettings();
-    } else {
-      hideSettings();
-    }
-  });
-});
-
-
+function toggleSettings() {
+  if ($("#settings").is(":hidden")) {
+    showSettings();
+  } else {
+    hideSettings();
+  }
+}
 
 function hideHeaderbar() {
   // don't hide for now

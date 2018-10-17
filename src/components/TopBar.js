@@ -13,13 +13,13 @@ export default class TopBar extends Component {
   render() {
     return (
       <div id="topbar">
-        <button id="menubutton" type="button" className="topbarbutton">
+        <button id="menubutton" type="button" className="topbarbutton" onClick={window.toggleMenu}>
           <i className="fa fa-bars" aria-hidden="true"></i>
         </button>
         <div id="topbartitle">
           Saaristolautat.fi
         </div>
-        <button id="settingsbutton" type="button" className="topbarbutton right">
+        <button id="settingsbutton" type="button" className="topbarbutton right" onClick={window.toggleSettings}>
           <i className="fa fa-sliders" aria-hidden="true"></i>
         </button>
       </div>

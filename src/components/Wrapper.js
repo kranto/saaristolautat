@@ -1,4 +1,8 @@
 import React, { Component } from 'react';
+import InfoPage from './InfoPage';
+import TopBar from './TopBar';
+import Settings from './Settings';
+import Menu from './Menu';
 
 export default class Wrapper extends Component {
 
@@ -14,7 +18,7 @@ export default class Wrapper extends Component {
     return (
       <div>
         <div id="wrapper2">
-          <div id="infopage" className="fmodal" style={{display: "none"}}></div>
+          <InfoPage />
           <div className="mapoverlay"></div>
           <div className="info" id="infoholder"></div>
         </div>
@@ -24,10 +28,11 @@ export default class Wrapper extends Component {
         </div>
 
         <div id="scrollIndicator"><i className="fa fa-ellipsis-h" aria-hidden="true"></i></div>
-        <div id="topbar"></div>
+
+        <TopBar id="topbar" />
+        <Menu />
+        <Settings />
         <div id="liveindpos"></div>
-        <div id="menu"></div>
-        <div id="settings"></div>
         <div id="timetables" className="fmodal" style={{display: "none"}}></div>
       </div>
     );
