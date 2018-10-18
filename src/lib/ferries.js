@@ -188,10 +188,6 @@ function initLanguage() {
 initLanguage();
 window.currentFerriesLang = currentLang; // pass to loader in index.js
 
-$(document).ready(function() {
-  showLanguage(currentLang);
-});
-
 function shortName(props) {
   return props["sname_" + currentLang] || props.sname || props["name_" + currentLang] || props.name;
 }
