@@ -9,7 +9,6 @@ import txtol from './lib/txtol';
 import { initMapTypes } from './lib/maptypes';
 import { initLiveLayer } from './lib/live';
 import { initObjectRenderer } from './lib/objects';
-import { routeInfo } from './lib/datarenderer';
 import { initFullscreen } from './lib/fullscreen';
 import { loadFerriesData } from './lib/dataloader';
 import { initLocalizer } from './lib/localizer';
@@ -20,7 +19,6 @@ import { createMap, initMap, initLayers, initSettings, initInfoPage, L2 } from '
 
 window.initApplication = () => {
 	txtol.init();
-	window.routeInfo = routeInfo;
 	const map = createMap();
 	initMapTypes(map);
 	const objectRenderer = initObjectRenderer(map, txtol);

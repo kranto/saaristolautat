@@ -1,3 +1,5 @@
+import {L} from './ferries';
+
 function sanitizePhone(num) {
     return num.replace(/\(.*\)/g, "").replace(/[-]/g, " ");
 }
@@ -45,7 +47,7 @@ function getLocalizedItem(item, lang) {
         var key = keys[index];
         if (ew(key, "_L")) {
             let key1 = key.substring(0, key.length - 2);
-            result[key1] = window.L(lang, item[key]);
+            result[key1] = L(lang, item[key]);
         } else if (ew(key, "_" + lang)) {
             let key1 = key.substring(0, key.length - 3);
             if (result[key1]) result[key1 + "_local"] = result[key1];

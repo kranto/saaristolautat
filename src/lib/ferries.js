@@ -153,6 +153,7 @@ function showLanguage(lang) {
 }
 
 export var currentLang;
+export let L;
 export let L2;
 
 export function setLanguage(lang) {
@@ -163,7 +164,7 @@ export function setLanguage(lang) {
   $(".lang-button").toggleClass('active', false);
   $(".lang-button[setlang=" + lang +"]").toggleClass('active', true);
   currentLang = lang;
-  L2 = function(msg) { return (typeof window.L !== 'undefined')? window.L(currentLang, msg): msg; }
+  L2 = function(msg) { return (typeof L !== 'undefined')? L(currentLang, msg): msg; }
 
   if (objects) {
     objects.forEach(function(object){ if (object.init) object.init(); });
@@ -639,7 +640,7 @@ let dataLoaded = false;
 export function initMap(map, objectRenderer, initRoutes, loadFerriesData, initLocalizer) {
   loadFerriesData(function(data, geojson, messages) {
     fdata = data;
-    window.L = initLocalizer(messages);
+    L = initLocalizer(messages);
     objectRenderer.renderData(geojson, data, objects);
     initRoutes(map, data);
     dataLoaded = true;
