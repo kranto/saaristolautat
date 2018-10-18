@@ -1,5 +1,13 @@
 import { layers, L2 } from './ferries';
 
+let layerResolve;
+
+const liveLayerPromise = new Promise((resolve, reject) => {
+  layerResolve = resolve;
+});
+
+export default liveLayerPromise;
+
 export function initLiveLayer(map, txtol, liveIndicator) {
 
   var LIVE_MIN_ZOOM = 8;
@@ -171,8 +179,8 @@ export function initLiveLayer(map, txtol, liveIndicator) {
       return 86400;
   }
 
-  return {
+  layerResolve({
     toggleLiveLayer: toggleLiveLayer,
     updateLiveInd: updateLiveInd
-  }
+  });
 }

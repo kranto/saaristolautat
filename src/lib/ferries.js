@@ -3,6 +3,7 @@ import {onlyUnique} from './datautils';
 import {toggleScrollIndicator, cancelHeaderBarToggle, toggleHeaderbar, hideMenuAndSettings, hideSettings, closeInfoPage, hideMenu} from './uicontrol';
 import {panTo} from './mapcontrol';
 import {lauttaLegs, lauttaRoutes} from './routes';
+import liveLayer from './live';
 
 let google;
 
@@ -148,7 +149,7 @@ function showLanguage(lang) {
     else
       $(this).hide();      
   });
-  if (typeof window.liveLayer !== 'undefined') window.liveLayer.updateLiveInd();
+  liveLayer.then(layer => layer.updateLiveInd());
 }
 
 export var currentLang;
@@ -522,7 +523,7 @@ export const layers = localStorgageLayers? JSON.parse(localStorgageLayers): {
 localStorage.setItem("layers", JSON.stringify(layers));
 
 var onLayersChange = {
-  live: function(layer, enable) { if (typeof window.liveLayer !== 'undefined') window.liveLayer.toggleLiveLayer(enable); }
+  live: (layer, enable) => { liveLayer.then(layer => layer.toggleLiveLayer(enable)); }
 };
 
 var map;

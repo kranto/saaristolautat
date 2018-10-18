@@ -25,7 +25,7 @@ window.initApplication = () => {
 	initMapTypes(map);
 	const objectRenderer = initObjectRenderer(map, txtol);
 	initMap(map, objectRenderer, initRoutes, loadFerriesData, initLocalizer);
-	window.liveLayer = initLiveLayer(map, txtol, liveIndicator);
+	initLiveLayer(map, txtol, liveIndicator);
 	initLayers();
 }
 
