@@ -15,7 +15,7 @@ import { loadFerriesData } from './lib/dataloader';
 import { initLocalizer } from './lib/localizer';
 import { initRoutes } from './lib/routes';
 import './lib/uicontrol';
-
+import './lib/mapcontrol';
 
 window.initApplication = () => {
 	txtol.init();
