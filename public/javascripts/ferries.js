@@ -722,6 +722,7 @@ var hidden = true;
 var prevRenderZoom = 0;
 
 function rerender(map, force) {
+  if (!dataLoaded) return;
   var zoom = map.getZoom();
   var mapTypeId = map.getMapTypeId();
   var newRerender = mapTypeId + ":" + zoom;
@@ -790,12 +791,14 @@ function createMap() {
   return map;
 }
 
-function initMap(map, objectRenderer, loadFerriesData, initLocalizer) {
+var dataLoaded = false;
+function initMap(map, objectRenderer, initRoutes, loadFerriesData, initLocalizer) {
   loadFerriesData(function(data, geojson, messages) {
     fdata = data;
     L = initLocalizer(messages);
     objectRenderer.renderData(geojson, data, objects);
-    initRoutes(map, data);    
+    initRoutes(map, data);
+    dataLoaded = true;
   });
 
   map.addListener('zoom_changed',function() {

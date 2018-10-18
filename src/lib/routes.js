@@ -1,9 +1,12 @@
 
-var lauttaRoutes;
-var lauttaLegs;
+export function initRoutes(map, data) {
 
-function initRoutes(map, data) {
-
+  const google = window.google;
+  const select = window.select;
+  const layers = window.layers;
+  const shortName = window.shortName;
+  const description = window.description;
+  
   var lauttaLineSymbol = {
     path: 'M 0,-1 0,1',
     strokeOpacity: 0.4,
@@ -95,14 +98,14 @@ function initRoutes(map, data) {
     this.legs.forEach(function(leg) { leg.rerender(zoom, mapTypeId); });
   }
 
-  lauttaLegs = data.lauttaLegs.map(function(leg) {
+  window.lauttaLegs = data.lauttaLegs.map(function(leg) {
     return new Leg(leg);
   });
 
-  lauttaLegIndex = {};
-  lauttaLegs.forEach(function(leg) { lauttaLegIndex[leg.id] = leg});
+  const lauttaLegIndex = {};
+  window.lauttaLegs.forEach(function(leg) { lauttaLegIndex[leg.id] = leg});
 
-  lauttaRoutes = data.lauttaRoutes.map(function(route) {
+  window.lauttaRoutes = data.lauttaRoutes.map(function(route) {
     route = new Route(route);
     route.legs.forEach(function(leg) { leg.addRoute(route); });
     return route;
