@@ -1,6 +1,6 @@
-export function initLiveLayer(map, txtol, liveIndicator) {
+import { layers } from './ferries';
 
-  const layers = window.layers;
+export function initLiveLayer(map, txtol, liveIndicator) {
 
   var LIVE_MIN_ZOOM = 8;
   var LIVE_LABEL_MIN_ZOOM = 9;

@@ -1,13 +1,8 @@
 import { shortName, longName, description } from './datautils';
-
+import { layers, select, tooltip, roadColor, roadColorSatellite } from './ferries';
 export function initObjectRenderer(map, txtol) {
 
   const google = window.google;
-  const tooltip = window.tooltip;
-  const roadColor = window.roadColor;
-  const roadColorSatellite = window.roadColorSatellite;
-  const layers = window.layers;
-  const select = window.select;
 
   function createCircleIcon(color, opacity, scale, labelOrigin) {
     return {
@@ -203,8 +198,8 @@ export function initObjectRenderer(map, txtol) {
       }
     }
 
-    marker.addListener('click', function() { window.latestHandledMapClickAt = new Date().getTime(); showTooltip(); });
-    label.addEventListener('click', function(event) { event.stopPropagation(); event.preventDefault(); window.latestHandledMapClickAt = new Date().getTime(); showTooltip(); });
+    marker.addListener('click', showTooltip);
+    label.addEventListener('click', function(event) { event.stopPropagation(); event.preventDefault(); showTooltip(); });
     return {
       ref: ref,
       init: function() {

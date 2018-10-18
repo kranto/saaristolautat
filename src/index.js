@@ -16,17 +16,17 @@ import { initLocalizer } from './lib/localizer';
 import { initRoutes } from './lib/routes';
 import './lib/uicontrol';
 import './lib/mapcontrol';
-import './lib/ferries';
+import { createMap, initMap, initLayers, initSettings, initInfoPage, currentLang } from './lib/ferries';
 
 window.initApplication = () => {
 	txtol.init();
 	window.routeInfo = routeInfo;
-	const map = window.createMap();
+	const map = createMap();
 	initMapTypes(map);
 	const objectRenderer = initObjectRenderer(map, txtol);
-	window.initMap(map, objectRenderer, initRoutes, loadFerriesData, initLocalizer);
+	initMap(map, objectRenderer, initRoutes, loadFerriesData, initLocalizer);
 	window.liveLayer = initLiveLayer(map, txtol, liveIndicator);
-	window.initLayers();
+	initLayers();
 }
 
 const loadGoogleMaps = () => {
@@ -36,8 +36,8 @@ const loadGoogleMaps = () => {
 }
 
 const initElements = () => {
-	window.initSettings();
-	window.initInfoPage();
+	initSettings();
+	initInfoPage();
 }
 
 //--
@@ -46,7 +46,7 @@ ReactDOM.render(<App />, document.getElementById('app'));
 const liveIndicator = ReactDOM.render(<LiveIndicator />, document.getElementById('liveindpos'));
 
 window.setInfoContent1 = function(data) {
-	ReactDOM.render(<InfoContent data={data} lang={window.currentFerriesLang}/>, document.getElementById('infoholder'));
+	ReactDOM.render(<InfoContent data={data} lang={currentLang}/>, document.getElementById('infoholder'));
 }
 
 window.unsetInfoContent1 = function() {
@@ -62,7 +62,7 @@ window.unsetInfoContent2 = function() {
 }
 
 window.setTimetables = function(data) {
-	ReactDOM.render(<Timetables data={data} lang={window.currentFerriesLang} />, document.getElementById('timetables'));
+	ReactDOM.render(<Timetables data={data} lang={currentLang} />, document.getElementById('timetables'));
 }
 
 window.unsetTimetables = function() {

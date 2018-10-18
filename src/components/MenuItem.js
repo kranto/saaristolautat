@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import {menuItemClicked} from '../lib/ferries';
 
 export default class MenuItem extends Component {
 
@@ -11,7 +12,7 @@ export default class MenuItem extends Component {
   }
 
   onMenuItemClick() {
-    window.menuItemClicked("#" + this.props.target);
+    menuItemClicked("#" + this.props.target);
   }
 
   render() {

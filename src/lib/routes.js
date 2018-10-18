@@ -1,3 +1,5 @@
+import { shortName, description } from './datautils';
+import { layers, select } from './ferries';
 
 export let lauttaLegs;
 export let lauttaRoutes;
@@ -5,10 +7,6 @@ export let lauttaRoutes;
 export function initRoutes(map, data) {
 
   const google = window.google;
-  const select = window.select;
-  const layers = window.layers;
-  const shortName = window.shortName;
-  const description = window.description;
   
   var lauttaLineSymbol = {
     path: 'M 0,-1 0,1',

@@ -1,5 +1,5 @@
 import {routeInfo} from './datarenderer';
-import {shortName, longName, description, onlyUnique} from './datautils';
+import {onlyUnique} from './datautils';
 import {toggleScrollIndicator, cancelHeaderBarToggle, toggleHeaderbar, hideMenuAndSettings, hideSettings, closeInfoPage, hideMenu} from './uicontrol';
 import {panTo} from './mapcontrol';
 import {lauttaLegs, lauttaRoutes} from './routes';
@@ -105,21 +105,21 @@ function openInfoPage(target) {
   hideMenu();  
 }
 
-function initInfoPage() {
+export function initInfoPage() {
   $('#closeInfoPageButton').click(function() { history.go(-history.state.depth); });
   $('#infopage').click(function() { history.go(-history.state.depth); });
   $('#infopagecontent').click(function(event) { event.stopPropagation(); });
   showLanguage(currentLang);
 }
 
-function menuItemClicked(infoPage) {
+export function menuItemClicked(infoPage) {
   if (history.state && history.state.infoPage === infoPage) return;
   var newState = {infoPage: infoPage, depth: history.state && history.state.depth? history.state.depth + 1: 1};
   history.pushState(newState, null, null);
   navigateTo(newState);
 }
 
-function initSettings() {
+export function initSettings() {
   $(".mapTypeSelect").bind('change', function() {
     const newValue = this.options[this.selectedIndex].value;
     map.setMapTypeId(newValue);
@@ -189,7 +189,6 @@ function initLanguage() {
 }
 
 initLanguage();
-window.currentFerriesLang = currentLang; // pass to loader in index.js
 
 function addMapListeners(map) {
   google.maps.event.addListener(map,'maptypeid_changed',function () {
@@ -293,7 +292,7 @@ function initPierLinks() {
   });
 
   $("div.pierlink").mouseout(function(event) {
-    if (!pierlinkDown) window.tooltip.close();
+    if (!pierlinkDown) tooltip.close();
   });
 
   $("div.pierlink").mousedown(function(event) {
@@ -425,7 +424,7 @@ function selectByIds(ids) {
   }
 }
 
-function select(targets, mouseEvent, dontPushState) {
+export function select(targets, mouseEvent, dontPushState) {
 
   if (!targets.length) return;
 
@@ -474,7 +473,7 @@ function latLng2Point(latLng, map) {
   return new google.maps.Point((worldPoint.x - bottomLeft.x) * scale, (worldPoint.y - topRight.y) * scale);
 }
 
-function unselectAll(pushState) {
+export function unselectAll(pushState) {
   $("#wrapper2").css({pointerEvents: "none"});
   $(".mapverlay").css({pointerEvents: "none"});
 
@@ -508,7 +507,7 @@ function unselectAll(pushState) {
 
 var localStorgageLayers = localStorage.getItem("layers");
 
-var layers = localStorgageLayers? JSON.parse(localStorgageLayers): {
+export const layers = localStorgageLayers? JSON.parse(localStorgageLayers): {
   ringroads: false,
   distances: true,
   roadferries: true,
@@ -526,8 +525,8 @@ var onLayersChange = {
 
 var map;
 
-var roadColor = '#8a7d6a';
-var roadColorSatellite = '#c0c0c0';
+export const roadColor = '#8a7d6a';
+export const roadColorSatellite = '#c0c0c0';
 
 function createMapStyles(mapTypeId, zoom, settings) {
   return [
@@ -612,7 +611,8 @@ var mapOptions = {
   styles: [],
 };
 
-function createMap() {
+export let tooltip;
+export function createMap() {
   google = window.google;
   map = new google.maps.Map(document.getElementById('map'), mapOptions);
   map.setMapTypeId(google.maps.MapTypeId.ROADMAP);
@@ -623,7 +623,7 @@ function createMap() {
 
   map.addListener('zoom_changed', updateMapStyles);
 
-  window.tooltip = new google.maps.InfoWindow({
+  tooltip = new google.maps.InfoWindow({
     content: "",
     disableAutoPan: true
   });
@@ -631,9 +631,9 @@ function createMap() {
   return map;
 }
 
-var fdata;
-var dataLoaded = false;
-function initMap(map, objectRenderer, initRoutes, loadFerriesData, initLocalizer) {
+let fdata;
+let dataLoaded = false;
+export function initMap(map, objectRenderer, initRoutes, loadFerriesData, initLocalizer) {
   loadFerriesData(function(data, geojson, messages) {
     fdata = data;
     window.L = initLocalizer(messages);
@@ -659,22 +659,10 @@ function initMap(map, objectRenderer, initRoutes, loadFerriesData, initLocalizer
   return map;
 }
 
-function initLayers(map) {
+export function initLayers(map) {
   for (var layer in layers) {
     if (layers.hasOwnProperty(layer) && layers[layer] && onLayersChange[layer]) onLayersChange[layer](map, true);
   }
 }
 
-window.initSettings = initSettings;
-window.initInfoPage = initInfoPage;
-window.createMap = createMap;
-window.initMap = initMap;
-window.initLayers = initLayers;
-window.shortName = shortName;
-window.longName = longName;
-window.description = description;
-window.layers = layers;
-window.menuItemClicked = menuItemClicked;
 window.setLanguage = setLanguage;
-window.select = select;
-window.unselectAll = unselectAll;
