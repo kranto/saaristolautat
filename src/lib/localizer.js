@@ -1,5 +1,5 @@
 
-function initLocalizer(messages) {
+export function initLocalizer(messages) {
   function deepGet (obj, properties) {
     if (obj === undefined || obj === null || properties.length === 0) {
       return obj;

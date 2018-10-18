@@ -790,7 +790,7 @@ function createMap() {
   return map;
 }
 
-function initMap(map, objectRenderer, loadFerriesData) {
+function initMap(map, objectRenderer, loadFerriesData, initLocalizer) {
   loadFerriesData(function(data, geojson, messages) {
     fdata = data;
     L = initLocalizer(messages);

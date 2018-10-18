@@ -12,6 +12,7 @@ import { initObjectRenderer } from './lib/objects';
 import { routeInfo } from './lib/datarenderer';
 import { initFullscreen } from './lib/fullscreen';
 import { loadFerriesData } from './lib/dataloader';
+import { initLocalizer } from './lib/localizer';
 
 
 window.initApplication = () => {
@@ -20,7 +21,7 @@ window.initApplication = () => {
 	const map = window.createMap();
 	initMapTypes(map);
 	const objectRenderer = initObjectRenderer(map, txtol);
-	window.initMap(map, objectRenderer, loadFerriesData);
+	window.initMap(map, objectRenderer, loadFerriesData, initLocalizer);
 	window.liveLayer = initLiveLayer(map, txtol, window.L2, liveIndicator);
 	window.initLayers();
 }
