@@ -11,15 +11,16 @@ import { initLiveLayer } from './lib/live';
 import { initObjectRenderer } from './lib/objects';
 import { routeInfo } from './lib/datarenderer';
 import { initFullscreen } from './lib/fullscreen';
+import { loadFerriesData } from './lib/dataloader';
 
 
 window.initApplication = () => {
 	txtol.init();
 	window.routeInfo = routeInfo;
-	const map = window.initMap();
+	const map = window.createMap();
 	initMapTypes(map);
 	const objectRenderer = initObjectRenderer(map, txtol);
-	window.initMap2(map, objectRenderer);
+	window.initMap(map, objectRenderer, loadFerriesData);
 	window.liveLayer = initLiveLayer(map, txtol, window.L2, liveIndicator);
 	window.initLayers();
 }

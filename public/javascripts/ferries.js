@@ -162,7 +162,6 @@ function doToggleHeaderbar() {
 
 var headerBarTimeout = null;
 function toggleHeaderbar() {
-  if (new Date().getTime() - latestHandledMapClickAt < 200) return; // too short time since a label was clicked
   headerBarTimeout = setTimeout(doToggleHeaderbar, 200);
 }
 
@@ -242,6 +241,7 @@ function showLanguage(lang) {
   if (typeof liveLayer !== 'undefined') liveLayer.updateLiveInd();
 }
 var currentLang;
+var L;
 var L2;
 
 function setLanguage(lang) {
@@ -758,14 +758,7 @@ function renderData(data, map) {
 }
 
 var fdata;
-var objectRenderer;
 
-function receiveFData(data, geojson, messages) {
-  fdata = data;
-  L = initLocalizer(messages);
-  objectRenderer.renderData(geojson, data, objects);
-  initRoutes(map, data);
-}
 var mapOptions = {
   center: {lat: 60.25, lng: 21.25},
   zoom: 9,
@@ -779,9 +772,7 @@ var mapOptions = {
   styles: [],
 };
 
-var latestHandledMapClickAt = 0;
-
-function initMap() {
+function createMap() {
   map = new google.maps.Map(document.getElementById('map'), mapOptions);
   map.setMapTypeId(google.maps.MapTypeId.ROADMAP);
   map.fitBounds({south: 60, north: 60.5, west: 20, east: 22.3});
@@ -799,9 +790,13 @@ function initMap() {
   return map;
 }
 
-function initMap2(map, objectRenderer1) {
-  objectRenderer = objectRenderer1;
-  loadFerriesData(receiveFData);
+function initMap(map, objectRenderer, loadFerriesData) {
+  loadFerriesData(function(data, geojson, messages) {
+    fdata = data;
+    L = initLocalizer(messages);
+    objectRenderer.renderData(geojson, data, objects);
+    initRoutes(map, data);    
+  });
 
   map.addListener('zoom_changed',function() {
     cancelHeaderBarToggle();
