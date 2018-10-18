@@ -1,10 +1,12 @@
 import {routeInfo} from './datarenderer';
+import {shortName, longName, description, onlyUnique} from './datautils';
+import {toggleScrollIndicator, cancelHeaderBarToggle, toggleHeaderbar, hideMenuAndSettings, hideSettings, closeInfoPage, hideMenu} from './uicontrol';
+import {panTo} from './mapcontrol';
+import {lauttaLegs, lauttaRoutes} from './routes';
 
 let google;
 
-const { $, history, toggleScrollIndicator, location, hideMenu } = window;
-const { lauttaRoutes, lauttaLegs, toggleHeaderbar, hideMenuAndSettings, hideSettings } = window;
-const { closeInfoPage, panTo, cancelHeaderBarToggle } = window;
+const { $, history, location} = window;
 
 $(document).ready(function(){
   $(".info").on("mouseleave", function(e) {
@@ -148,7 +150,8 @@ function showLanguage(lang) {
   });
   if (typeof window.liveLayer !== 'undefined') window.liveLayer.updateLiveInd();
 }
-var currentLang;
+
+export var currentLang;
 
 function setLanguage(lang) {
   if (typeof Storage !== 'undefined') {
@@ -187,24 +190,6 @@ function initLanguage() {
 
 initLanguage();
 window.currentFerriesLang = currentLang; // pass to loader in index.js
-
-function shortName(props) {
-  return props["sname_" + currentLang] || props.sname || props["name_" + currentLang] || props.name;
-}
-
-function longName(props) {
-  var localName = props.sname || props.name;
-  var currLocaleName = props["sname_" + currentLang] || props["name_" + currentLang];
-  var firstName = currLocaleName? currLocaleName: localName;
-  var otherNames = ["", "_fi", "_sv", "_en"].map(function(l) {
-    return props["sname" + l] || props["name" + l];
-  }).filter(function(name) { return typeof name !== 'undefined' && name !== firstName; }).filter(onlyUnique);
-  return firstName + ((otherNames.length > 0)? "/" + otherNames.join("/"): "");
-}
-
-function description(props) {
-  return props["description_" + currentLang] || props.description;
-}
 
 function addMapListeners(map) {
   google.maps.event.addListener(map,'maptypeid_changed',function () {
@@ -263,10 +248,6 @@ $("#bannerModal").on('hidden.bs.modal', function () {
     localStorage.setItem("dontShowAgainVersion", currentBannerVersion);
   }
 });
-
-function onlyUnique(value, index, self) { 
-    return self.indexOf(value) === index;
-}
 
 $(document).keyup(function(e) {
   if (e.keyCode === 27) { // escape key maps to keycode `27`

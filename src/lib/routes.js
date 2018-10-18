@@ -1,4 +1,7 @@
 
+export let lauttaLegs;
+export let lauttaRoutes;
+
 export function initRoutes(map, data) {
 
   const google = window.google;
@@ -98,14 +101,14 @@ export function initRoutes(map, data) {
     this.legs.forEach(function(leg) { leg.rerender(zoom, mapTypeId); });
   }
 
-  window.lauttaLegs = data.lauttaLegs.map(function(leg) {
+  lauttaLegs = data.lauttaLegs.map(function(leg) {
     return new Leg(leg);
   });
 
   const lauttaLegIndex = {};
-  window.lauttaLegs.forEach(function(leg) { lauttaLegIndex[leg.id] = leg});
+  lauttaLegs.forEach(function(leg) { lauttaLegIndex[leg.id] = leg});
 
-  window.lauttaRoutes = data.lauttaRoutes.map(function(route) {
+  lauttaRoutes = data.lauttaRoutes.map(function(route) {
     route = new Route(route);
     route.legs.forEach(function(leg) { leg.addRoute(route); });
     return route;

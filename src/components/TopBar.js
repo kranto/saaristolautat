@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import {toggleMenu, toggleSettings} from '../lib/uicontrol';
 
 export default class TopBar extends Component {
 
@@ -13,13 +14,13 @@ export default class TopBar extends Component {
   render() {
     return (
       <div id="topbar">
-        <button id="menubutton" type="button" className="topbarbutton" onClick={window.toggleMenu}>
+        <button id="menubutton" type="button" className="topbarbutton" onClick={toggleMenu}>
           <i className="fa fa-bars" aria-hidden="true"></i>
         </button>
         <div id="topbartitle">
           Saaristolautat.fi
         </div>
-        <button id="settingsbutton" type="button" className="topbarbutton right" onClick={window.toggleSettings}>
+        <button id="settingsbutton" type="button" className="topbarbutton right" onClick={toggleSettings}>
           <i className="fa fa-sliders" aria-hidden="true"></i>
         </button>
       </div>

@@ -1,4 +1,4 @@
-function panTo(map, bounds, mapWidth) {
+export function panTo(map, bounds, mapWidth) {
     // pan to center of the bounds, then pan according to the info window and headerbar
     // and finally if bounds do not fit, zoom out and start over. 
     var center = { lat: (bounds.north + bounds.south) / 2, lng: (bounds.west + bounds.east) / 2 };
@@ -13,5 +13,3 @@ function panTo(map, bounds, mapWidth) {
         panTo(map, bounds, mapWidth);
     }
 }
-
-window.panTo = panTo;

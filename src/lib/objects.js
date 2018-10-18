@@ -1,9 +1,8 @@
+import { shortName, longName, description } from './datautils';
+
 export function initObjectRenderer(map, txtol) {
 
   const google = window.google;
-  const shortName = window.shortName;
-  const longName = window.longName;
-  const description = window.description;
   const tooltip = window.tooltip;
   const roadColor = window.roadColor;
   const roadColorSatellite = window.roadColorSatellite;
