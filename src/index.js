@@ -16,6 +16,7 @@ import { initLocalizer } from './lib/localizer';
 import { initRoutes } from './lib/routes';
 import './lib/uicontrol';
 import './lib/mapcontrol';
+import './lib/ferries';
 
 window.initApplication = () => {
 	txtol.init();
@@ -24,13 +25,13 @@ window.initApplication = () => {
 	initMapTypes(map);
 	const objectRenderer = initObjectRenderer(map, txtol);
 	window.initMap(map, objectRenderer, initRoutes, loadFerriesData, initLocalizer);
-	window.liveLayer = initLiveLayer(map, txtol, window.L2, liveIndicator);
+	window.liveLayer = initLiveLayer(map, txtol, liveIndicator);
 	window.initLayers();
 }
 
 const loadGoogleMaps = () => {
 	const googleMapScript = document.createElement('script');
-	googleMapScript.setAttribute('src','https://maps.googleapis.com/maps/api/js?key=AIzaSyAX_N6yFjHfac6v9-xiwA31yg1twAMMyGA&callback=initApplication');
+	googleMapScript.setAttribute('src','https://maps.googleapis.com/maps/api/js?key=AIzaSyAX_N6yFjHfac6v9-xiwA31yg1twAMMyGA&v=3.33&callback=initApplication');
 	document.body.appendChild(googleMapScript);	
 }
 

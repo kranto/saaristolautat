@@ -1,6 +1,12 @@
-$(document).ready(function(){
-  // $('#wrapper2').bind('scroll',toggleScrollIndicator);
+import {routeInfo} from './datarenderer';
 
+let google;
+
+const { $, history, toggleScrollIndicator, location, hideMenu } = window;
+const { lauttaRoutes, lauttaLegs, toggleHeaderbar, hideMenuAndSettings, hideSettings } = window;
+const { closeInfoPage, panTo, cancelHeaderBarToggle } = window;
+
+$(document).ready(function(){
   $(".info").on("mouseleave", function(e) {
     $("#wrapper2").css({pointerEvents: "none"});
     $(".mapoverlay").css({pointerEvents: "none"});
@@ -76,7 +82,7 @@ window.onhashchange = function() {
     navigateTo(newState);
   } else if (fdata.piers[hash]) {
     history.go(-1);
-    objects.filter(function(o) { return o.id == hash; })[0].showTooltip(true);
+    objects.filter(function(o) { return o.id === hash; })[0].showTooltip(true);
   }
 }
 
@@ -84,9 +90,8 @@ function openInfoPage(target) {
   $('#infopage').fadeIn();
   $("#infopage").scrollTop(0);
   $(".infosection").hide();
-  if (target != "none") {
+  if (target !== "none") {
     $(target).show();
-    wasSelected = selected.slice();
     unselectAll(false);
     $(".showLive").off("click");
     $(".showLive").click(function() {
@@ -106,7 +111,7 @@ function initInfoPage() {
 }
 
 function menuItemClicked(infoPage) {
-  if (history.state && history.state.infoPage == infoPage) return;
+  if (history.state && history.state.infoPage === infoPage) return;
   var newState = {infoPage: infoPage, depth: history.state && history.state.depth? history.state.depth + 1: 1};
   history.pushState(newState, null, null);
   navigateTo(newState);
@@ -114,7 +119,7 @@ function menuItemClicked(infoPage) {
 
 function initSettings() {
   $(".mapTypeSelect").bind('change', function() {
-    newValue = this.options[this.selectedIndex].value;
+    const newValue = this.options[this.selectedIndex].value;
     map.setMapTypeId(newValue);
   });
 
@@ -134,30 +139,26 @@ function initSettings() {
   showLanguage(currentLang);
 }
 
-var wasSelected = [];
-
 function showLanguage(lang) {
   $("[lang]").each(function () {
-    if ($(this).attr("lang") == lang)
+    if ($(this).attr("lang") === lang)
       $(this).show();
     else
       $(this).hide();      
   });
-  if (typeof liveLayer !== 'undefined') liveLayer.updateLiveInd();
+  if (typeof window.liveLayer !== 'undefined') window.liveLayer.updateLiveInd();
 }
 var currentLang;
-var L;
-var L2;
 
 function setLanguage(lang) {
   if (typeof Storage !== 'undefined') {
     localStorage.setItem('language', lang);
   }
-  if (lang != 'fi' && lang != 'sv') lang = 'en';
+  if (lang !== 'fi' && lang !== 'sv') lang = 'en';
   $(".lang-button").toggleClass('active', false);
   $(".lang-button[setlang=" + lang +"]").toggleClass('active', true);
   currentLang = lang;
-  L2 = function(msg) { return (typeof L !== 'undefined')? L(currentLang, msg): msg; }
+  window.L2 = function(msg) { return (typeof window.L !== 'undefined')? window.L(currentLang, msg): msg; }
 
   if (objects) {
     objects.forEach(function(object){ if (object.init) object.init(); });
@@ -192,7 +193,6 @@ $(document).ready(function() {
 });
 
 function shortName(props) {
-  var value = props["sname_" + currentLang] || props.sname || props["name_" + currentLang] || props.name;
   return props["sname_" + currentLang] || props.sname || props["name_" + currentLang] || props.name;
 }
 
@@ -202,7 +202,7 @@ function longName(props) {
   var firstName = currLocaleName? currLocaleName: localName;
   var otherNames = ["", "_fi", "_sv", "_en"].map(function(l) {
     return props["sname" + l] || props["name" + l];
-  }).filter(function(name) { return typeof name !== 'undefined' && name != firstName; }).filter(onlyUnique);
+  }).filter(function(name) { return typeof name !== 'undefined' && name !== firstName; }).filter(onlyUnique);
   return firstName + ((otherNames.length > 0)? "/" + otherNames.join("/"): "");
 }
 
@@ -212,7 +212,7 @@ function description(props) {
 
 function addMapListeners(map) {
   google.maps.event.addListener(map,'maptypeid_changed',function () {
-    var isSatellite = map.getMapTypeId() === 'satellite' || map.getMapTypeId() == 'hybrid';
+    var isSatellite = map.getMapTypeId() === 'satellite' || map.getMapTypeId() === 'hybrid';
     if (isSatellite) {
       $('#setMapTypeMap').removeClass('active');
       $('#setMapTypeSatellite').addClass('active');
@@ -231,7 +231,7 @@ function addMapListeners(map) {
 var loaderTimeout = false;
 var mapInitialized = false;
 
-if (window.location.hostname == "localhost") $("#loader").fadeOut(500);
+if (window.location.hostname === "localhost") $("#loader").fadeOut(500);
 
 setTimeout(function() { loaderTimeout = true; hideLoader(); }, 3000);
 
@@ -273,7 +273,7 @@ function onlyUnique(value, index, self) {
 }
 
 $(document).keyup(function(e) {
-  if (e.keyCode == 27) { // escape key maps to keycode `27`
+  if (e.keyCode === 27) { // escape key maps to keycode `27`
     if (hideMenuAndSettings()) {
       // nothing
     } else if (history.state.infoPage) {
@@ -294,7 +294,7 @@ function closeTimetables() {
 }
 
 function openTimetable(id) {
-  var timetable = selectedRoute.timetables.filter(function(tt) { return tt.id == id; })[0];
+  var timetable = selectedRoute.timetables.filter(function(tt) { return tt.id === id; })[0];
   window.setTimetables(timetable); // render react component via index.js
   $('#timetables').fadeIn();
   hideMenu();
@@ -311,12 +311,12 @@ function initPierLinks() {
   $("div.pierlink").mouseover(function(event) {
     if (!isTouch) {
       var dataTarget = this.getAttribute("data-target");
-      objects.filter(function(o) { return o.id == dataTarget; })[0].showTooltip(false);
+      objects.filter(function(o) { return o.id === dataTarget; })[0].showTooltip(false);
     }
   });
 
   $("div.pierlink").mouseout(function(event) {
-    if (!pierlinkDown) tooltip.close();
+    if (!pierlinkDown) window.tooltip.close();
   });
 
   $("div.pierlink").mousedown(function(event) {
@@ -337,7 +337,7 @@ function initPierLinks() {
   $("div.pierlink").bind("touchstart", function(event) {
     isTouch = true;
     var dataTarget = this.getAttribute("data-target");
-    objects.filter(function(o) { return o.id == dataTarget; })[0].showTooltip(false);
+    objects.filter(function(o) { return o.id === dataTarget; })[0].showTooltip(false);
     touchstartTimeout = setTimeout(function() {
       $(".info").animate({ opacity: 0 });
       pierlinkDown = true;
@@ -360,22 +360,17 @@ function setInfoContent(targets, dontPushState) {
   if (lastInfoContent) window.unsetInfoContent1();
   lastInfoContent = true;
 
-  var output;
   var route;
-  // $(".info .infocontent").addClass("removing");
   if (targets[0].ref) {
     route = targets[0].ref;
     if (!dontPushState) history.pushState({route: route, timetables: null}, null, null);
 
-    var data = routeInfo(fdata.routes[route], currentLang);
+    const data = routeInfo(fdata.routes[route], currentLang);
     selectedRoute = data;
-    // output = Mustache.render(template, data);
-    // output = output.replace(/tmplsrc/g, "src");
-    // $(".info").append(output);
     window.setInfoContent1(data);
   } else {
     var uniqueNames = targets.map(function(target) { return target.name; }).filter(onlyUnique);
-    var data = { names: uniqueNames, contents: targets };
+    const data = { names: uniqueNames, contents: targets };
     window.setInfoContent2(data);
     if (!dontPushState) history.pushState({route: targets.map(function(r) { return r.id; }), timetables: null}, null, null);
   }
@@ -472,7 +467,7 @@ function select(targets, mouseEvent, dontPushState) {
 
   $(".info").scrollTop(0);
 
-  if (selectedCountWas == 0) {
+  if (selectedCountWas === 0) {
 
     $(function() {
       $("#wrapper2").toggleClass("info-open", true);
@@ -506,7 +501,7 @@ function unselectAll(pushState) {
   $("#wrapper2").css({pointerEvents: "none"});
   $(".mapverlay").css({pointerEvents: "none"});
 
-  if (selected.length == 0) return;
+  if (selected.length === 0) return;
   if (typeof pushState === 'undefined') pushState = true;
 
   if (pushState) history.pushState({route: null}, null, null);
@@ -549,11 +544,10 @@ var layers = localStorgageLayers? JSON.parse(localStorgageLayers): {
 localStorage.setItem("layers", JSON.stringify(layers));
 
 var onLayersChange = {
-  live: function(layer, enable) { if (typeof liveLayer !== 'undefined') liveLayer.toggleLiveLayer(enable); }
+  live: function(layer, enable) { if (typeof window.liveLayer !== 'undefined') window.liveLayer.toggleLiveLayer(enable); }
 };
 
 var map;
-var tooltip;
 
 var roadColor = '#8a7d6a';
 var roadColorSatellite = '#c0c0c0';
@@ -584,8 +578,8 @@ function createMapStyles(mapTypeId, zoom, settings) {
     { featureType: 'road', elementType: 'labels', stylers: [{visibility: 'on'}]},
     { featureType: 'road', elementType: 'labels.text.stroke', stylers: [{color: '#ffffff'}, {weight: 3}]},
     { featureType: 'road', elementType: 'labels.text.fill', stylers: [{color: '#000000'}]},
-    { featureType: 'road', elementType: 'geometry.fill', stylers: [{color: mapTypeId == google.maps.MapTypeId.ROADMAP? roadColor: roadColorSatellite}]},
-    { featureType: 'road', elementType: 'geometry.stroke', stylers: [{color: mapTypeId == google.maps.MapTypeId.ROADMAP? roadColor: roadColorSatellite}]},
+    { featureType: 'road', elementType: 'geometry.fill', stylers: [{color: mapTypeId === google.maps.MapTypeId.ROADMAP? roadColor: roadColorSatellite}]},
+    { featureType: 'road', elementType: 'geometry.stroke', stylers: [{color: mapTypeId === google.maps.MapTypeId.ROADMAP? roadColor: roadColorSatellite}]},
     { featureType: 'road.highway', elementType: 'geometry.fill', stylers: [{visibility: "simplified"}, {weight: zoom <= 7? 0.5: Math.max(0.6, 0.6 + (zoom-7)*0.4)}]},
     { featureType: 'road.highway', elementType: 'geometry.stroke', stylers: [{visibility: "simplified"}, {weight: 0.1}]},
     { featureType: 'road.highway.controlled_access', elementType: 'geometry.fill', stylers: [{visibility: "simplified"}, {weight: zoom <= 6? 0.7: Math.max(0.8, 0.8 + (zoom-6)*0.55)}]},
@@ -614,11 +608,8 @@ function rerender(map, force) {
   var newRerender = mapTypeId + ":" + zoom;
   if (prevRerender === newRerender && !force) return;
   prevRerender = newRerender;
-  var t0 = new Date().getTime();
-  // console.log('rerender started at', newRerender);
   objects.forEach(function(object){ object.rerender(zoom, mapTypeId); }); 
   if (lauttaLegs) lauttaLegs.forEach(function(leg) { leg.rerender(zoom, mapTypeId); });
-  // console.log('rerender finished at', zoom, 'in', new Date().getTime() - t0, 'ms');
   hidden = false;
   prevRenderZoom = zoom;
 }
@@ -626,25 +617,10 @@ function rerender(map, force) {
 function hideObjects(map) {
   if (hidden) return;
   var zoom = map.getZoom();
-  if (zoom == prevRenderZoom) return;
-  var t0 = new Date().getTime();
-  // console.log('hide started');
+  if (zoom === prevRenderZoom) return;
   objects.forEach(function(object){ if (object.hide) object.hide(); }); 
-  // console.log('hide finished in', new Date().getTime() - t0, 'ms');
   hidden = true;
 }
-
-function renderData(data, map) {
-  var features = data.features;
-  features.forEach(function(feature) {
-    var type = feature.properties.stype;
-    if (typeof renderers[type] !== 'undefined') {
-      objects.push(renderers[type](feature, map));
-    }
-  });
-}
-
-var fdata;
 
 var mapOptions = {
   center: {lat: 60.25, lng: 21.25},
@@ -660,6 +636,7 @@ var mapOptions = {
 };
 
 function createMap() {
+  google = window.google;
   map = new google.maps.Map(document.getElementById('map'), mapOptions);
   map.setMapTypeId(google.maps.MapTypeId.ROADMAP);
   map.fitBounds({south: 60, north: 60.5, west: 20, east: 22.3});
@@ -669,7 +646,7 @@ function createMap() {
 
   map.addListener('zoom_changed', updateMapStyles);
 
-  tooltip = new google.maps.InfoWindow({
+  window.tooltip = new google.maps.InfoWindow({
     content: "",
     disableAutoPan: true
   });
@@ -677,11 +654,12 @@ function createMap() {
   return map;
 }
 
+var fdata;
 var dataLoaded = false;
 function initMap(map, objectRenderer, initRoutes, loadFerriesData, initLocalizer) {
   loadFerriesData(function(data, geojson, messages) {
     fdata = data;
-    L = initLocalizer(messages);
+    window.L = initLocalizer(messages);
     objectRenderer.renderData(geojson, data, objects);
     initRoutes(map, data);
     dataLoaded = true;
@@ -694,7 +672,7 @@ function initMap(map, objectRenderer, initRoutes, loadFerriesData, initLocalizer
   });
 
   map.addListener('maptypeid_changed',function () {
-    $(".map").toggleClass("satellite", map.getMapTypeId() == 'satellite' || map.getMapTypeId() == 'hybrid');
+    $(".map").toggleClass("satellite", map.getMapTypeId() === 'satellite' || map.getMapTypeId() === 'hybrid');
     updateMapStyles();
     rerender(map, true);
   });
@@ -709,3 +687,17 @@ function initLayers(map) {
     if (layers.hasOwnProperty(layer) && layers[layer] && onLayersChange[layer]) onLayersChange[layer](map, true);
   }
 }
+
+window.initSettings = initSettings;
+window.initInfoPage = initInfoPage;
+window.createMap = createMap;
+window.initMap = initMap;
+window.initLayers = initLayers;
+window.shortName = shortName;
+window.longName = longName;
+window.description = description;
+window.layers = layers;
+window.menuItemClicked = menuItemClicked;
+window.setLanguage = setLanguage;
+window.select = select;
+window.unselectAll = unselectAll;

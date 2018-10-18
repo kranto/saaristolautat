@@ -1,4 +1,4 @@
-export function initLiveLayer(map, txtol, L2, liveIndicator) {
+export function initLiveLayer(map, txtol, liveIndicator) {
 
   const layers = window.layers;
 
@@ -17,7 +17,7 @@ export function initLiveLayer(map, txtol, L2, liveIndicator) {
     }
 
     if (enable) {
-      if (typeof liveIndicator !== 'undefined' && typeof L !== 'undefined') liveIndicator.setText(L2("live.loading"));
+      if (typeof liveIndicator !== 'undefined' && typeof L !== 'undefined') liveIndicator.setText(window.L2("live.loading"));
       loadLiveData(map);
       liveInterval = setInterval(function() { loadLiveData(map); }, 10000);
     } else {
@@ -115,7 +115,7 @@ export function initLiveLayer(map, txtol, L2, liveIndicator) {
         msg = ["live.notvisible"];
       }
     }
-    liveIndicator.setText(L2(msg));
+    liveIndicator.setText(window.L2(msg));
   }
 
   function updateVesselLabel(map, feature, isVisible) {
