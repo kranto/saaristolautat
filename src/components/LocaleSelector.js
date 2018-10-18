@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import { setLanguage } from '../lib/ferries';
 
 export default class LocaleSelector extends Component {
 
@@ -13,7 +14,7 @@ export default class LocaleSelector extends Component {
   }
 
   onButtonClicked(event) {
-    window.setLanguage(event.target.getAttribute("setlang"));
+    setLanguage(event.target.getAttribute("setlang"));
   }
 
   render() {

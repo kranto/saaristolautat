@@ -17,8 +17,7 @@ export default class Timetables extends Component {
   render() {
 
     const data = this.props.data;
-    const lang = this.props.lang;
-    const L = val => window.L(lang, val);
+    const L = this.props.l2;
 
     const tabItems = data.tables.map(table => 
       <li key={table.tabid} className="nav-item">

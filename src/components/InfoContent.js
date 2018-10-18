@@ -13,8 +13,7 @@ export default class InfoContent extends Component {
   render() {
 
     const data = this.props.data;
-    const lang = this.props.lang;
-    const L = val => window.L(lang, val);
+    const L = this.props.l2;
 
     const titleLine = data.specifier? 
       (<div className="infotitle">{ data.name }: <span className="specifier">{data.specifier}</span></div>):

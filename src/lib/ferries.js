@@ -152,8 +152,9 @@ function showLanguage(lang) {
 }
 
 export var currentLang;
+export let L2;
 
-function setLanguage(lang) {
+export function setLanguage(lang) {
   if (typeof Storage !== 'undefined') {
     localStorage.setItem('language', lang);
   }
@@ -161,7 +162,7 @@ function setLanguage(lang) {
   $(".lang-button").toggleClass('active', false);
   $(".lang-button[setlang=" + lang +"]").toggleClass('active', true);
   currentLang = lang;
-  window.L2 = function(msg) { return (typeof window.L !== 'undefined')? window.L(currentLang, msg): msg; }
+  L2 = function(msg) { return (typeof window.L !== 'undefined')? window.L(currentLang, msg): msg; }
 
   if (objects) {
     objects.forEach(function(object){ if (object.init) object.init(); });
@@ -237,6 +238,7 @@ function hideLoader() {
     rerender(map, true);
     $("#loader").fadeOut(1000);
     if (dontShowAgainVersion < currentBannerVersion && !location.hash && !selected.length) {
+      $('#bannerModal').modal({});
       setTimeout(function() {$('#bannerModal').modal({});}, 500);
     }
   }
@@ -664,5 +666,3 @@ export function initLayers(map) {
     if (layers.hasOwnProperty(layer) && layers[layer] && onLayersChange[layer]) onLayersChange[layer](map, true);
   }
 }
-
-window.setLanguage = setLanguage;

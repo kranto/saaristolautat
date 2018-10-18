@@ -1,4 +1,4 @@
-import { layers } from './ferries';
+import { layers, L2 } from './ferries';
 
 export function initLiveLayer(map, txtol, liveIndicator) {
 
@@ -17,7 +17,7 @@ export function initLiveLayer(map, txtol, liveIndicator) {
     }
 
     if (enable) {
-      if (typeof liveIndicator !== 'undefined' && typeof L !== 'undefined') liveIndicator.setText(window.L2("live.loading"));
+      if (typeof liveIndicator !== 'undefined' && typeof L !== 'undefined') liveIndicator.setText(L2("live.loading"));
       loadLiveData(map);
       liveInterval = setInterval(function() { loadLiveData(map); }, 10000);
     } else {
@@ -115,7 +115,7 @@ export function initLiveLayer(map, txtol, liveIndicator) {
         msg = ["live.notvisible"];
       }
     }
-    liveIndicator.setText(window.L2(msg));
+    liveIndicator.setText(L2(msg));
   }
 
   function updateVesselLabel(map, feature, isVisible) {

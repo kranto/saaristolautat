@@ -16,7 +16,7 @@ import { initLocalizer } from './lib/localizer';
 import { initRoutes } from './lib/routes';
 import './lib/uicontrol';
 import './lib/mapcontrol';
-import { createMap, initMap, initLayers, initSettings, initInfoPage, currentLang } from './lib/ferries';
+import { createMap, initMap, initLayers, initSettings, initInfoPage, L2 } from './lib/ferries';
 
 window.initApplication = () => {
 	txtol.init();
@@ -46,7 +46,7 @@ ReactDOM.render(<App />, document.getElementById('app'));
 const liveIndicator = ReactDOM.render(<LiveIndicator />, document.getElementById('liveindpos'));
 
 window.setInfoContent1 = function(data) {
-	ReactDOM.render(<InfoContent data={data} lang={currentLang}/>, document.getElementById('infoholder'));
+	ReactDOM.render(<InfoContent data={data} l2={L2}/>, document.getElementById('infoholder'));
 }
 
 window.unsetInfoContent1 = function() {
@@ -62,7 +62,7 @@ window.unsetInfoContent2 = function() {
 }
 
 window.setTimetables = function(data) {
-	ReactDOM.render(<Timetables data={data} lang={currentLang} />, document.getElementById('timetables'));
+	ReactDOM.render(<Timetables data={data} l2={L2} />, document.getElementById('timetables'));
 }
 
 window.unsetTimetables = function() {
@@ -77,4 +77,3 @@ window.toggleFullscreen = toggleFullscreen;
 
 initElements();
 loadGoogleMaps();
-
