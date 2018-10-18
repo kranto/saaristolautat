@@ -14,6 +14,7 @@ import { initFullscreen } from './lib/fullscreen';
 import { loadFerriesData } from './lib/dataloader';
 import { initLocalizer } from './lib/localizer';
 import { initRoutes } from './lib/routes';
+import './lib/uicontrol';
 
 
 window.initApplication = () => {
