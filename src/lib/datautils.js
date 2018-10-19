@@ -1,4 +1,4 @@
-import { currentLang } from './ferries';
+import { currentLang } from './localizer';
 
 export function onlyUnique(value, index, self) { 
     return self.indexOf(value) === index;

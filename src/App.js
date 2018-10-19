@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import Loader  from './components/Loader';
 import Banner from './components/Banner';
 import Wrapper from './components/Wrapper';
-import {currentLang} from './lib/ferries';
+import {currentLang} from './lib/localizer';
 
 export default class App extends Component {
   render() {

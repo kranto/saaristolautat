@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { setLanguage } from '../lib/ferries';
+import { setLanguage } from '../lib/localizer';
 
 export default class LocaleSelector extends Component {
 

@@ -4,6 +4,7 @@ import {toggleScrollIndicator, cancelHeaderBarToggle, toggleHeaderbar, hideMenuA
 import {panTo} from './mapcontrol';
 import {lauttaLegs, lauttaRoutes} from './routes';
 import liveLayer from './live';
+import {currentLang} from './localizer';
 
 let google;
 
@@ -149,22 +150,11 @@ function showLanguage(lang) {
     else
       $(this).hide();      
   });
-  liveLayer.then(layer => layer.updateLiveInd());
 }
 
-export var currentLang;
-export let L;
-export let L2;
-
-export function setLanguage(lang) {
-  if (typeof Storage !== 'undefined') {
-    localStorage.setItem('language', lang);
-  }
-  if (lang !== 'fi' && lang !== 'sv') lang = 'en';
+window.addEventListener('localeChanged', () => {
   $(".lang-button").toggleClass('active', false);
-  $(".lang-button[setlang=" + lang +"]").toggleClass('active', true);
-  currentLang = lang;
-  L2 = function(msg) { return (typeof L !== 'undefined')? L(currentLang, msg): msg; }
+  $(".lang-button[setlang=" + currentLang +"]").toggleClass('active', true);
 
   if (objects) {
     objects.forEach(function(object){ if (object.init) object.init(); });
@@ -179,19 +169,8 @@ export function setLanguage(lang) {
     select(selected);
   }
 
-  showLanguage(lang);
-}
-
-function initLanguage() {
-  var lang;
-  if (typeof Storage !== 'undefined') {
-    lang = localStorage.getItem('language');
-  }
-  lang = lang || window.navigator.language.split("-")[0] || "fi";
-  setLanguage(lang);
-}
-
-initLanguage();
+  showLanguage(currentLang);
+}, false);
 
 function addMapListeners(map) {
   google.maps.event.addListener(map,'maptypeid_changed',function () {
@@ -509,7 +488,7 @@ export function unselectAll(pushState) {
   selected = [];
 }
 
-var localStorgageLayers = localStorage.getItem("layers");
+const localStorgageLayers = localStorage.getItem("layers");
 
 export const layers = localStorgageLayers? JSON.parse(localStorgageLayers): {
   ringroads: false,
@@ -523,16 +502,16 @@ export const layers = localStorgageLayers? JSON.parse(localStorgageLayers): {
 
 localStorage.setItem("layers", JSON.stringify(layers));
 
-var onLayersChange = {
+const onLayersChange = {
   live: (layer, enable) => { liveLayer.then(layer => layer.toggleLiveLayer(enable)); }
 };
 
-var map;
+let map;
 
 export const roadColor = '#8a7d6a';
 export const roadColorSatellite = '#c0c0c0';
 
-function createMapStyles(mapTypeId, zoom, settings) {
+function createMapStyles(mapTypeId, zoom) {
   return [
     // forests visible
     { featureType: 'landscape.natural', elementType: 'geometry.fill', stylers: [ 
@@ -640,7 +619,7 @@ let dataLoaded = false;
 export function initMap(map, objectRenderer, initRoutes, loadFerriesData, initLocalizer) {
   loadFerriesData(function(data, geojson, messages) {
     fdata = data;
-    L = initLocalizer(messages);
+    initLocalizer(messages);
     objectRenderer.renderData(geojson, data, objects);
     initRoutes(map, data);
     dataLoaded = true;

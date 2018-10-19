@@ -1,4 +1,5 @@
-import { layers, L2 } from './ferries';
+import { layers } from './ferries';
+import { L2 } from './localizer';
 
 let layerResolve;
 
@@ -25,7 +26,7 @@ export function initLiveLayer(map, txtol, liveIndicator) {
     }
 
     if (enable) {
-      if (typeof liveIndicator !== 'undefined' && typeof L !== 'undefined') liveIndicator.setText(L2("live.loading"));
+      if (typeof liveIndicator !== 'undefined') liveIndicator.setText(L2("live.loading"));
       loadLiveData(map);
       liveInterval = setInterval(function() { loadLiveData(map); }, 10000);
     } else {
@@ -106,6 +107,8 @@ export function initLiveLayer(map, txtol, liveIndicator) {
         }
       }
     });
+
+    window.addEventListener('localeChanged', updateLiveInd);
 
     var msg = ["live.notavailable"];
     if (countCurrentTotal > 0) {

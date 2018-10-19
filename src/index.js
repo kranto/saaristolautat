@@ -15,7 +15,8 @@ import { initLocalizer } from './lib/localizer';
 import { initRoutes } from './lib/routes';
 import './lib/uicontrol';
 import './lib/mapcontrol';
-import { createMap, initMap, initLayers, initSettings, initInfoPage, L2 } from './lib/ferries';
+import { createMap, initMap, initLayers, initSettings, initInfoPage } from './lib/ferries';
+import { L2 } from './lib/localizer';
 
 window.initApplication = () => {
 	txtol.init();

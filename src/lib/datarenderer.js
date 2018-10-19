@@ -1,4 +1,4 @@
-import {L} from './ferries';
+import {L} from './localizer';
 
 function sanitizePhone(num) {
     return num.replace(/\(.*\)/g, "").replace(/[-]/g, " ");
