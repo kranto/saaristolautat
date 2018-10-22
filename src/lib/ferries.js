@@ -153,8 +153,8 @@ function showLanguage(lang) {
 }
 
 window.addEventListener('localeChanged', () => {
-  $(".lang-button").toggleClass('active', false);
-  $(".lang-button[setlang=" + currentLang +"]").toggleClass('active', true);
+  // $(".lang-button").toggleClass('active', false);
+  // $(".lang-button[setlang=" + currentLang +"]").toggleClass('active', true);
 
   if (objects) {
     objects.forEach(function(object){ if (object.init) object.init(); });

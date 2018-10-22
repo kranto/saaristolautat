@@ -1,3 +1,6 @@
+import store from '../store';
+import * as settings from '../actions/settingsActions';
+
 const localize_languages = ["fi", "sv", "en"];
 let messages;
 
@@ -28,6 +31,7 @@ export function setLanguage(lang) {
   if (lang !== 'fi' && lang !== 'sv') lang = 'en';
   currentLang = lang;
   window.dispatchEvent(new Event('localeChanged'));
+  store.dispatch(settings.localeSet(currentLang));
 }
 
 function deepGet(obj, properties) {
