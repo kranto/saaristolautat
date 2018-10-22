@@ -1,7 +1,6 @@
 var txtol = {};
 
-// call this after google maps loaded
-txtol.init = function() {
+txtol.init = function(OverlayView) { // window.google.maps.OverlayView
 
   var directions = { 'N': {y: -1, x: -0.5}, 'NE': {y: -1, x: 0}, 'E': {y: -0.5, x: 0}, 'SE': {y: 0, x: 0},
   'S': {x: -0.5, y: 0}, 'SW': {x: -1, y: 0}, 'W': {x: -1, y: -0.5}, 'NW': {x: -1, y: -1}, 'C': {x: -0.5, y: -0.5}};
@@ -32,7 +31,7 @@ txtol.init = function() {
     this.setMap(map);
   }
 
-  TxtOverlay.prototype = new window.google.maps.OverlayView();
+  TxtOverlay.prototype = new OverlayView();
 
   TxtOverlay.prototype.setInnerHTML = function(innerHTML) {
     if (this.div_ && this.div_.innerHTML !== innerHTML) {

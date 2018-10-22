@@ -19,7 +19,7 @@ import { createMap, initMap, initLayers, initSettings, initInfoPage } from './li
 import { L2 } from './lib/localizer';
 
 window.initApplication = () => {
-	txtol.init();
+	txtol.init(window.google.maps.OverlayView);
 	const map = createMap();
 	initMapTypes(map);
 	const objectRenderer = initObjectRenderer(map, txtol);
