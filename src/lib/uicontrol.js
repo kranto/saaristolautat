@@ -1,11 +1,13 @@
+import {currentLang} from './localizer';
 
 const $ = window.$;
 
 var scrollLimit = 22;
 
-$(document).ready(function(){
-    $('#wrapper2').bind('scroll',toggleScrollIndicator);
-    $("#timetables").click(function(event) { if (event.target === this) {window.history.back(); }});
+$(document).ready(function () {
+    $('#wrapper2').bind('scroll', toggleScrollIndicator);
+    $("#timetables").click(function (event) { if (event.target === this) { window.history.back(); } });
+    showLanguage(currentLang);
 });
 
 export function toggleScrollIndicator() {
@@ -69,7 +71,7 @@ function doToggleHeaderbar(callback) {
 
 var headerBarTimeout = null;
 export function toggleHeaderbar(callback) {
-    headerBarTimeout = setTimeout(function() { doToggleHeaderbar(callback); }, 200);
+    headerBarTimeout = setTimeout(function () { doToggleHeaderbar(callback); }, 200);
 }
 
 export function cancelHeaderBarToggle() {
@@ -80,3 +82,16 @@ export function cancelHeaderBarToggle() {
 export function closeInfoPage() {
     $('#infopage').fadeOut();
 }
+
+function showLanguage(lang) {
+    $("[lang]").each(function () {
+        if ($(this).attr("lang") === lang)
+            $(this).show();
+        else
+            $(this).hide();
+    });
+}
+
+window.addEventListener('localeChanged', () => {
+    showLanguage(currentLang);
+}, false);

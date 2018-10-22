@@ -111,7 +111,6 @@ export function initInfoPage() {
   $('#closeInfoPageButton').click(function() { history.go(-history.state.depth); });
   $('#infopage').click(function() { history.go(-history.state.depth); });
   $('#infopagecontent').click(function(event) { event.stopPropagation(); });
-  showLanguage(currentLang);
 }
 
 export function menuItemClicked(infoPage) {
@@ -138,24 +137,9 @@ export function initSettings() {
     if (onLayersChange[layer]) onLayersChange[layer](layer, this.checked);
     rerender(map, true);
   });
-
-  $(".lang-button[setlang=" + currentLang +"]").toggleClass('active', true);
-  showLanguage(currentLang);
-}
-
-function showLanguage(lang) {
-  $("[lang]").each(function () {
-    if ($(this).attr("lang") === lang)
-      $(this).show();
-    else
-      $(this).hide();      
-  });
 }
 
 window.addEventListener('localeChanged', () => {
-  // $(".lang-button").toggleClass('active', false);
-  // $(".lang-button[setlang=" + currentLang +"]").toggleClass('active', true);
-
   if (objects) {
     objects.forEach(function(object){ if (object.init) object.init(); });
     rerender(map, true);
@@ -168,8 +152,6 @@ window.addEventListener('localeChanged', () => {
   if (selected) {
     select(selected);
   }
-
-  showLanguage(currentLang);
 }, false);
 
 function addMapListeners(map) {
@@ -193,7 +175,7 @@ function addMapListeners(map) {
 var loaderTimeout = false;
 var mapInitialized = false;
 
-if (window.location.hostname === "localhost") $("#loader").fadeOut(500);
+// if (window.location.hostname === "localhost") $("#loader").fadeOut(500);
 
 setTimeout(function() { loaderTimeout = true; hideLoader(); }, 3000);
 
@@ -225,10 +207,12 @@ function hideLoader() {
   }
 }
 
-$("#bannerModal").on('hidden.bs.modal', function () {
-  if ($("#dont-show-again-cb").is(":checked")) {
-    localStorage.setItem("dontShowAgainVersion", currentBannerVersion);
-  }
+$(document).ready(function() {
+  $("#bannerModal").on('hidden.bs.modal', function () {
+    if ($("#dont-show-again-cb").is(":checked")) {
+      localStorage.setItem("dontShowAgainVersion", currentBannerVersion);
+    }
+  });  
 });
 
 $(document).keyup(function(e) {
