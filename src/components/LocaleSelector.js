@@ -11,7 +11,6 @@ class LocaleSelector extends Component {
   }
 
   render() {
-    console.log('render')
     const buttons = this.locales.map( (locale) => 
       (<button key={locale} type="button" className={"btn btn-secondary lang-button" + (this.props.locale === locale? " active": "")} setlang={locale} style={{ width: "33%" }} onClick={this.onButtonClicked.bind(this)}>{locale.toUpperCase()}</button>)
     );

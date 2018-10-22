@@ -15,7 +15,7 @@ export default class Loader extends Component {
     },
     en: {
       main: "Ferry routes in the Finnish archipelago",
-      islands: "40000 islands<br/>50 ferries<br/>200 piers",
+      islands: "40000 islands<br/>50 ferries<br/>200 docks",
       loading: "Loading..."
     }
   }
