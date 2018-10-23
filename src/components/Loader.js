@@ -1,24 +1,7 @@
 import React, { Component } from 'react';
+import {L2} from '../lib/localizer';
 
 export default class Loader extends Component {
-
-  textsAll = {
-    fi : {
-      main: "Turun saariston ja Ahvenanmaan lauttareitit",
-      islands: "40000 saarta<br/>50 lauttaa<br/>200 laituria",
-      loading: "Ladataan..."
-    },
-    sv: {
-      main: "Skärgårdsfärjorna i Skärgårdshavet",
-      islands: "40000 öar<br/>50 färjor<br/>200 bryggor",
-      loading: "Laddas..."
-    },
-    en: {
-      main: "Ferry routes in the Finnish archipelago",
-      islands: "40000 islands<br/>50 ferries<br/>200 docks",
-      loading: "Loading..."
-    }
-  }
 
   componentDidMount() {
     if (this.props.callback) this.props.callback();
@@ -29,8 +12,6 @@ export default class Loader extends Component {
   }
 
   render() {
-    const lang = this.props.lang || "fi";
-    const texts = this.textsAll[lang];
     return (
       <div id="loader">
         <div id="loaderbox">
@@ -39,14 +20,14 @@ export default class Loader extends Component {
           </div>
           <div id="loadercontent">
             <h1>Saaristolautat.fi (react)</h1>
-            <p>{texts.main}</p>
-            <p dangerouslySetInnerHTML={{__html: texts.islands}}></p>
+            <p>{L2("loader.main")}</p>
+            <p dangerouslySetInnerHTML={{__html: L2("loader.islands")}}></p>
           </div>
         </div>
         <div style={{position: "absolute", bottom: "30px", textAlign: "center", width: "100%", color: "white"}}>
           <i className="fa fa-cog fa-spin fa-3x fa-fw"></i>
           <div style={{fontSize: "20px", display: "inline-block", position: "relative", top: "-7px"}}>
-            {texts.loading}
+            {L2("loader.loading")}
           </div>
         </div>
       </div>

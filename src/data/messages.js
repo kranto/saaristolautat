@@ -62,8 +62,24 @@ const messagesRaw = { // FI SV EN
     }
 }
 
-const locales = ["fi", "sv", "en"];
-const messages = {};
+const loader = {
+    fi: {
+        main: "Turun saariston ja Ahvenanmaan lauttareitit",
+        islands: "40000 saarta<br/>50 lauttaa<br/>200 laituria",
+        loading: "Ladataan..."
+    },
+    sv: {
+        main: "Skärgårdsfärjorna i Skärgårdshavet",
+        islands: "40000 öar<br/>50 färjor<br/>200 bryggor",
+        loading: "Laddas..."
+    },
+    en: {
+        main: "Ferry routes in the Finnish archipelago",
+        islands: "40000 islands<br/>50 ferries<br/>200 docks",
+        loading: "Loading..."
+    }
+}
+
 
 function replaceArrayLeafs(node, replace) {
     if (typeof node !== "object") return; // this node is not an object
@@ -82,9 +98,17 @@ function pickLocale(raw, index) {
     return msgsTemp;
 }
 
-locales.forEach(locale => {
-    let index = locales.indexOf(locale);
-    messages[locale] = pickLocale(messagesRaw, index);
-});
+const locales = ["fi", "sv", "en"];
+const messages = {};
+
+function initMessages() {
+    locales.forEach(locale => {
+        let index = locales.indexOf(locale);
+        messages[locale] = pickLocale(messagesRaw, index);
+    });
+    Object.keys(loader).forEach(key => messages[key] = {...messages[key], loader: loader[key]});
+}
+
+initMessages();
 
 export default messages;
