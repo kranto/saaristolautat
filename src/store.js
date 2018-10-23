@@ -5,6 +5,12 @@ import promise from "redux-promise-middleware";
 
 import reducer from "./reducers";
 
-const middleware = applyMiddleware(promise(), thunk, createLogger());
+const middlewareList = [promise(), thunk];
+
+if (process.env.NODE_ENV === `development`) {
+  middlewareList.push(createLogger());
+}
+
+const middleware = applyMiddleware(...middlewareList);
 
 export default createStore(reducer, middleware);
