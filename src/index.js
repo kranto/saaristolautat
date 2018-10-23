@@ -11,7 +11,6 @@ import { initLiveLayer } from './lib/live';
 import { initObjectRenderer } from './lib/objects';
 import { initFullscreen } from './lib/fullscreen';
 import { loadFerriesData } from './lib/dataloader';
-import { initLocalizer } from './lib/localizer';
 import { initRoutes } from './lib/routes';
 import './lib/uicontrol';
 import './lib/mapcontrol';
@@ -23,7 +22,7 @@ window.initApplication = () => {
 	const map = createMap();
 	initMapTypes(map);
 	const objectRenderer = initObjectRenderer(map, txtol);
-	initMap(map, objectRenderer, initRoutes, loadFerriesData, initLocalizer);
+	initMap(map, objectRenderer, initRoutes, loadFerriesData);
 	initLiveLayer(map, txtol, liveIndicator);
 	initLayers();
 }

@@ -600,10 +600,9 @@ export function createMap() {
 
 let fdata;
 let dataLoaded = false;
-export function initMap(map, objectRenderer, initRoutes, loadFerriesData, initLocalizer) {
-  loadFerriesData(function(data, geojson, messages) {
+export function initMap(map, objectRenderer, initRoutes, loadFerriesData) {
+  loadFerriesData(function(data, geojson) {
     fdata = data;
-    initLocalizer(messages);
     setTimeout(function() {
       objectRenderer.renderData(geojson, data, objects);
       initRoutes(map, data);

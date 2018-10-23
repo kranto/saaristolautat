@@ -2,14 +2,8 @@
 export function loadFerriesData(callback) {
   var fgeojson = [];
   var fdata;
-  var fmessages;
 
   const $ = window.$;
-
-  $.get("/data/messages.json?v=1.5", function(data) {
-    fmessages = data;
-    sendDataIf();
-  });
 
   $.get('/data/saaristo.json?v=1.5', function(data) {
     fgeojson.push(data);
@@ -78,8 +72,8 @@ export function loadFerriesData(callback) {
   }
 
   function sendDataIf() {
-    if (fgeojson.length >= 3 && fdata && fmessages) {
-      callback(fdata, fgeojson, fmessages);
+    if (fgeojson.length >= 3 && fdata) {
+      callback(fdata, fgeojson);
     }
   }
 

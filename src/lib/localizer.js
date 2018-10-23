@@ -1,15 +1,12 @@
 import store from '../store';
 import * as settings from '../actions/settingsActions';
-
-const localize_languages = ["fi", "sv", "en"];
-let messages;
+import messages from '../data/messages';
 
 export var currentLang;
 export const L = (lang, args) => {
   if (!(args instanceof Array)) args = [args];
-  if (!messages) return args;
 
-  var message = deepGet(messages, args[0].split("."))[localize_languages.indexOf(lang)];
+  var message = deepGet(messages[lang], args[0].split("."));
   for (var i = 0; i < 5; i++) {
     var arg = i < args.length - 1? args[i+1]: "";
     var str = "{" + i + "}";
@@ -19,10 +16,6 @@ export const L = (lang, args) => {
 };
 
 export const L2 = (msg) => L(currentLang, msg);
-
-export function initLocalizer(msgs) {
-  messages = msgs;
-}
 
 export function setLanguage(lang) {
   if (typeof Storage !== 'undefined') {
