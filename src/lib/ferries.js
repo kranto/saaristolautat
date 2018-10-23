@@ -604,9 +604,11 @@ export function initMap(map, objectRenderer, initRoutes, loadFerriesData, initLo
   loadFerriesData(function(data, geojson, messages) {
     fdata = data;
     initLocalizer(messages);
-    objectRenderer.renderData(geojson, data, objects);
-    initRoutes(map, data);
-    dataLoaded = true;
+    setTimeout(function() {
+      objectRenderer.renderData(geojson, data, objects);
+      initRoutes(map, data);
+      dataLoaded = true;  
+    }, 1000);
   });
 
   map.addListener('zoom_changed',function() {
