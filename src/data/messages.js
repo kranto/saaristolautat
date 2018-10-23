@@ -59,24 +59,22 @@ const messagesRaw = { // FI SV EN
         zoomin: ['Lähennä nähdäksesi alusten sijainnit', 'Zooma in för att se fartygens lägen', "Zoom in for vessels' positions"],
         delay1: ['Viive ~ {0} min', 'Försening ~ {0} min', "Delay ~ {0} min"],
         delay2: ['Viive {0} - {1} min', 'Försening {0} - {1} min', "Delay {0} - {1} min"],
-    }
-}
-
-const loader = {
-    fi: {
-        main: "Turun saariston ja Ahvenanmaan lauttareitit",
-        islands: "40000 saarta<br/>50 lauttaa<br/>200 laituria",
-        loading: "Ladataan..."
     },
-    sv: {
-        main: "Skärgårdsfärjorna i Skärgårdshavet",
-        islands: "40000 öar<br/>50 färjor<br/>200 bryggor",
-        loading: "Laddas..."
+    application: {
+        title: ["Saaristolautat.fi (react)", "Saaristolautat.fi (react)", "Saaristolautat.fi (react)"]
     },
-    en: {
-        main: "Ferry routes in the Finnish archipelago",
-        islands: "40000 islands<br/>50 ferries<br/>200 docks",
-        loading: "Loading..."
+    loader: {
+        main: ["Turun saariston ja Ahvenanmaan lauttareitit", "Skärgårdsfärjorna i Skärgårdshavet", "Ferry routes in the Finnish archipelago"],
+        islands: [ "40000 saarta<br/>50 lauttaa<br/>200 laituria",  "40000 öar<br/>50 färjor<br/>200 bryggor", "40000 islands<br/>50 ferries<br/>200 docks"],
+        loading: [ "Ladataan...", "Laddas...", "Loading..."]
+    },
+    banner: {
+        clickRoute: ["Klikkaa reittiä kartalla nähdäksesi reitin tiedot", "Klicka en rutt på kartan för information", "Click a route on map to see route details"],
+        routes: ["Reitit", "Rutter", "Routes"],
+        timetables: ["Aikataulut", "Tidtabeller", "Schedules"],
+        contactInfo: ["Yhteystiedot", "Kontaktuppgifter", "Contact information"],
+        dontshowagain: ["Älä näytä uudestaan", "Visa inte mer", "Don't show again"],
+        close: ["Sulje", "Stäng", "Close"] 
     }
 }
 
@@ -106,7 +104,6 @@ function initMessages() {
         let index = locales.indexOf(locale);
         messages[locale] = pickLocale(messagesRaw, index);
     });
-    Object.keys(loader).forEach(key => messages[key] = {...messages[key], loader: loader[key]});
 }
 
 initMessages();
