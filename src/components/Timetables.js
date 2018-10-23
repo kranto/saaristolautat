@@ -61,8 +61,8 @@ export default class Timetables extends Component {
         </div>
         <div className="fmodalbody">
           <div className="alert alert-warning">
-            { L('unofficialcopy') }
-            <a target="info" href={ data.link }>{ L('fromoriginal') } 
+            { L('unofficialcopy') }&nbsp;
+            <a target="info" href={ data.link }>{ L('fromoriginal') }&nbsp;
             <i className="fa fa-external-link" aria-hidden="true"></i></a>.
           </div>
           <div className="navtabswrapper">
