@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import {L2 as L} from '../lib/localizer';
 
 export default class InfoContent extends Component {
 
@@ -13,7 +14,6 @@ export default class InfoContent extends Component {
   render() {
 
     const data = this.props.data;
-    const L = this.props.l2;
 
     const titleLine = data.specifier? 
       (<div className="infotitle">{ data.name }: <span className="specifier">{data.specifier}</span></div>):
@@ -40,7 +40,7 @@ export default class InfoContent extends Component {
     const timetableItems = data.timetables.map( timetable =>
       <div key={timetable.id} className="col-12 col-sm-12 col-md-12">
         <button type="button" linktype={timetable.exttimetables.toString()} data-target={timetable.id} className={"btn btn-info btn-md timetablebutton " + timetable.exttimetables} href={timetable.link}>
-          &nbsp;{L('timetables')} {timetable.buttonspecifier? "-": ""} {timetable.buttonspecifier}
+          &nbsp;{L('infocontent.timetables')} {timetable.buttonspecifier? "-": ""} {timetable.buttonspecifier}
         </button>
       </div>
     );
@@ -84,7 +84,7 @@ export default class InfoContent extends Component {
 
         <div className="spaceabove">{noteItems}</div>
 
-        <div className="spaceabove"><h4>{L('contactinfo')}</h4></div>
+        <div className="spaceabove"><h4>{L('infocontent.contactinfo')}</h4></div>
 
         <div id="contactslist" className="">
           <div className="contactsbox">{contactItems}</div>

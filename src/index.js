@@ -15,7 +15,6 @@ import { initRoutes } from './lib/routes';
 import './lib/uicontrol';
 import './lib/mapcontrol';
 import { createMap, initMap, initLayers, initSettings, initInfoPage } from './lib/ferries';
-import { L2 } from './lib/localizer';
 
 window.initApplication = () => {
 	txtol.init(window.google.maps.OverlayView);
@@ -44,7 +43,7 @@ ReactDOM.render(<App />, document.getElementById('app'));
 const liveIndicator = ReactDOM.render(<LiveIndicator />, document.getElementById('liveindpos'));
 
 window.setInfoContent1 = function(data) {
-	ReactDOM.render(<InfoContent data={data} l2={L2}/>, document.getElementById('infoholder'));
+	ReactDOM.render(<InfoContent data={data}/>, document.getElementById('infoholder'));
 }
 
 window.unsetInfoContent1 = function() {
@@ -60,7 +59,7 @@ window.unsetInfoContent2 = function() {
 }
 
 window.setTimetables = function(data) {
-	ReactDOM.render(<Timetables data={data} l2={L2} />, document.getElementById('timetables'));
+	ReactDOM.render(<Timetables data={data} />, document.getElementById('timetables'));
 }
 
 window.unsetTimetables = function() {

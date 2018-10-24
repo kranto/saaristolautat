@@ -44,8 +44,10 @@ const messagesRaw = { // FI SV EN
     limit: {
         mc_bikes_only: ["Vain moottoripyöriä ja polkupyöriä", "Bara motorcyklar och cyklar", "Only motorcycles and bicycles"],
     },
-    contactinfo: ["Yhteystiedot", "Kontaktuppgifter", "Contact Information"],
-    timetables: ["Aikataulut", "Tidtabeller", "Schedules"],
+    infocontent: {
+        contactinfo: ["Yhteystiedot", "Kontaktuppgifter", "Contact Information"],
+        timetables: ["Aikataulut", "Tidtabeller", "Schedules"],    
+    },
     unofficialcopy: ["Tämä on epävirallinen kopio. Tarkista muutokset, poikkeukset ja lisätiedot",
         "Detta är en inofficiell kopia. Kontrollera om ändringar, undantag och ytterligare information",
         "This is an unofficial copy. Check for changes, exceptions, and additional information"],

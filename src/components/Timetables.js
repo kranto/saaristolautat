@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import {L2 as L} from '../lib/localizer';
 
 export default class Timetables extends Component {
 
@@ -17,7 +18,6 @@ export default class Timetables extends Component {
   render() {
 
     const data = this.props.data;
-    const L = this.props.l2;
 
     const tabItems = data.tables.map(table => 
       <li key={table.tabid} className="nav-item">
