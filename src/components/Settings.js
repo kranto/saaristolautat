@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import FullScreenButton from './FullScreenButton';
 import SettingsLayers from './SettingsLayers';
 import MapTypeSelector from './MapTypeSelector';
 import LocaleSelector from './LocaleSelector';
@@ -13,10 +14,6 @@ export default class Settings extends Component {
     return false;
   }
 
-  toggleFullscreen() {
-    window.toggleFullscreen();
-  }
-
   render() {
     return (
       <div id="settings">
@@ -24,11 +21,7 @@ export default class Settings extends Component {
 
           <div className="boxs"><MapTypeSelector /></div>
 
-          <div className="boxs">
-            <button type="button" className="btn btn-secondary" id="toggleFullscreen" style={{ width: "100%" }} onClick={this.toggleFullscreen}>
-              <span lang="fi">Koko ruutu</span><span lang="sv">Full screen</span><span lang="en">Full screen</span>
-            </button>
-          </div>
+          <div className="boxs"><FullScreenButton /></div>
 
           <div className="boxs"><SettingsLayers /></div>
 

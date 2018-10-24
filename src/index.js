@@ -7,11 +7,11 @@ import txtol from './lib/txtol';
 import { initMapTypes } from './lib/maptypes';
 import { initLiveLayer } from './lib/live';
 import { initObjectRenderer } from './lib/objects';
-import { initFullscreen } from './lib/fullscreen';
 import { loadFerriesData } from './lib/dataloader';
 import { initRoutes } from './lib/routes';
 import './lib/uicontrol';
 import './lib/mapcontrol';
+import  {initFullscreen} from './lib/fullscreen';
 import { createMap, initMap, initLayers, initSettings, initInfoPage } from './lib/ferries';
 
 window.initApplication = () => {
@@ -55,11 +55,7 @@ window.unsetInfoContent2 = function() {
 	ReactDOM.unmountComponentAtNode(document.getElementById('infoholder'));
 }
 
-const toggleFullscreen = initFullscreen(document.getElementById('wrapper'), (isFullScreen) => {
-	window.$('#toggleFullscreen').toggleClass('active', isFullScreen);
-});
-
-window.toggleFullscreen = toggleFullscreen;
+initFullscreen(document.getElementById('wrapper'));
 
 initElements();
 loadGoogleMaps();

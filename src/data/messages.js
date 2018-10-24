@@ -77,6 +77,9 @@ const messagesRaw = { // FI SV EN
         contactInfo: ["Yhteystiedot", "Kontaktuppgifter", "Contact information"],
         dontshowagain: ["Älä näytä uudestaan", "Visa inte mer", "Don't show again"],
         close: ["Sulje", "Stäng", "Close"] 
+    },
+    settings: {
+        fullscreen: ["Koko ruutu", "Full screen", "Full screen"]
     }
 }
 
