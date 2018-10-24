@@ -4,6 +4,7 @@ import messages from '../data/messages';
 
 export var currentLang;
 export const L = (lang, args) => {
+  if (args === "" || args === null) return "";
   if (!(args instanceof Array)) args = [args];
 
   var message = deepGet(messages[lang], args[0].split("."));

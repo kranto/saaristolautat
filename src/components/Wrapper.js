@@ -3,6 +3,7 @@ import InfoPage from './InfoPage';
 import TopBar from './TopBar';
 import Settings from './Settings';
 import Menu from './Menu';
+import LiveIndicator from './LiveIndicator';
 
 export default class Wrapper extends Component {
 
@@ -32,7 +33,7 @@ export default class Wrapper extends Component {
         <TopBar id="topbar" />
         <Menu />
         <Settings />
-        <div id="liveindpos"></div>
+        <div id="liveindpos"><LiveIndicator /></div>
         <div id="timetables" className="fmodal" style={{display: "none"}}></div>
       </div>
     );

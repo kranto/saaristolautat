@@ -1,6 +1,5 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import LiveIndicator from './components/LiveIndicator';
 import App from './App';
 import InfoContent2  from './components/InfoContent2';
 import InfoContent  from './components/InfoContent';
@@ -22,7 +21,7 @@ window.initApplication = () => {
 	initMapTypes(map);
 	const objectRenderer = initObjectRenderer(map, txtol);
 	initMap(map, objectRenderer, initRoutes, loadFerriesData);
-	initLiveLayer(map, txtol, liveIndicator);
+	initLiveLayer(map, txtol);
 	initLayers();
 }
 
@@ -40,7 +39,6 @@ const initElements = () => {
 //--
 
 ReactDOM.render(<App />, document.getElementById('app'));	
-const liveIndicator = ReactDOM.render(<LiveIndicator />, document.getElementById('liveindpos'));
 
 window.setInfoContent1 = function(data) {
 	ReactDOM.render(<InfoContent data={data}/>, document.getElementById('infoholder'));

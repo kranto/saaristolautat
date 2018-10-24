@@ -1,5 +1,5 @@
 import { layers } from './ferries';
-import { L2 } from './localizer';
+import store from '../store';
 
 let layerResolve;
 
@@ -9,7 +9,7 @@ const liveLayerPromise = new Promise((resolve, reject) => {
 
 export default liveLayerPromise;
 
-export function initLiveLayer(map, txtol, liveIndicator) {
+export function initLiveLayer(map, txtol) {
 
   var LIVE_MIN_ZOOM = 8;
   var LIVE_LABEL_MIN_ZOOM = 9;
@@ -26,11 +26,11 @@ export function initLiveLayer(map, txtol, liveIndicator) {
     }
 
     if (enable) {
-      if (typeof liveIndicator !== 'undefined') liveIndicator.setText(L2("live.loading"));
+      store.dispatch({type: "UPDATE_INDICATOR_MSG", payload: "live.loading"});
       loadLiveData(map);
       liveInterval = setInterval(function() { loadLiveData(map); }, 10000);
     } else {
-      liveIndicator.setText("");
+      store.dispatch({type: "UPDATE_INDICATOR_MSG", payload: ""});
       map.data.forEach(function(feature) {
         map.data.remove(feature);
       });
@@ -76,10 +76,9 @@ export function initLiveLayer(map, txtol, liveIndicator) {
   }
 
   function updateLiveInd() {
-    if (typeof liveIndicator === 'undefined') return;
     if (!liveLoadCount) return;
     if (!layers || !layers.live) {
-      liveIndicator.setText("");
+      store.dispatch({type: "UPDATE_INDICATOR_MSG", payload: ""});
       return;
     }
     var sumCurrentInBounds = 0;
@@ -126,7 +125,7 @@ export function initLiveLayer(map, txtol, liveIndicator) {
         msg = ["live.notvisible"];
       }
     }
-    liveIndicator.setText(L2(msg));
+    store.dispatch({type: "UPDATE_INDICATOR_MSG", payload: msg});
   }
 
   function updateVesselLabel(map, feature, isVisible) {

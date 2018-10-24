@@ -1,33 +1,36 @@
 import React, { Component } from 'react'
+import { connect } from 'react-redux';
+import { L2 } from '../lib/localizer';
 
 const $ = window.$;
 
-export default class LiveIndicator extends Component {
+class LiveIndicator extends Component {
 
-  constructor() {
-    super();
-    this.state = { text: ""};
-  }
-
-  setText(text) {
-    if (text.length > 0) {
-      this.setState({ text: text });
+  componentDidUpdate() {
+    if (this.props.live.msg) {
       $("#liveind").show();
       $("#liveind").animate({left: '0px'});
     } else {
-      const that = this;
       $("#liveind").animate({left: '-100px'}, function() { 
         $("#liveind").hide();
-        that.setState({ text: "" });
       });
-    }
+    }    
   }
 
   render() {
     return (
       <div id="liveind">
-        <span id="liveindtxt">{this.state.text}</span>
+        <span id="liveindtxt">{L2(this.props.live.msg)}</span>
       </div>
     );
   }
 }
+
+const mapStateToProps = (state) => {
+  return {
+    locale: state.settings.locale,
+    live: state.live
+  };
+};
+
+export default connect(mapStateToProps)(LiveIndicator);
