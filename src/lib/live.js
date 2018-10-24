@@ -107,8 +107,6 @@ export function initLiveLayer(map, txtol) {
       }
     });
 
-    window.addEventListener('localeChanged', updateLiveInd);
-
     var msg = ["live.notavailable"];
     if (countCurrentTotal > 0) {
       if (map.getZoom() < LIVE_MIN_ZOOM) {
