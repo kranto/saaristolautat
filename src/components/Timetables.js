@@ -1,14 +1,11 @@
 import React, { Component } from 'react';
 import {L2 as L} from '../lib/localizer';
+import { connect } from 'react-redux';
 
-export default class Timetables extends Component {
+class Timetables extends Component {
 
   componentDidMount() {
     if (this.props.callback) this.props.callback();
-  }
-
-  shouldComponentUpdate() {
-    return false;
   }
 
   onCloseClicked() {
@@ -18,6 +15,9 @@ export default class Timetables extends Component {
   render() {
 
     const data = this.props.data;
+    if (!data) return "";
+
+    console.log(data);
 
     const tabItems = data.tables.map(table => 
       <li key={table.tabid} className="nav-item">
@@ -78,3 +78,12 @@ export default class Timetables extends Component {
     );
   }
 }
+
+const mapStateToProps = (state) => {
+  return {
+    locale: state.settings.locale,
+    data: state.selection.timetables
+  };
+};
+
+export default connect(mapStateToProps)(Timetables);

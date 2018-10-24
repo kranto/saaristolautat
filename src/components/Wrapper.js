@@ -4,6 +4,7 @@ import TopBar from './TopBar';
 import Settings from './Settings';
 import Menu from './Menu';
 import LiveIndicator from './LiveIndicator';
+import Timetables from './Timetables';
 
 export default class Wrapper extends Component {
 
@@ -34,7 +35,7 @@ export default class Wrapper extends Component {
         <Menu />
         <Settings />
         <div id="liveindpos"><LiveIndicator /></div>
-        <div id="timetables" className="fmodal" style={{display: "none"}}></div>
+        <div id="timetables" className="fmodal" style={{display: "none"}}><Timetables /></div>
       </div>
     );
   }

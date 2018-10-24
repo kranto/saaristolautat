@@ -5,6 +5,7 @@ import {panTo} from './mapcontrol';
 import {lauttaLegs, lauttaRoutes} from './routes';
 import liveLayer from './live';
 import {currentLang} from './localizer';
+import store from '../store';
 
 let google;
 
@@ -231,14 +232,14 @@ $(document).keyup(function(e) {
 
 function closeTimetables() {
   $('#timetables').fadeOut(function() {
-    window.unsetTimetables();
+    store.dispatch({type: "TIMETABLE_CLOSED"});
   });
   $('#timetables').scrollTop(0);
 }
 
 function openTimetable(id) {
   var timetable = selectedRoute.timetables.filter(function(tt) { return tt.id === id; })[0];
-  window.setTimetables(timetable); // render react component via index.js
+  store.dispatch({type: "TIMETABLE_OPENED", payload: timetable});
   $('#timetables').fadeIn();
   hideMenu();
   hideSettings();

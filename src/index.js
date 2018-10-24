@@ -3,7 +3,6 @@ import ReactDOM from 'react-dom';
 import App from './App';
 import InfoContent2  from './components/InfoContent2';
 import InfoContent  from './components/InfoContent';
-import Timetables  from './components/Timetables';
 import txtol from './lib/txtol';
 import { initMapTypes } from './lib/maptypes';
 import { initLiveLayer } from './lib/live';
@@ -54,14 +53,6 @@ window.setInfoContent2 = function(data) {
 
 window.unsetInfoContent2 = function() {
 	ReactDOM.unmountComponentAtNode(document.getElementById('infoholder'));
-}
-
-window.setTimetables = function(data) {
-	ReactDOM.render(<Timetables data={data} />, document.getElementById('timetables'));
-}
-
-window.unsetTimetables = function() {
-	ReactDOM.unmountComponentAtNode(document.getElementById('timetables'));
 }
 
 const toggleFullscreen = initFullscreen(document.getElementById('wrapper'), (isFullScreen) => {
