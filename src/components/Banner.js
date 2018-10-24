@@ -34,7 +34,7 @@ class Banner extends Component {
                 <input id="dont-show-again-cb" type="checkbox" value="false" version="1" />
                 <label htmlFor="dont-show-again-cb">{L2("banner.dontshowagain")}</label>
               </div>
-              <button type="button" className="btn btn-secondary" data-dismiss="modal">Close</button>
+              <button type="button" className="btn btn-secondary" data-dismiss="modal">{L2("banner.close")}</button>
             </div>
           </div>
         </div>
