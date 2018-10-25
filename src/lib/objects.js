@@ -31,12 +31,8 @@ export function initObjectRenderer(map, txtol) {
   function road(feature, map) {
     var roadCoords = feature.geometry.coordinates.map(function(coord) { return new google.maps.LatLng(coord[1], coord[0]); });
     var roadObject = new google.maps.Polyline({
+      ...styles.road.init,
       path: new google.maps.MVCArray(roadCoords),
-      geodesic: false,
-      // strokeColor: '#000000',
-      strokeOpacity: 1,
-      strokeWeight: 1,
-      zIndex: 0,
       map: map,
       clickable: false
     });
@@ -46,7 +42,7 @@ export function initObjectRenderer(map, txtol) {
       rerender: function(zoom, mapTypeId) {
         var addZ = mapTypeId === 'hybrid'? 2: 0;
         roadObject.setVisible(zoom >= minZ + addZ && zoom <= maxZ + addZ);
-        roadObject.setOptions({strokeColor: styles.road.getStrokeColor(mapTypeId)});
+        roadObject.setOptions(styles.road.update(zoom, mapTypeId));
       }
     };
   }
@@ -54,51 +50,32 @@ export function initObjectRenderer(map, txtol) {
   function route(feature, map) {
     var coords = feature.geometry.coordinates.map(function(coord) { return new google.maps.LatLng(coord[1], coord[0]); });
     var object = new google.maps.Polyline({
+      ...styles.route.init,
       path: new google.maps.MVCArray(coords),
-      geodesic: false,
-      strokeColor: '#202020',
-      strokeOpacity: 0.4,
-      strokeWeight: 1,
-      zIndex: 0,
-      map: map,
       cursor: 'context-menu',
+      map: map,
       clickable: true
     });
     return {
       rerender: function(zoom, mapTypeId) {
         object.setVisible(layers.ringroads && zoom >= 8);
-        object.setOptions({strokeWeight: (zoom<=8? 2: zoom<=9? 2.5: 3)});
+        object.setOptions(styles.route.update(zoom, mapTypeId));
       }
     };
   }
 
-  // Define a symbol using SVG path notation, with an opacity of 1.
-  var borderLineSymbol = {
-    path: 'M 0,-4 0,0',
-    strokeOpacity: 0.4,
-    strokeColor: '#808080',
-    scale: 1
-  };
-
   function border(feature, map) {
     var coords = feature.geometry.coordinates.map(function(coord) { return new google.maps.LatLng(coord[1], coord[0]); });
     var object = new google.maps.Polyline({
+      ...styles.border.init,
       path: new google.maps.MVCArray(coords),
-      geodesic: false,
-      zIndex: 0,
       map: map,
       clickable: false,
-      strokeOpacity: 0,
-      icons: [{
-        icon: borderLineSymbol,
-        offset: '0',
-        repeat: '8px'
-      }],
     });
     return {
       rerender: function(zoom, mapTypeId) {
         object.setVisible(zoom >= 7 && zoom <= 30);
-        borderLineSymbol.opacity = 1;
+        object.setOptions(styles.border.update(zoom, mapTypeId));
       }
     };
   }
