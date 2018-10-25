@@ -1,5 +1,6 @@
 import { shortName, longName, description } from './datautils';
-import { layers, select, tooltip, roadColor, roadColorSatellite } from './ferries';
+import { layers, select, tooltip } from './ferries';
+import styles from './styles';
 export function initObjectRenderer(map, txtol) {
 
   const google = window.google;
@@ -32,7 +33,7 @@ export function initObjectRenderer(map, txtol) {
     var roadObject = new google.maps.Polyline({
       path: new google.maps.MVCArray(roadCoords),
       geodesic: false,
-      strokeColor: roadColor,
+      // strokeColor: '#000000',
       strokeOpacity: 1,
       strokeWeight: 1,
       zIndex: 0,
@@ -45,7 +46,7 @@ export function initObjectRenderer(map, txtol) {
       rerender: function(zoom, mapTypeId) {
         var addZ = mapTypeId === 'hybrid'? 2: 0;
         roadObject.setVisible(zoom >= minZ + addZ && zoom <= maxZ + addZ);
-        roadObject.setOptions({strokeColor: mapTypeId === google.maps.MapTypeId.ROADMAP? roadColor: roadColorSatellite});
+        roadObject.setOptions({strokeColor: styles.road.getStrokeColor(mapTypeId)});
       }
     };
   }
