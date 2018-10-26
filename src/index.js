@@ -12,7 +12,7 @@ import { initRoutes } from './lib/routes';
 import './lib/uicontrol';
 import './lib/mapcontrol';
 import  {initFullscreen} from './lib/fullscreen';
-import { createMap, initMap, initLayers, initSettings, initInfoPage } from './lib/ferries';
+import { createMap, initMap, initSettings, initInfoPage } from './lib/ferries';
 
 window.initApplication = () => {
 	txtol.init(window.google.maps.OverlayView);
@@ -21,7 +21,6 @@ window.initApplication = () => {
 	const objectRenderer = initObjectRenderer(map, txtol);
 	initMap(map, objectRenderer, initRoutes, loadFerriesData);
 	initLiveLayer(map, txtol);
-	initLayers();
 }
 
 const loadGoogleMaps = () => {

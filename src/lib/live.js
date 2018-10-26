@@ -1,14 +1,6 @@
 import { layers } from './ferries';
 import store from '../store';
 
-let refreshLiveLayer = function() {};
-let liveLayerEnabled = false;
-
-export function toggleLiveLayer(enable) {
-  liveLayerEnabled = enable;
-  refreshLiveLayer(enable);
-}
-
 export function initLiveLayer(map, txtol) {
 
   var LIVE_MIN_ZOOM = 8;
@@ -18,42 +10,46 @@ export function initLiveLayer(map, txtol) {
 
   map.addListener('idle', updateLiveInd);
 
-  refreshLiveLayer = function(enable) {
+  let liveLayerEnabled = null;
+
+  function refreshLiveLayer() {
+    if (layers.live === liveLayerEnabled) return; // state not changed
+    liveLayerEnabled = layers.live;
 
     if (liveInterval) {
       clearInterval(liveInterval);
       liveInterval = null;
     }
 
-    if (enable) {
+    if (liveLayerEnabled) {
       store.dispatch({type: "UPDATE_INDICATOR_MSG", payload: "live.loading"});
       loadLiveData(map);
       liveInterval = setInterval(function() { loadLiveData(map); }, 10000);
     } else {
       store.dispatch({type: "UPDATE_INDICATOR_MSG", payload: ""});
       map.data.forEach(function(feature) {
-        map.data.remove(feature);
+        map.data.remove(feature); 
       });
       Object.values(vesselLabels).forEach(function(l) { l.hide(); });
       liveLoadCount = 0;
     }
 
-    map.data.setStyle(function(feature) {
-      var isVessel = feature.getGeometry().getType() === 'Point';
-      var isVisible = vesselIsVisible(feature);
-      var isLabelVisible = map.getZoom() >= LIVE_LABEL_MIN_ZOOM && isVisible;
-      if (isVessel) updateVesselLabel(map, feature, isLabelVisible);
-      return {
-        visible: isVisible,
-        strokeColor: '#a0a0a0',
-        strokeWeight: 0.5,
-        icon: isVisible && isVessel? createVesselIcon(feature): null,
-        zIndex: isVessel? 100: 99,
-        clickable: false
-      };
-    });
-
   }
+
+  map.data.setStyle(function(feature) {
+    var isVessel = feature.getGeometry().getType() === 'Point';
+    var isVisible = vesselIsVisible(feature);
+    var isLabelVisible = map.getZoom() >= LIVE_LABEL_MIN_ZOOM && isVisible;
+    if (isVessel) updateVesselLabel(map, feature, isLabelVisible);
+    return {
+      visible: isVisible,
+      strokeColor: '#a0a0a0',
+      strokeWeight: 0.5,
+      icon: isVisible && isVessel? createVesselIcon(feature): null,
+      zIndex: isVessel? 100: 99,
+      clickable: false
+    };
+  });
 
   function vesselIsVisible(feature) {
     if (feature.getGeometry().getType() === 'Point') {
@@ -179,5 +175,6 @@ export function initLiveLayer(map, txtol) {
       return 86400;
   }
 
-  refreshLiveLayer(liveLayerEnabled);
+  refreshLiveLayer();
+  window.addEventListener('layersChanged', refreshLiveLayer, false);
 }
