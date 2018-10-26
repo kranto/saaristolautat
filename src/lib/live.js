@@ -1,13 +1,13 @@
 import { layers } from './ferries';
 import store from '../store';
 
-let layerResolve;
+let refreshLiveLayer = function() {};
+let liveLayerEnabled = false;
 
-const liveLayerPromise = new Promise((resolve, reject) => {
-  layerResolve = resolve;
-});
-
-export default liveLayerPromise;
+export function toggleLiveLayer(enable) {
+  liveLayerEnabled = enable;
+  refreshLiveLayer(enable);
+}
 
 export function initLiveLayer(map, txtol) {
 
@@ -18,7 +18,7 @@ export function initLiveLayer(map, txtol) {
 
   map.addListener('idle', updateLiveInd);
 
-  function toggleLiveLayer(enable) {
+  refreshLiveLayer = function(enable) {
 
     if (liveInterval) {
       clearInterval(liveInterval);
@@ -179,8 +179,5 @@ export function initLiveLayer(map, txtol) {
       return 86400;
   }
 
-  layerResolve({
-    toggleLiveLayer: toggleLiveLayer,
-    updateLiveInd: updateLiveInd
-  });
+  refreshLiveLayer(liveLayerEnabled);
 }

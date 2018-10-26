@@ -3,7 +3,7 @@ import {onlyUnique} from './datautils';
 import {toggleScrollIndicator, cancelHeaderBarToggle, toggleHeaderbar, hideMenuAndSettings, hideSettings, closeInfoPage, hideMenu} from './uicontrol';
 import {panTo} from './mapcontrol';
 import {lauttaLegs, lauttaRoutes} from './routes';
-import liveLayer from './live';
+import {toggleLiveLayer} from './live';
 import {currentLang} from './localizer';
 import store from '../store';
 import styles, {getMapStyle} from './styles';
@@ -489,7 +489,7 @@ export const layers = localStorgageLayers? JSON.parse(localStorgageLayers): {
 localStorage.setItem("layers", JSON.stringify(layers));
 
 const onLayersChange = {
-  live: (layer, enable) => { liveLayer.then(layer => layer.toggleLiveLayer(enable)); }
+  live: (layer, enable) => toggleLiveLayer(enable)
 };
 
 let map;
