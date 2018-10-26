@@ -1,6 +1,6 @@
 import axios from 'axios';  
 
-const baseUri = '/data/';
+const baseUri = 'data/';
 const indexUri = baseUri + 'index.json?v=' + (Math.random() + "").substring(2);
 const indexP = axios.get(indexUri);
 
