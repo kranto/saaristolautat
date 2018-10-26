@@ -1,96 +1,158 @@
 import { layers } from './ferries';
 import store from '../store';
 
-export function initLiveLayer(map, txtol) {
+const LIVE_MIN_ZOOM = 8;
+const LIVE_LABEL_MIN_ZOOM = 9;
 
-  var LIVE_MIN_ZOOM = 8;
-  var LIVE_LABEL_MIN_ZOOM = 9;
-  var liveInterval = null;
-  var liveLoadCount = 0;
+function getVesselAge(feature) {
+  const timestamp = feature.getProperty("timestampExternal")
+  if (timestamp)
+    return Math.max(0, Date.now() - timestamp) / 1000;
+  else
+    return 86400;
+}
 
-  map.addListener('idle', updateLiveInd);
+function vesselIsCurrent(feature) {
+  return getVesselAge(feature) < 600;
+}
 
-  let liveLayerEnabled = null;
+function vesselIsVisible(map, feature) {
+  if (feature.getGeometry().getType() === 'Point') {
+    return map.getZoom() >= LIVE_MIN_ZOOM && vesselIsCurrent(feature);
+  } else {
+    return map.getZoom() >= LIVE_MIN_ZOOM;
+  }
+}
 
-  function refreshLiveLayer() {
-    if (layers.live === liveLayerEnabled) return; // state not changed
-    liveLayerEnabled = layers.live;
+function createVesselIcon(map, feature) {
+  const speed = feature.getProperty("sog");
+  const relOpacity = Math.max(0.3, 1 - 0.7 * Math.max(0, getVesselAge(feature) - 180) / 600);
+  const color = map.getMapTypeId() === 'satellite' ? '#80b0a0' : '#a030ff';
+  const hasSpeed = speed > 0.1;
+  const scale = hasSpeed ? 3 : 2;
+  const rotation = hasSpeed ? feature.getProperty("cog") : 45;
+  const path = hasSpeed ? "M -1 2 L -1 -2 0 -3 1 -2 1 2 0 1 -1 2" : "M -1 -1 L 1 -1 1 1 -1 1 -1 -1";
+  return {
+    path: path,
+    rotation: rotation,
+    strokeWeight: 1,
+    strokeColor: color,
+    strokeOpacity: 1 * relOpacity,
+    fillColor: color,
+    fillOpacity: 0.6 * relOpacity,
+    scale: scale * (map.getZoom() < 9 ? 0.6 : map.getZoom() / 10)
+  };
+}
 
-    if (liveInterval) {
-      clearInterval(liveInterval);
-      liveInterval = null;
+export default class LiveLayer {
+
+  init(map, txtol) {
+    this.map = map;
+    this.txtol = txtol;
+    this.initStyle();
+    this.refreshLiveLayer();
+    map.addListener('idle', this.updateLiveInd.bind(this));
+    window.addEventListener('layersChanged', () => this.refreshLiveLayer(), false);
+  }
+
+  map = null;
+  liveInterval = null;
+  liveLoadCount = 0;
+
+  liveLayerEnabled = null;
+
+  refreshLiveLayer() {
+    if (layers.live === this.liveLayerEnabled) return; // state not changed
+    this.liveLayerEnabled = layers.live;
+
+    if (this.liveInterval) {
+      clearInterval(this.liveInterval);
+      this.liveInterval = null;
     }
 
-    if (liveLayerEnabled) {
-      store.dispatch({type: "UPDATE_INDICATOR_MSG", payload: "live.loading"});
-      loadLiveData(map);
-      liveInterval = setInterval(function() { loadLiveData(map); }, 10000);
+    if (this.liveLayerEnabled) {
+      store.dispatch({ type: "UPDATE_INDICATOR_MSG", payload: "live.loading" });
+      this.loadLiveData();
+      this.liveInterval = setInterval(this.loadLiveData.bind(this), 10000);
     } else {
-      store.dispatch({type: "UPDATE_INDICATOR_MSG", payload: ""});
-      map.data.forEach(function(feature) {
-        map.data.remove(feature); 
-      });
-      Object.values(vesselLabels).forEach(function(l) { l.hide(); });
-      liveLoadCount = 0;
+      store.dispatch({ type: "UPDATE_INDICATOR_MSG", payload: "" });
+      this.map.data.forEach(feature => this.map.data.remove(feature));
+      Object.values(this.vesselLabels).forEach(function (l) { l.hide(); });
+      this.liveLoadCount = 0;
     }
 
   }
 
-  map.data.setStyle(function(feature) {
-    var isVessel = feature.getGeometry().getType() === 'Point';
-    var isVisible = vesselIsVisible(feature);
-    var isLabelVisible = map.getZoom() >= LIVE_LABEL_MIN_ZOOM && isVisible;
-    if (isVessel) updateVesselLabel(map, feature, isLabelVisible);
-    return {
-      visible: isVisible,
-      strokeColor: '#a0a0a0',
-      strokeWeight: 0.5,
-      icon: isVisible && isVessel? createVesselIcon(feature): null,
-      zIndex: isVessel? 100: 99,
-      clickable: false
-    };
-  });
+  vesselLabels = {};
 
-  function vesselIsVisible(feature) {
-    if (feature.getGeometry().getType() === 'Point') {
-      return map.getZoom() >= LIVE_MIN_ZOOM && vesselIsCurrent(feature);
+  loadLiveData() {
+    this.map.data.loadGeoJson('https://live.saaristolautat.fi/livedata.json',
+      { idPropertyName: "mmsi" },
+      () => {
+        this.liveLoadCount++;
+        this.updateLiveInd();
+      });
+    this.map.data.loadGeoJson('https://live.saaristolautat.fi/livehistory.json');
+  }
+
+  initStyle() {
+    this.map.data.setStyle(feature => {
+      const isVessel = feature.getGeometry().getType() === 'Point';
+      const isVisible = vesselIsVisible(this.map, feature);
+      const isLabelVisible = this.map.getZoom() >= LIVE_LABEL_MIN_ZOOM && isVisible;
+      if (isVessel) this.updateVesselLabel(feature, isLabelVisible);
+      return {
+        visible: isVisible,
+        strokeColor: '#a0a0a0',
+        strokeWeight: 0.5,
+        icon: isVisible && isVessel ? createVesselIcon(this.map, feature) : null,
+        zIndex: isVessel ? 100 : 99,
+        clickable: false
+      };
+    });
+  }
+
+  updateVesselLabel(feature, isVisible) {
+    const vessel = feature.getProperty("vessel");
+    const ageClass = vesselIsCurrent(feature) ? "current" : "old";
+    const speed = feature.getProperty("sog");
+    const name = vessel.name;
+    const mmsi = vessel.mmsi;
+    const position = feature.getGeometry().get();
+    const classes = "vessel " + ageClass + (speed <= 0.1 ? " stopped" : "");
+    let label;
+    if (this.vesselLabels[mmsi]) {
+      label = this.vesselLabels[mmsi];
+      label.setPosition(position);
+      label.setClass(classes);
+      label.draw();
     } else {
-      return map.getZoom() >= LIVE_MIN_ZOOM;
+      label = new this.txtol.TxtOverlay(position, name, classes, this.map, { dir: 'NW', x: -5, y: -5 });
+      this.vesselLabels[mmsi] = label;
     }
+    if (isVisible) label.show(); else label.hide();
   }
 
-  var vesselLabels = {};
-
-  function loadLiveData(map) {
-    map.data.loadGeoJson('https://live.saaristolautat.fi/livedata.json',
-      {idPropertyName: "mmsi"},
-      function () {
-        liveLoadCount++;
-        updateLiveInd();
-      });
-    map.data.loadGeoJson('https://live.saaristolautat.fi/livehistory.json');
-  }
-
-  function updateLiveInd() {
-    if (!liveLoadCount) return;
-    if (!layers || !layers.live) {
-      store.dispatch({type: "UPDATE_INDICATOR_MSG", payload: ""});
+  updateLiveInd() {
+    if (!this.liveLoadCount) return;
+    if (!layers.live) {
+      store.dispatch({ type: "UPDATE_INDICATOR_MSG", payload: "" });
       return;
     }
-    var sumCurrentInBounds = 0;
-    var countCurrentInBounds = 0;
-    var countCurrentInBoundsEncourse = 0;
-    var countCurrentTotal = 0;
-    var minCurrentInBounds = 1000;
-    var maxCurrentInBounds = -1;
-    map.data.forEach(function(feature) {
-      var isVessel = feature.getGeometry().getType() === 'Point';
+    let sumCurrentInBounds = 0;
+    let countCurrentInBounds = 0;
+    let countCurrentInBoundsEncourse = 0;
+    let countCurrentTotal = 0;
+    let minCurrentInBounds = 1000;
+    let maxCurrentInBounds = -1;
+    this.map.data.forEach((feature) => {
+      const isVessel = feature.getGeometry().getType() === 'Point';
       if (isVessel) {
-        var isCurrent = vesselIsCurrent(feature);
-        if (isCurrent) countCurrentTotal++; 
-        if (map.getBounds().contains(feature.getGeometry().get())) {
+        const isCurrent = vesselIsCurrent(feature);
+        if (isCurrent) countCurrentTotal++;
+        if (this.map.getBounds().contains(feature.getGeometry().get())) {
           if (isCurrent) {
-            var age = getVesselAge(feature);
+            const age = getVesselAge(feature);
             sumCurrentInBounds += age;
             countCurrentInBounds++;
             if (feature.getProperty("sog") > 0.1) {
@@ -103,78 +165,22 @@ export function initLiveLayer(map, txtol) {
       }
     });
 
-    var msg = ["live.notavailable"];
+    let msg = ["live.notavailable"];
     if (countCurrentTotal > 0) {
-      if (map.getZoom() < LIVE_MIN_ZOOM) {
-        msg = [ "live.zoomin"];
+      if (this.map.getZoom() < LIVE_MIN_ZOOM) {
+        msg = ["live.zoomin"];
       } else if (countCurrentInBounds > 0) {
         if (countCurrentInBoundsEncourse > 0) {
-          var min = Math.round(minCurrentInBounds/60);
-          var max = Math.round(maxCurrentInBounds/60);
-          msg = min === max? ["live.delay1", min]: ["live.delay2", min, max];
+          const min = Math.round(minCurrentInBounds / 60);
+          const max = Math.round(maxCurrentInBounds / 60);
+          msg = min === max ? ["live.delay1", min] : ["live.delay2", min, max];
         } else {
-          msg = ["live.delay1", Math.round(sumCurrentInBounds/countCurrentInBounds/60)]
+          msg = ["live.delay1", Math.round(sumCurrentInBounds / countCurrentInBounds / 60)]
         }
       } else {
         msg = ["live.notvisible"];
       }
     }
-    store.dispatch({type: "UPDATE_INDICATOR_MSG", payload: msg});
+    store.dispatch({ type: "UPDATE_INDICATOR_MSG", payload: msg });
   }
-
-  function updateVesselLabel(map, feature, isVisible) {
-    var vessel = feature.getProperty("vessel");
-    var ageClass = vesselIsCurrent(feature)? "current": "old";
-    var speed = feature.getProperty("sog");
-    var name = vessel.name;
-    var mmsi = vessel.mmsi;
-    var position = feature.getGeometry().get();
-    var classes = "vessel " + ageClass + (speed <= 0.1? " stopped": "");
-    var label;
-    if (vesselLabels[mmsi]) {
-      label = vesselLabels[mmsi];
-      label.setPosition(position);
-      label.setClass(classes);
-      label.draw();
-    } else {
-      label = new txtol.TxtOverlay(position, name, classes, map, {dir: 'NW', x: -5, y: -5});
-      vesselLabels[mmsi] = label;
-    }
-    if (isVisible) label.show(); else label.hide();
-  }
-
-  function createVesselIcon(feature) {
-    var speed = feature.getProperty("sog");
-    var relOpacity = Math.max(0.3, 1 - 0.7*Math.max(0, getVesselAge(feature)-180)/600);
-    var color = map.getMapTypeId() === 'satellite'? '#80b0a0': '#a030ff';
-    var hasSpeed = speed > 0.1;
-    var scale = hasSpeed? 3: 2;
-    var rotation = hasSpeed? feature.getProperty("cog"): 45;
-    var path = hasSpeed? "M -1 2 L -1 -2 0 -3 1 -2 1 2 0 1 -1 2": "M -1 -1 L 1 -1 1 1 -1 1 -1 -1";
-    return {
-      path: path,
-      rotation: rotation,
-      strokeWeight: 1,
-      strokeColor: color,
-      strokeOpacity: 1 * relOpacity,
-      fillColor: color,
-      fillOpacity: 0.6 * relOpacity,
-      scale: scale * (map.getZoom() < 9? 0.6: map.getZoom()/10) 
-    };
-  }
-
-  function vesselIsCurrent(feature) {
-    return getVesselAge(feature) < 600;
-  }
-
-  function getVesselAge(feature) {
-    var timestamp = feature.getProperty("timestampExternal")
-    if (timestamp)
-      return Math.max(0, Date.now() - timestamp) / 1000;
-    else
-      return 86400;
-  }
-
-  refreshLiveLayer();
-  window.addEventListener('layersChanged', refreshLiveLayer, false);
 }

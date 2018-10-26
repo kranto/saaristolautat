@@ -5,7 +5,7 @@ import InfoContent2  from './components/InfoContent2';
 import InfoContent  from './components/InfoContent';
 import txtol from './lib/txtol';
 import { initMapTypes } from './lib/maptypes';
-import { initLiveLayer } from './lib/live';
+import LiveLayer from './lib/live';
 import { initObjectRenderer } from './lib/objects';
 import { loadFerriesData } from './lib/dataloader';
 import { initRoutes } from './lib/routes';
@@ -20,7 +20,7 @@ window.initApplication = () => {
 	initMapTypes(map);
 	const objectRenderer = initObjectRenderer(map, txtol);
 	initMap(map, objectRenderer, initRoutes, loadFerriesData);
-	initLiveLayer(map, txtol);
+	new LiveLayer().init(map, txtol);
 }
 
 const loadGoogleMaps = () => {
