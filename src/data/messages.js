@@ -97,7 +97,17 @@ const messagesRaw = { // FI SV EN
         OSM: ["OpenStreetMap", "OpenStreetMap", "OpenStreetMap"],
         MMLTAUSTA: ["MML taustakartta", "LMV bakgrundskarta", "NLS Background Map"],
         MMLMAASTO: ["MML maastokartta", "LMV terrängkarta", "NLS Terrain Map"],
-    }
+    },
+    mapLayers: {
+        title: ["Karttatasot", "Kartanivåerna", "Map Layers"],
+        longdistanceferries: ["Suuret autolautat", "Stora bilfärjorna", "Large car ferries"],
+        roadferries: ["Maantielautat", "Landvägsfärjorna", "Road ferries"],
+        conn4: ["Yhteysalukset", "Förbindelsefartygen", "Commuter ferries"],
+        conn5: ["Risteilyreitit", "Kryssningrutterna", "Cruise routes"],
+        ringroads: ["Rengastiet", "Ringvägarna", "Ring roads"],
+        distances: ["Välimatkat", "Avstånden", "Distances"],
+        live: ["Live", "Live", "Live"],
+    }    
 };
 
 function replaceArrayLeafs(node, replace) {
