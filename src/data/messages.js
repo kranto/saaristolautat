@@ -46,7 +46,7 @@ const messagesRaw = { // FI SV EN
     },
     infocontent: {
         contactinfo: ["Yhteystiedot", "Kontaktuppgifter", "Contact Information"],
-        timetables: ["Aikataulut", "Tidtabeller", "Schedules"],    
+        timetables: ["Aikataulut", "Tidtabeller", "Schedules"],
     },
     unofficialcopy: ["Tämä on epävirallinen kopio. Tarkista muutokset, poikkeukset ja lisätiedot",
         "Detta är en inofficiell kopia. Kontrollera om ändringar, undantag och ytterligare information",
@@ -67,8 +67,8 @@ const messagesRaw = { // FI SV EN
     },
     loader: {
         main: ["Turun saariston ja Ahvenanmaan lauttareitit", "Skärgårdsfärjorna i Skärgårdshavet", "Ferry routes in the Finnish archipelago"],
-        islands: [ "40000 saarta<br/>50 lauttaa<br/>200 laituria",  "40000 öar<br/>50 färjor<br/>200 bryggor", "40000 islands<br/>50 ferries<br/>200 docks"],
-        loading: [ "Ladataan...", "Laddas...", "Loading..."]
+        islands: ["40000 saarta<br/>50 lauttaa<br/>200 laituria", "40000 öar<br/>50 färjor<br/>200 bryggor", "40000 islands<br/>50 ferries<br/>200 docks"],
+        loading: ["Ladataan...", "Laddas...", "Loading..."]
     },
     banner: {
         clickRoute: ["Klikkaa reittiä kartalla nähdäksesi reitin tiedot", "Klicka en rutt på kartan för information", "Click a route on map to see route details"],
@@ -76,13 +76,20 @@ const messagesRaw = { // FI SV EN
         timetables: ["Aikataulut", "Tidtabeller", "Schedules"],
         contactInfo: ["Yhteystiedot", "Kontaktuppgifter", "Contact information"],
         dontshowagain: ["Älä näytä uudestaan", "Visa inte mer", "Don't show again"],
-        close: ["Sulje", "Stäng", "Close"] 
+        close: ["Sulje", "Stäng", "Close"]
     },
     settings: {
         fullscreen: ["Koko ruutu", "Full screen", "Full screen"]
+    },
+    menu: {
+        gettingthere: ["Miten sinne pääsee", "Hur går man dit", "Getting there"],
+        alandferriesinfo: ["Ahvenanmaan lautat", "Ålands färjor", "Ferries in Åland"],
+        finlandferriesinfo: ["Manner-Suomen lautat", "Fasta-Finlands färjor", "Ferries in Finland"],
+        live: ["Live-näkymä", "Live-vy", "Live view"],
+        linksinfo: ["Linkkejä", "Länkar", "Links"],
+        appinfo: ["Tietoja sovelluksesta", "Info om appen", "About the Application"]
     }
 }
-
 
 function replaceArrayLeafs(node, replace) {
     if (typeof node !== "object") return; // this node is not an object
