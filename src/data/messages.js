@@ -88,8 +88,17 @@ const messagesRaw = { // FI SV EN
         live: ["Live-näkymä", "Live-vy", "Live view"],
         linksinfo: ["Linkkejä", "Länkar", "Links"],
         appinfo: ["Tietoja sovelluksesta", "Info om appen", "About the Application"]
+    },
+    mapTypes: {
+        roadmap: ["Google tiekartta", "Google vägkarta", "Google Roadmap"],
+        satellite: ["Google satelliitti", "Google satellit", "Google Satellite"],
+        hybrid: ["Google hybridi", "Google hybrid", "Google Hybrid"],
+        terrain: ["Google maasto", "Google terräng", "Google Terrain"],
+        OSM: ["OpenStreetMap", "OpenStreetMap", "OpenStreetMap"],
+        MMLTAUSTA: ["MML taustakartta", "LMV bakgrundskarta", "NLS Background Map"],
+        MMLMAASTO: ["MML maastokartta", "LMV terrängkarta", "NLS Terrain Map"],
     }
-}
+};
 
 function replaceArrayLeafs(node, replace) {
     if (typeof node !== "object") return; // this node is not an object

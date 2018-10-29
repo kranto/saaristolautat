@@ -1,37 +1,27 @@
 import React, { Component } from 'react';
+import { L2 } from '../lib/localizer';
+import { connect } from 'react-redux';
 
-export default class MapTypeSelector extends Component {
+class MapTypeSelector extends Component {
 
-  mapTypes = [
-    { value: "roadmap", name: { fi: "Google tiekartta", sv: "Google vägkarta", en: "Google Roadmap"}},
-    { value: "satellite", name: { fi: "Google satelliitti", sv: "Google satellit", en: "Google Satellite"}},
-    { value: "hybrid", name: { fi: "Google hybridi", sv: "Google hybrid", en: "Google Hybrid"}},
-    { value: "terrain", name: { fi: "Google maasto", sv: "Google terräng", en: "Google Terrain"}},
-    { value: "OSM", name: { fi: "OpenStreetMap", sv: "OpenStreetMap", en: "OpenStreetMap"}},
-    { value: "MMLTAUSTA", name: { fi: "MML taustakartta", sv: "LMV bakgrundskarta", en: "NLS Background Map"}},
-    { value: "MMLMAASTO", name: { fi: "MML maastokartta", sv: "LMV terrängkarta", en: "NLS Terrain Map"}},
-  ];
+    mapTypes = ["roadmap", "satellite", "hybrid", "terrain", "OSM", "MMLTAUSTA", "MMLMAASTO"];
 
-  componentDidMount() {
-    if (this.props.callback) this.props.callback();
-  }
-
-  shouldComponentUpdate() {
-    return false;
-  }
-
-  render() {
-    const selects = Object.keys(this.mapTypes[0].name).map(lang => {
-      const options = this.mapTypes.map(mapType =>
-        <option key={mapType.value} value={mapType.value}>{mapType.name[lang]}</option>
-      );
-      return (<select key={lang} className="mapTypeSelect" lang={lang}>{options}</select>);
-    });
-
-    return (
-        <div className="MapTypeSelector">
-          {selects}
-        </div>
-    );
-  }
+    render() {
+        const options = this.mapTypes.map(mapType =>
+            <option key={mapType} value={mapType}>{L2("mapTypes." + mapType)} </option>
+        );
+        return (
+            <div className="MapTypeSelector" >
+                <select className="mapTypeSelect">{options}</select>
+            </div>
+        );
+    }
 }
+
+const mapStateToProps = (state) => {
+    return {
+        locale: state.settings.locale
+    };
+};
+
+export default connect(mapStateToProps)(MapTypeSelector);
