@@ -1,4 +1,4 @@
-import {L} from './localizer';
+import { L } from './localizer';
 
 function sanitizePhone(num) {
     return num.replace(/\(.*\)/g, "").replace(/[-]/g, " ");
@@ -10,8 +10,8 @@ function phoneUri(num) {
 
 function getPhones(item) {
     if (item.phones) {
-        var phones = Array.isArray(item.phones)? item.phones: [item.phones];
-        return phones.map(function(phone) {
+        var phones = Array.isArray(item.phones) ? item.phones : [item.phones];
+        return phones.map(function (phone) {
             if (typeof phone === 'object') {
                 return { class: "phone", specifier: " - " + phone.name, text: sanitizePhone(phone.tel), uri: phoneUri(phone.tel) };
             } else {
@@ -24,7 +24,7 @@ function getPhones(item) {
 }
 
 function getLocalizedItem(item, lang) {
-    
+
     if (!(item instanceof Object)) {
         if (typeof item === 'string' && item.indexOf("ref_") === 0) {
             console.error('should not come here');
@@ -38,7 +38,7 @@ function getLocalizedItem(item, lang) {
     }
 
     if (item instanceof Array) {
-        return item.map(function(i) { return getLocalizedItem(i, lang); });
+        return item.map(function (i) { return getLocalizedItem(i, lang); });
     }
 
     var result = {};
@@ -69,19 +69,19 @@ function ew(target, needle) {
 }
 
 function getWww(item) {
-    return item.www? [{ class: "www", text: item.www.replace(/^http(s?):\/\//,"").replace(/\/$/, ""), specifier: "", uri: item.www, target: "info"}]: [];
+    return item.www ? [{ class: "www", text: item.www.replace(/^http(s?):\/\//, "").replace(/\/$/, ""), specifier: "", uri: item.www, target: "info" }] : [];
 }
 
 function getEmail(item) {
-    return item.email? [{ class: "email", text: item.email, specifier: "", uri: "mailto:" + item.email}]: [];
+    return item.email ? [{ class: "email", text: item.email, specifier: "", uri: "mailto:" + item.email }] : [];
 }
 
 function getFb(item) {
     const fb = item.fb;
     if (typeof fb === 'object') {
-        return [{ class: "facebook", text: fb.name || item.name, specifier: "", uri: fb.uri, target: "facebook"}];
+        return [{ class: "facebook", text: fb.name || item.name, specifier: "", uri: fb.uri, target: "facebook" }];
     } else if (fb) {
-        return [{ class: "facebook", text: item.name,  specifier: "", uri: item.fb, target:"facebook" }];
+        return [{ class: "facebook", text: item.name, specifier: "", uri: item.fb, target: "facebook" }];
     } else {
         return [];
     }
@@ -96,7 +96,7 @@ function renderDate(date, lang) {
     if (!date) return "";
     var parts = date.split("-");
     // var currentYear = new Date().getFullYear();
-    return parts[2]+"."+parts[1]+"."; //+(parts[0] != currentYear? parts[0]: "");
+    return parts[2] + "." + parts[1] + "."; //+(parts[0] != currentYear? parts[0]: "");
 }
 
 function renderDates(fromD, toD, lang) {
@@ -104,14 +104,14 @@ function renderDates(fromD, toD, lang) {
 }
 
 function flatten(array) {
-    return array.reduce(function(a, b) { return a.concat(b); }, []);
+    return array.reduce(function (a, b) { return a.concat(b); }, []);
 }
 
 function filterTimetables(tables) {
     if (!tables) return null;
-    var today = new Date().toISOString().substring(0,10);
-    tables = tables.filter(function(table) { return !table.validTo || table.validTo >= today; });
-    return tables.length? tables: null;
+    var today = new Date().toISOString().substring(0, 10);
+    tables = tables.filter(function (table) { return !table.validTo || table.validTo >= today; });
+    return tables.length ? tables : null;
 }
 
 export function routeInfo(route, lang) {
@@ -120,69 +120,69 @@ export function routeInfo(route, lang) {
     var contacts = [];
     info.id = route.id;
     info.name = route.name;
-    info.specifier = route.specifier? route.specifier: "";
-    
+    info.specifier = route.specifier ? route.specifier : "";
+
     info.vessels = route.vessels;
-    info.vessels.forEach(function(vessel) {
+    info.vessels.forEach(function (vessel) {
         if (vessel.contact && Object.keys(vessel.contact).length > 0) {
             vessel.contact.name = vessel.name;
             contacts.push(vessel.contact);
         }
         var features = [];
-        if (vessel.capacity.bikes) features.push({icon: "bicycle", value: vessel.capacity.bikes});
-        if (vessel.capacity.cars) features.push({icon: "car", value: vessel.capacity.cars});
-        if (vessel.capacity.persons) features.push({icon: "user", value: vessel.capacity.persons});
-        if (vessel.features.cafe) features.push({icon: "coffee"});
-        if (vessel.features.access) features.push({icon: "wheelchair"});
+        if (vessel.capacity.bikes) features.push({ icon: "bicycle", value: vessel.capacity.bikes });
+        if (vessel.capacity.cars) features.push({ icon: "car", value: vessel.capacity.cars });
+        if (vessel.capacity.persons) features.push({ icon: "user", value: vessel.capacity.persons });
+        if (vessel.features.cafe) features.push({ icon: "coffee" });
+        if (vessel.features.access) features.push({ icon: "wheelchair" });
         vessel.features = features;
     });
 
     info.features =
-    ["interval", "duration", "order", "booking", "cost", "seasonal", "limit", "seealso"]
-        .filter(function(type) { return route.features[type]; })
-        .map(function(type) { return { class: type, value: route.features[type]}; });
+        ["interval", "duration", "order", "booking", "cost", "seasonal", "limit", "seealso"]
+            .filter(function (type) { return route.features[type]; })
+            .map(function (type) { return { class: type, value: route.features[type] }; });
 
     var piers = route.piers;
-    piers.forEach(function(pier) {
-        pier.class = pier.type === 1? "mainpier": "";
-        pier.specifier = pier.type === 1 && pier.mun.name !== pier.name ? "(" + pier.mun.name  + ")": "";
+    piers.forEach(function (pier) {
+        pier.class = pier.type === 1 ? "mainpier" : "";
+        pier.specifier = pier.type === 1 && pier.mun.name !== pier.name ? "(" + pier.mun.name + ")" : "";
     });
     piers[piers.length - 1].last = true;
     info.piers = piers;
 
     info.notes = route.notes;
 
-    route.operator.forEach(function(op) {
+    route.operator.forEach(function (op) {
         op.contact.name = op.name;
         contacts.push(op.contact);
     });
 
     var timetables = route.timetables;
 
-    timetables.forEach(function(timetable) {
-        timetable.buttonspecifier = timetables.length > 1? timetable.name? timetable.name: timetable.specifier: "";
-        timetable.name = timetable.name? timetable.name: route.name;
-        timetable.specifier= timetable.specifier? timetable.specifier: route.specifier;
+    timetables.forEach(function (timetable) {
+        timetable.buttonspecifier = timetables.length > 1 ? timetable.name ? timetable.name : timetable.specifier : "";
+        timetable.name = timetable.name ? timetable.name : route.name;
+        timetable.specifier = timetable.specifier ? timetable.specifier : route.specifier;
         timetable.tables = filterTimetables(timetable.tables);
-        timetable.exttimetables = timetable.tables? false: "external";
+        timetable.exttimetables = timetable.tables ? false : "external";
         var first = true;
         var id = 1;
-        if (timetable.tables) timetable.tables.forEach(function(table) {
+        if (timetable.tables) timetable.tables.forEach(function (table) {
             table.dates = renderDates(table.validFrom, table.validTo, lang);
-            table.active = first? "active": "";
-            table.show = first? "show": "";
+            table.active = first ? "active" : "";
+            table.show = first ? "show" : "";
             table.tabid = "tab" + id++;
             first = false;
         });
     });
 
     info.timetables = timetables;
-    
+
     info.pricelists = route.pricelists;
 
-    contacts = contacts.map(function(contact) {
+    contacts = contacts.map(function (contact) {
 
-        var contactItems = flatten([getPhones, getEmail, getWww, getFb].map(function(f) { return f(contact); }));
+        var contactItems = flatten([getPhones, getEmail, getWww, getFb].map(function (f) { return f(contact); }));
 
         return {
             name: contact.name,
