@@ -98,12 +98,6 @@ function openInfoPage(target) {
   if (target !== "none") {
     $(target).show();
     unselectAll(false);
-    $(".showLive").off("click");
-    $(".showLive").click(function () {
-      var liveMapUri = "live.html?lng=" + map.getCenter().lng() + "&lat=" + map.getCenter().lat() + "&zoom=" + map.getZoom();
-      window.open(liveMapUri, "livemap");
-      $('.navbar-toggle').click();
-    });
   }
   hideMenu();
 }
@@ -112,6 +106,12 @@ export function initInfoPage() {
   $('#closeInfoPageButton').click(function () { history.go(-history.state.depth); });
   $('#infopage').click(function () { history.go(-history.state.depth); });
   $('#infopagecontent').click(function (event) { event.stopPropagation(); });
+
+  $(".showLive").click(function () {
+    var liveMapUri = "live.html?lng=" + map.getCenter().lng() + "&lat=" + map.getCenter().lat() + "&zoom=" + map.getZoom();
+    window.open(liveMapUri, "livemap");
+    $('.navbar-toggle').click();
+  });
 }
 
 export function menuItemClicked(infoPage) {
