@@ -5,7 +5,7 @@ import { panTo } from './mapcontrol';
 import { lauttaLegs, lauttaRoutes } from './routes';
 import { currentLang } from './localizer';
 import store from '../store';
-import styles, { getMapStyle } from './styles';
+import { getMapStyle } from './styles';
 
 let google;
 

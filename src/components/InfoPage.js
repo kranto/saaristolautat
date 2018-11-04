@@ -1,16 +1,27 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
+import { L2 } from '../lib/localizer';
 
-export default class InfoPage extends Component {
+const locales = ["fi", "sv", "en"];
 
-  componentDidMount() {
-    if (this.props.callback) this.props.callback();
-  }
+const getItem = (arrayOrString, locale) => {
+  if (typeof arrayOrString === 'string') return arrayOrString;
+  const index = Math.min(arrayOrString.length - 1, locales.indexOf(locale));
+  return arrayOrString[index];
+}
 
-  shouldComponentUpdate() {
-    return false;
-  }
+const link = (urls, target, linkTexts, descriptions, locale) => (
+  <div><a href={getItem(urls, locale)} rel="noopener noreferrer" target={target}>{getItem(linkTexts, locale)}</a>
+    <p>{getItem(descriptions, locale)}</p>
+  </div>
+);
+
+class InfoPage extends Component {
 
   render() {
+    const { locale: lang } = this.props;
+    const onlyInFinnish = lang === "fi" ? "" : lang === "sv" ? (<span>Bara på finska...</span>) : (<span>Only in Finnish...</span>);
+
     return (
       <div id="infopage" className="fmodal" style={{ display: "none" }}>
 
@@ -18,9 +29,8 @@ export default class InfoPage extends Component {
           <button type="button" className="btn btn-secondary closeInfoButton" id="closeInfoPageButton"><i className="fa fa-times" aria-hidden="true"></i></button>
 
           <div id="gettingthere" className="infosection">
-            <span lang="sv">Bara på finska...</span>
-            <span lang="en">Only in Finnish...</span>
-            <h2>Miten sinne pääsee</h2>
+            <h2>{L2("menu.gettingthere")}</h2>
+            {onlyInFinnish}
             <h3>Autolla ja moottoripyörällä</h3>
             <p>Autolla ja moottoripyörällä on helppo seurata Saariston rengastietä Turusta Naantalin kautta Taivassaloon ja Kustaviin tai Paraisten kautta Nauvoon. Kustavista ja Korpposta voi jatkaa matkaa Iniöön ja Houtskariin tai Ahvenanmaalle.</p>
             <p>Ahvenanmaalle voi matkustaa myös suoraan autolautalla Helsingistä, Turusta ja Naantalista</p>
@@ -37,9 +47,8 @@ export default class InfoPage extends Component {
           </div>
 
           <div id="alandferriesinfo" className="infosection">
-            <span lang="sv">Bara på finska...</span>
-            <span lang="en">Only in Finnish...</span>
-            <h2>Ahvenanmaan lautat <img src="img/alandstrafiken.png" width="120px" alt="Ålandstrafiken" /></h2>
+            <h2>{L2("menu.alandferriesinfo")} <img src="img/alandstrafiken.png" width="120px" alt="Ålandstrafiken" /></h2>
+            {onlyInFinnish}
             <h3>Lauttareitit</h3>
             <ul className="ferrieslist">
               <li><div className="infopageroute" style={{ borderColor: "#db0a00" }}></div><strong>Pohjoinen linja</strong> yhdistää Manner-Suomen Kustavin Brändön kautta Ahvenanmantereen Vårdöhön.</li>
@@ -73,9 +82,8 @@ export default class InfoPage extends Component {
           </div >
 
           <div id="finlandferriesinfo" className="infosection">
-            <span lang="sv">Bara på finska...</span>
-            <span lang="en">Only in Finnish...</span>
-            <h2>Manner-Suomen lautat</h2>
+            <h2>{L2("menu.finlandferriesinfo")}</h2>
+            {onlyInFinnish}
             <h3>Lauttareitit</h3>
             <ul className="ferrieslist">
               <li><div className="infopageroute" style={{ height: "20px", position: "relative", top: "12px", borderTopColor: "#005dd8", borderBottomColor: "#00a000", borderBottomWidth: "5px", borderBottomStyle: "dotted" }}></div><strong>Maantielautat ja lossit</strong> kuljettavat ajoneuvoja ja matkustajia joko aina tarvittaessa tai aikataulun mukaan useita kertoja päivässä. Maantielautat ovat maksuttomia.</li>
@@ -92,137 +100,110 @@ export default class InfoPage extends Component {
             <p>
               Maantie- ja yhteysalusliikenteen järjestäjä on Varsinais-Suomen ELY-keskus. Useimpia maantielauttoja ja losseja operoi Finferries. Yhteysaluksilla on useita eri operaattoreita. Risteilyreitit ovat yksityisten yritysten järjestämiä. Kunkin linjan operaattorin näet linjan tiedoista.
           </p>
-          </div >
+          </div>
 
           <div id="live" className="infosection">
-            <h2 lang="fi">Live-näkymä</h2>
-            <h2 lang="sv">Live-vy</h2>
-            <h2 lang="en">Live view</h2>
+            <h2>{L2("menu.live")}</h2>
+            {lang === "fi" && (
+              <div>
+                <p>Live-karttatasolla esitetään Saaristomeren alueella sijaintinsa ilmoittavat matkustaja-alukset. Sijaintitiedot esitetään lähes reaaliajassa, mutta ajoittain viivettä voi kuitenkin esiintyä muutamia minuutteja. Aluksen sijainnin ja suunnan lisäksi näytetään aluksen reitti viimeisen kolmen tunnin ajalta </p>
+                <p>Liikennetietojen lähde <a href="http://www.liikennevirasto.fi">Liikennevirasto</a> / <a href="http://digitraffic.liikennevirasto.fi/meriliikenne/">meri.digitraffic.fi</a>, lisenssi <a href="http://creativecommons.org/licenses/by/4.0/">CC 4.0 BY</a></p>
+                <h3>Marinetraffic</h3>
+                <p>Kattavamman näkymän Saaristomeren ja koko maailman meriliikenteeseen saa mm. Marinetraffic.com-palvelusta</p>
+                <button type="button" className="btn btn-secondary linkbutton external showLive" style={{ width: "100%" }}>Live by Marinetraffic.com</button>
+              </div>
+            )}
+            {lang === "sv" && (
+              <div>
+                <span>Bara på engelska...</span>
+                <p>Live layer shows passanger vessels in the Finnish Archipelago. Location is shown almost in real time. However, from time to time there is a delay of up to a few minutes. In addition to location and direction, also the route from the last three hours is shown.</p>
+                <p>Source of live data <a href="http://www.liikennevirasto.fi">Liikennevirasto</a> / <a href="http://digitraffic.liikennevirasto.fi/meriliikenne/">meri.digitraffic.fi</a>, license <a href="http://creativecommons.org/licenses/by/4.0/">CC 4.0 BY</a></p>
+                <h3>Marinetraffic</h3>
+                <p>A more comprehensive view to marine traffic is available e.g. in  Marinetraffic.com service.</p>
+                <button type="button" className="btn btn-secondary linkbutton external showLive" style={{ width: "100%" }}>Live by Marinetraffic.com</button>
+              </div>
+            )}
 
-            <div lang="fi">
-              <p>Live-karttatasolla esitetään Saaristomeren alueella sijaintinsa ilmoittavat matkustaja-alukset. Sijaintitiedot esitetään lähes reaaliajassa, mutta ajoittain viivettä voi kuitenkin esiintyä muutamia minuutteja. Aluksen sijainnin ja suunnan lisäksi näytetään aluksen reitti viimeisen kolmen tunnin ajalta </p>
-              <p>Liikennetietojen lähde <a href="http://www.liikennevirasto.fi">Liikennevirasto</a> / <a href="http://digitraffic.liikennevirasto.fi/meriliikenne/">meri.digitraffic.fi</a>, lisenssi <a href="http://creativecommons.org/licenses/by/4.0/">CC 4.0 BY</a></p>
-              <h3>Marinetraffic</h3>
-              <p>Kattavamman näkymän Saaristomeren ja koko maailman meriliikenteeseen saa mm. Marinetraffic.com-palvelusta</p>
-              <button type="button" className="btn btn-secondary linkbutton external showLive" style={{ width: "100%" }}>Live by Marinetraffic.com</button>
-            </div>
-
-            <div lang="sv">
-              <span lang="sv">Bara på engelska...</span>
-              <p>Live layer shows passanger vessels in the Finnish Archipelago. Location is shown almost in real time. However, from time to time there is a delay of up to a few minutes. In addition to location and direction, also the route from the last three hours is shown.</p>
-              <p>Source of live data <a href="http://www.liikennevirasto.fi">Liikennevirasto</a> / <a href="http://digitraffic.liikennevirasto.fi/meriliikenne/">meri.digitraffic.fi</a>, license <a href="http://creativecommons.org/licenses/by/4.0/">CC 4.0 BY</a></p>
-              <h3>Marinetraffic</h3>
-              <p>A more comprehensive view to marine traffic is available e.g. in  Marinetraffic.com service.</p>
-              <button type="button" className="btn btn-secondary linkbutton external showLive" style={{ width: "100%" }}>Live by Marinetraffic.com</button>
-            </div >
-
-            <div lang="en">
-              <p>Live layer shows passanger vessels in the Finnish Archipelago. Location is shown almost in real time. However, from time to time there is a delay of up to a few minutes. In addition to location and direction, also the route from the last three hours is shown.</p>
-              <p>Source of live data <a href="http://www.liikennevirasto.fi">Liikennevirasto</a> / <a href="http://digitraffic.liikennevirasto.fi/meriliikenne/">meri.digitraffic.fi</a>, license <a href="http://creativecommons.org/licenses/by/4.0/">CC 4.0 BY</a></p>
-              <h3>Marinetraffic</h3>
-              <p>A more comprehensive view to marine traffic is available e.g. in  Marinetraffic.com service.</p>
-              <button type="button" className="btn btn-secondary linkbutton external showLive" style={{ width: "100%" }}>Live by Marinetraffic.com</button>
-            </div >
+            {lang !== "fi" && lang !== "sv" && (
+              <div>
+                <p>Live layer shows passanger vessels in the Finnish Archipelago. Location is shown almost in real time. However, from time to time there is a delay of up to a few minutes. In addition to location and direction, also the route from the last three hours is shown.</p>
+                <p>Source of live data <a href="http://www.liikennevirasto.fi">Liikennevirasto</a> / <a href="http://digitraffic.liikennevirasto.fi/meriliikenne/">meri.digitraffic.fi</a>, license <a href="http://creativecommons.org/licenses/by/4.0/">CC 4.0 BY</a></p>
+                <h3>Marinetraffic</h3>
+                <p>A more comprehensive view to marine traffic is available e.g. in  Marinetraffic.com service.</p>
+                <button type="button" className="btn btn-secondary linkbutton external showLive" style={{ width: "100%" }}>Live by Marinetraffic.com</button>
+              </div>
+            )}
           </div >
 
           <div id="linksinfo" className="infosection">
-            <h2 lang="fi">Linkkejä</h2>
-            <h2 lang="sv">Länkar</h2>
-            <h2 lang="en">Links</h2>
+            <h2>{L2("menu.linksinfo")}</h2>
 
-            <h3 lang="fi">Lautat</h3>
-            <h3 lang="sv">Färjorna</h3>
-            <h3 lang="en">Ferries</h3>
+            <h3>{L2("infopage.ferries")}</h3>
+            {link(["http://lautta.net/?lang=" + lang],
+              "lauttanet",
+              "Lautta.net",
+              ["Kaikkien Manner-Suomen lauttojen portaali. Aikataulut, reittihaku, tiedotteet ym.",
+                "Portal till alla Fastlands-Finlands färjor. Tidtabeller, ruttsökning, meddelanden osv.",
+                "Portal to all road ferries in Mainland Finland. Timetables, route finder, announcements etc."
+              ], lang)}
+            {link(["http://www.ely-keskus.fi/web/ely/saaristoliikenne", "http://www.ely-keskus.fi/sv/web/ely/saaristoliikenne", "http://www.ely-keskus.fi/en/web/ely-en/transport"],
+              "ely",
+              ["Varsinais-Suomen ELY-keskus", "NTM-centralen i Egentliga Finland", "ELY Centre in Southwest Finland"],
+              ["Manner-Suomen maantielautta- ja yhteysalusliikenteen järjestäjä",
+                "Fastlands-Finlands landsvägs- och förbindelsefartygstrafikens organisatör",
+                "Authority responsible for organizing ferry routes in Mainland Finland"
+              ], lang)}
+            {link(["http://www.finferries.fi/", "http://www.finferries.fi/sv/", "http://www.finferries.fi/en/"],
+              "finferries",
+              "FinFerries.fi",
+              ["Manner-Suomen tärkein maantielauttaoperaattori",
+                "Fastlands-Finlands viktigaste landvägsfärjoperatör",
+                "The main operator of ferries in Mainland Finland"
+              ], lang)}
+            {link("http://www.alandstrafiken.ax/" + lang,
+              "alandstrafiken",
+              "Alandstrafiken.ax",
+              ["Ahvenanmaan lauttojen ja muun julkisen liikenteen järjestäjä. Aikataulut, varaukset, tiedotteet ym.",
+                "Ålands färj- och andra offentlig trafiks organisatör. Tidtabeller, bokning, meddelanden osv.",
+                "Organiser of ferries and other public transport in Åland. Timetables, bookings, announcements etc."
+              ], lang)}
 
-            <div lang="fi"><a href="http://lautta.net/?lang=fi" rel="noopener noreferrer" target="lauttanet">Lautta.net</a>
-              <p>Kaikkien Manner-Suomen lauttojen portaali. Aikataulut, reittihaku, tiedotteet ym. </p>
-            </div>
-            <div lang="sv"><a href="http://lautta.net/?lang=sv" rel="noopener noreferrer" target="lauttanet">Lautta.net</a>
-              <p>Portal till alla Fastlands-Finlands färjor. Tidtabeller, ruttsökning, meddelanden osv.</p>
-            </div>
-            <div lang="en"><a href="http://lautta.net/?lang=en" rel="noopener noreferrer" target="lauttanet">Lautta.net</a>
-              <p>Portal to all road ferries in Mainland Finland. Timetables, route finder, announcements etc.</p>
-            </div>
+            <h3>{L2("infopage.touristinfo")}</h3>
 
-            <div lang="fi"><a href="http://www.ely-keskus.fi/web/ely/saaristoliikenne" rel="noopener noreferrer" target="ely">Varsinais-Suomen ELY-keskus</a>
-              <p>Manner-Suomen maantielautta- ja yhteysalusliikenteen järjestäjä</p>
-            </div>
-            <div lang="sv"><a href="http://www.ely-keskus.fi/sv/web/ely/saaristoliikenne" rel="noopener noreferrer" target="ely">NTM-centralen i Egentliga Finland</a>
-              <p>Fastlands-Finlands landsvägs- och förbindelsefartygstrafikens organisatör</p>
-            </div>
-            <div lang="en"><a href="http://www.ely-keskus.fi/en/web/ely-en/transport" rel="noopener noreferrer" target="ely">ELY Centre in Southwest Finland</a>
-              <p>Authority responsible for organizing ferry routes in Mainland Finland</p>
-            </div>
+            {link(["http://saaristo.org/index.php?page=101&lang=1", "http://saaristo.org/index.php?page=101&lang=3", "http://saaristo.org/index.php?page=101&lang=2"],
+              "saaristoorg",
+              "Saaristo.org",
+              ["Turun saariston matkailuneuvonta<",
+                "Åbo skärgårdens turistinformation",
+                "Turku Archipelago Tourist Information Center"
+              ], lang)}
+            {link(["http://www.visitaland.com/fi/", "http://www.visitaland.com/", "http://www.visitaland.com/en/"],
+              "visitaland",
+              "Visit Åland",
+              ["Ahvenanmaan matkailuneuvonta",
+                "Ålands turistinformation",
+                "Åland Tourist information Center"
+              ], lang)}
+            {link(["http://www.aland.travel/index-fi.html", "http://www.aland.travel/index.html", "http://www.aland.travel/index-en.html"],
+              "alandtravel",
+              "Åland.travel",
+              ["Ahvenanmaan saaristokuntien matkailutietoa. Föglö, Sottunga, Kumlinge, Vårdö, Brändö, Kökar.",
+                "Ålands skärgårdkommunernas turistinformation. Föglö, Sottunga, Kumlinge, Vårdö, Brändö, Kökar.",
+                "Tourist information of the archipelago municipalities in Åland. Föglö, Sottunga, Kumlinge, Vårdö, Brändö, Kökar."
+              ], lang)}
 
-            <div lang="fi"><a href="http://www.finferries.fi/" rel="noopener noreferrer" target="finferries">FinFerries.fi</a>
-              <p>Manner-Suomen tärkein maantielauttaoperaattori</p>
-            </div>
-            <div lang="sv"><a href="http://www.finferries.fi/sv/" rel="noopener noreferrer" target="finferries">FinFerries.fi</a>
-              <p>Fastlands-Finlands viktigaste landvägsfärjoperatör</p>
-            </div>
-            <div lang="en"><a href="http://www.finferries.fi/en/" rel="noopener noreferrer" target="finferries">FinFerries.fi</a>
-              <p>The main operator of ferries in Mainland Finland</p>
-            </div>
-
-            <div lang="fi"><a href="http://www.alandstrafiken.ax/fi" rel="noopener noreferrer" target="alandstrafiken">Alandstrafiken.ax</a>
-              <p>Ahvenanmaan lauttojen ja muun julkisen liikenteen järjestäjä. Aikataulut, varaukset, tiedotteet ym.</p>
-            </div>
-            <div lang="sv"><a href="http://www.alandstrafiken.ax/sv" rel="noopener noreferrer" target="alandstrafiken">Alandstrafiken.ax</a>
-              <p>Ålands färj- och andra offentlig trafiks organisatör. Tidtabeller, bokning, meddelanden osv.</p>
-            </div>
-            <div lang="en"><a href="http://www.alandstrafiken.ax/en" rel="noopener noreferrer" target="alandstrafiken">Alandstrafiken.ax</a>
-              <p>Organiser of ferries and other public transport in Åland. Timetables, bookings, announcements etc.</p>
-            </div>
-
-            <h3 lang="fi">Matkailutietoa</h3>
-            <h3 lang="sv">Turistinformation</h3>
-            <h3 lang="en">Tourist Information</h3>
-
-            <div lang="fi"><a href="http://saaristo.org/index.php?page=101&lang=1" rel="noopener noreferrer" target="saaristoorg">Saaristo.org</a>
-              <p>Turun saariston matkailuneuvonta</p>
-            </div>
-            <div lang="sv"><a href="http://saaristo.org/index.php?page=101&lang=3" rel="noopener noreferrer" target="saaristoorg">Saaristo.org</a>
-              <p>Åbo skärgårdens turistinformation</p>
-            </div>
-            <div lang="en"><a href="http://saaristo.org/index.php?page=101&lang=2" rel="noopener noreferrer" target="saaristoorg">Saaristo.org</a>
-              <p>Turku Archipelago Tourist Information Center</p>
-            </div>
-
-            <div lang="fi"><a href="http://www.visitaland.com/fi/" rel="noopener noreferrer" target="visitaland">Visit Åland</a>
-              <p>Ahvenanmaan matkailuneuvonta</p>
-            </div>
-            <div lang="sv"><a href="http://www.visitaland.com/" rel="noopener noreferrer" target="visitaland">Visit Åland</a>
-              <p>Ålands turistinformation</p>
-            </div>
-            <div lang="en"><a href="http://www.visitaland.com/en/" rel="noopener noreferrer" target="visitaland">Visit Åland</a>
-              <p>Åland Tourist information Center</p>
-            </div>
-
-            <div lang="fi"><a href="http://www.aland.travel/index-fi.html" rel="noopener noreferrer" target="alandtravel">Åland.travel</a>
-              <p>Ahvenanmaan saaristokuntien matkailutietoa. Föglö, Sottunga, Kumlinge, Vårdö, Brändö, Kökar.</p>
-            </div>
-            <div lang="sv"><a href="http://www.aland.travel/index.html" rel="noopener noreferrer" target="alandtravel">Åland.travel</a>
-              <p>Ålands skärgårdkommunernas turistinformation. Föglö, Sottunga, Kumlinge, Vårdö, Brändö, Kökar.</p>
-            </div>
-            <div lang="en"><a href="http://www.aland.travel/index-en.html" rel="noopener noreferrer" target="alandtravel">Åland.travel</a>
-              <p>Tourist information of the archipelago municipalities in Åland. Föglö, Sottunga, Kumlinge, Vårdö, Brändö, Kökar.</p>
-            </div>
           </div>
 
           <div id="appinfo" className="infosection">
-            <h2 lang="fi">Tietoja sovelluksesta</h2>
-            <h2 lang="sv">Info om appen</h2>
-            <h2 lang="en">About the Application</h2>
-
-            <span lang="sv">Bara på finska...</span>
-            <span lang="en">Only in Finnish...</span>
+            <h2>{L2("menu.appinfo")}</h2>
+            {onlyInFinnish}
             <p>
               <img src="/mstile-70x70.png" alt="logo" style={{ width: "40px", height: "40px", verticalAlign: "baseline", marginBottom: "-7px" }} />
               <strong>Saaristolautat.fi</strong> on harrastuspohjalta tehty karttasovellus, jonka tiedot on koottu varsinaisten palveluntarjoajien nettisivuilta. Sovelluksen tarkoitus on auttaa saaristoon suuntaavien matkojen suunnittelussa.
-          </p>
+            </p>
             <div className="alert alert-danger" role="alert" style={{ marginTop: "30px" }}>
               Tarkista aina reitit ja aikataulut palveluntarjoajien palveluista!
-          </div>
+            </div>
             <div id="followbox">
               <h5>Seuraa Saaristolauttoja ja anna palautetta</h5>
               <ul>
@@ -234,35 +215,28 @@ export default class InfoPage extends Component {
             <div id="licensebox">
               <p>
                 Saaristolautat.fi © Kyösti Ranto 2018
-            </p>
+              </p>
 
-              <div style={{ marginTop: "10px" }} />
-              <span lang="fi">Karttatiedot</span>
-              <span lang="sv">Karta data</span>
-              <span lang="en">Map data</span> © <a href="http://www.google.com/">Google</a>,  <a href="http://www.openstreetmap.org/copyright" rel="noopener noreferrer" target="_blank">OpenStreetMap</a> contributors, <a href="http://www.maanmittauslaitos.fi/" rel="noopener noreferrer" target="_blank">Maanmittauslaitos</a>.
-            <br />
-              <span lang="fi">Ikonit</span>
-              <span lang="sv">Ikoner</span>
-              <span lang="en">Icons by</span> Font Awesome, <a href="http://creativecommons.org/licenses/by/4.0/" rel="noopener noreferrer" target="license">CC 4.0 BY</a>
+              <div style={{ marginTop: "10px" }}></div>
+              {L2("infopage.mapdata")} © <a href="http://www.google.com/">Google</a>,  <a href="http://www.openstreetmap.org/copyright" rel="noopener noreferrer" target="_blank">OpenStreetMap</a> contributors, <a href="http://www.maanmittauslaitos.fi/" rel="noopener noreferrer" target="_blank">Maanmittauslaitos</a>.
               <br />
-              <span lang="fi">Sovellusikoni</span>
-              <span lang="sv">App ikon</span>
-              <span lang="en">Application icon made</span>
-              by Freepik from <a href="https://www.flaticon.com" rel="noopener noreferrer" target="flaticon">www.flaticon.com</a>
+              {L2("infopage.icons")} Font Awesome, <a href="http://creativecommons.org/licenses/by/4.0/" rel="noopener noreferrer" target="license">CC 4.0 BY</a>
               <br />
-              <span lang="fi">
-                Liikennetietojen lähde <a href="http://www.liikennevirasto.fi" rel="noopener noreferrer" target="livi">Liikennevirasto</a> / <a href="http://digitraffic.liikennevirasto.fi/meriliikenne/" rel="noopener noreferrer" target="digitraffic">meri.digitraffic.fi</a>, lisenssi <a href="http://creativecommons.org/licenses/by/4.0/" rel="noopener noreferrer" target="license">CC 4.0 BY</a>
-              </span>
-              <span lang="sv">
-                Trafikuppgifternas källa <a href="http://www.liikennevirasto.fi" rel="noopener noreferrer" target="livi">Trafikverket</a> / <a href="http://digitraffic.liikennevirasto.fi/meriliikenne/" rel="noopener noreferrer" target="digitraffic">meri.digitraffic.fi</a>, licens <a href="http://creativecommons.org/licenses/by/4.0/" rel="noopener noreferrer" target="license">CC 4.0 BY</a>
-              </span>
-              <span lang="en">
-                Source of traffic information <a href="http://www.liikennevirasto.fi" rel="noopener noreferrer" target="livi">Finnish Transport Agency</a> / <a href="http://digitraffic.liikennevirasto.fi/meriliikenne/" rel="noopener noreferrer" target="digitraffic">meri.digitraffic.fi</a>, license <a href="http://creativecommons.org/licenses/by/4.0/" rel="noopener noreferrer" target="license">CC 4.0 BY</a>
-              </span>
+              {L2("infopage.appicon")} by Freepik from <a href="https://www.flaticon.com" rel="noopener noreferrer" target="flaticon">www.flaticon.com</a>
+              <br />
+              {L2("infopage.trafficinfo")} <a href="http://www.liikennevirasto.fi" rel="noopener noreferrer" target="livi">Finnish Transport Agency</a> / <a href="http://digitraffic.liikennevirasto.fi/meriliikenne/" rel="noopener noreferrer" target="digitraffic">meri.digitraffic.fi</a>, license <a href="http://creativecommons.org/licenses/by/4.0/" rel="noopener noreferrer" target="license">CC 4.0 BY</a>
             </div>
-          </div >
-        </div >
+          </div>
+        </div>
       </div>
     );
   }
 }
+
+const mapStateToProps = (state) => {
+  return {
+    locale: state.settings.locale
+  };
+};
+
+export default connect(mapStateToProps)(InfoPage);

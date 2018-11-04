@@ -89,6 +89,14 @@ const messagesRaw = { // FI SV EN
         linksinfo: ["Linkkejä", "Länkar", "Links"],
         appinfo: ["Tietoja sovelluksesta", "Info om appen", "About the Application"]
     },
+    infopage: {
+        ferries: ["Lautat", "Färjorna", "Ferries"],
+        touristinfo: ["Matkailutietoa", "Turistinformation", "Tourist Information"],
+        mapdata: ["Karttatiedot", "Karta data", "Map data"],
+        icons: ["Ikonit", "Ikoner", "Icons by"],
+        appicon: ["Sovellusikoni", "App ikon", "Application icon"],
+        trafficinfo: ["", "", "Source of traffic information"],
+    },
     mapTypes: {
         roadmap: ["Google tiekartta", "Google vägkarta", "Google Roadmap"],
         satellite: ["Google satelliitti", "Google satellit", "Google Satellite"],

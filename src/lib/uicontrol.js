@@ -7,7 +7,6 @@ var scrollLimit = 22;
 $(document).ready(function () {
     $('#wrapper2').bind('scroll', toggleScrollIndicator);
     $("#timetables").click(function (event) { if (event.target === this) { window.history.back(); } });
-    showLanguage(currentLang);
 });
 
 export function toggleScrollIndicator() {
@@ -82,16 +81,3 @@ export function cancelHeaderBarToggle() {
 export function closeInfoPage() {
     $('#infopage').fadeOut();
 }
-
-function showLanguage(lang) {
-    $("[lang]").each(function () {
-        if ($(this).attr("lang") === lang)
-            $(this).show();
-        else
-            $(this).hide();
-    });
-}
-
-window.addEventListener('localeChanged', () => {
-    showLanguage(currentLang);
-}, false);
