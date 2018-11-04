@@ -6,8 +6,12 @@ export default function reducer(state = {
       return { ...state, timetables: action.payload };
     case "TIMETABLE_CLOSED":
       return { ...state, timetables: null };
-    case "ROUTE_SELECTED":
-      return { ...state, selected: action.payload };
+    case "INFOCONTENT_SELECTED":
+      return { ...state, infoContent: action.payload };
+    case "INFOCONTENT2_SELECTED":
+      return { ...state, infoContent2: action.payload };
+      case "INFOCONTENT_UNSELECTED":
+      return { ...state, infoContent: null, infoContent2: null };
     default:
       return state;
   }

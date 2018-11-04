@@ -104,12 +104,12 @@ function openInfoPage(target) {
 }
 
 export function closeInfoPage() {
-    history.go(-history.state.depth);
+  history.go(-history.state.depth);
 }
 
 export function showLivePage() {
-    var liveMapUri = "live.html?lng=" + map.getCenter().lng() + "&lat=" + map.getCenter().lat() + "&zoom=" + map.getZoom();
-    window.open(liveMapUri, "livemap");
+  var liveMapUri = "live.html?lng=" + map.getCenter().lng() + "&lat=" + map.getCenter().lat() + "&zoom=" + map.getZoom();
+  window.open(liveMapUri, "livemap");
 }
 
 export function menuItemClicked(infoPage) {
@@ -139,7 +139,7 @@ export function initSettings() {
 }
 
 export function onLocaleChanged() {
-    console.log('onLocaleChanged');
+  console.log('onLocaleChanged');
   if (objects) {
     objects.forEach(function (object) { if (object.init) object.init(); });
     rerender(map, true);
@@ -147,10 +147,6 @@ export function onLocaleChanged() {
 
   if (typeof lauttaRoutes !== 'undefined') {
     lauttaRoutes.forEach(function (route) { if (route.init) route.init(); });
-  }
-
-  if (selected) {
-    select(selected);
   }
 }
 
@@ -300,7 +296,7 @@ function initPierLinks() {
 var lastInfoContent = false;
 function setInfoContent(targets, dontPushState) {
 
-  if (lastInfoContent) window.unsetInfoContent1();
+  if (lastInfoContent) store.dispatch({type:"INFOCONTENT_UNSELECTED", payload: null});
   lastInfoContent = true;
 
   var route;
@@ -310,11 +306,11 @@ function setInfoContent(targets, dontPushState) {
 
     const data = routeInfo(fdata.routes[route], currentLang);
     selectedRoute = data;
-    window.setInfoContent1(data);
+    store.dispatch({ type: "INFOCONTENT_SELECTED", payload: fdata.routes[route] });
   } else {
     var uniqueNames = targets.map(function (target) { return target.name; }).filter(onlyUnique);
     const data = { names: uniqueNames, contents: targets };
-    window.setInfoContent2(data);
+    store.dispatch({ type: "INFOCONTENT2_SELECTED", payload: targets });
     if (!dontPushState) history.pushState({ route: targets.map(function (r) { return r.id; }), timetables: null }, null, null);
   }
 
@@ -450,7 +446,7 @@ export function unselectAll(pushState) {
       $(".info").animate({ left: -400 }, 'fast', function () {
         $(".info").css({ left: "" });
         $("#wrapper2").toggleClass("info-open", false);
-        window.unsetInfoContent1();
+        store.dispatch({type:"INFOCONTENT_UNSELECTED", payload: null});
       });
     } else {
       $("#wrapper2").animate({ scrollTop: 0 }, 'fast', function () {
@@ -458,7 +454,7 @@ export function unselectAll(pushState) {
           $(".info").css({ top: "" });
         });
         $("#wrapper2").toggleClass("info-open", false);
-        window.unsetInfoContent1();
+        store.dispatch({type:"INFOCONTENT_UNSELECTED", payload: null});
         toggleScrollIndicator();
       });
     }

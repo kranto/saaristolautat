@@ -6,6 +6,8 @@ import Menu from './Menu';
 import LiveIndicator from './LiveIndicator';
 import Timetables from './Timetables';
 import MapContainer from './MapContainer';
+import InfoContent from './InfoContent';
+import InfoContent2 from './InfoContent2';
 
 export default class Wrapper extends Component {
 
@@ -15,7 +17,7 @@ export default class Wrapper extends Component {
         <div id="wrapper2">
           <InfoPage />
           <div className="mapoverlay"></div>
-          <div className="info" id="infoholder"></div>
+          <div className="info" id="infoholder"><InfoContent /><InfoContent2 /></div>
         </div>
 
         <MapContainer />

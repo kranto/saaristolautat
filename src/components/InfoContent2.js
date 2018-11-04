@@ -1,14 +1,20 @@
 import React, { Component } from 'react';
 import {unselectAll} from '../lib/ferries';
+import { onlyUnique } from '../lib/datautils';
+import { connect } from 'react-redux';
 
-export default class InfoContent2 extends Component {
+class InfoContent2 extends Component {
 
   render() {
-    const nameItems = this.props.names.map(name => 
+    if (!this.props.targets) return <div />;
+    
+    const targets = this.props.targets;
+    const names = targets.map(function (target) { return target.name; }).filter(onlyUnique);
+    const nameItems = names.map(name => 
       <div key={name} className="routeheader">{name}</div>
     );
 
-    const contentItems = this.props.contents.map(content => 
+    const contentItems = targets.map(content => 
       <a key={content.name + content.operator.name} href={content.operator.link} target="operator">
         <div className="contentbox">
           <div className="routename">{content.name}</div>
@@ -31,3 +37,12 @@ export default class InfoContent2 extends Component {
     );
   }
 }
+
+const mapStateToProps = (state) => {
+    return {
+        locale: state.settings.locale,
+        targets: state.selection.infoContent2
+    };
+};
+
+export default connect(mapStateToProps)(InfoContent2);
