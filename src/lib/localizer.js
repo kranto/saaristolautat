@@ -24,7 +24,6 @@ export function setLanguage(lang) {
     }
     if (lang !== 'fi' && lang !== 'sv') lang = 'en';
     currentLang = lang;
-    window.dispatchEvent(new Event('localeChanged'));
     store.dispatch(settings.localeSet(currentLang));
 }
 

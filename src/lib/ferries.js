@@ -140,7 +140,8 @@ export function initSettings() {
   });
 }
 
-window.addEventListener('localeChanged', () => {
+export function onLocaleChanged() {
+    console.log('onLocaleChanged');
   if (objects) {
     objects.forEach(function (object) { if (object.init) object.init(); });
     rerender(map, true);
@@ -153,7 +154,7 @@ window.addEventListener('localeChanged', () => {
   if (selected) {
     select(selected);
   }
-}, false);
+}
 
 function addMapListeners(map) {
   google.maps.event.addListener(map, 'maptypeid_changed', function () {

@@ -5,16 +5,9 @@ import Settings from './Settings';
 import Menu from './Menu';
 import LiveIndicator from './LiveIndicator';
 import Timetables from './Timetables';
+import MapContainer from './MapContainer';
 
 export default class Wrapper extends Component {
-
-  componentDidMount() {
-    if (this.props.callback) this.props.callback();
-  }
-
-  shouldComponentUpdate() {
-    return false;
-  }
 
   render() {
     return (
@@ -25,9 +18,7 @@ export default class Wrapper extends Component {
           <div className="info" id="infoholder"></div>
         </div>
 
-        <div id="mapcontainer">
-          <div id="map" className="map"></div>
-        </div>
+        <MapContainer />
 
         <div id="scrollIndicator"><i className="fa fa-ellipsis-h" aria-hidden="true"></i></div>
 

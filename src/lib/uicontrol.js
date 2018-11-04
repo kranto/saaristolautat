@@ -1,4 +1,3 @@
-import {currentLang} from './localizer';
 
 const $ = window.$;
 
