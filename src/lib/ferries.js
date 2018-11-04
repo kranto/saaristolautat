@@ -1,5 +1,4 @@
 import { routeInfo } from './datarenderer';
-import { onlyUnique } from './datautils';
 import { toggleScrollIndicator, cancelHeaderBarToggle, toggleHeaderbar, hideMenuAndSettings, hideSettings, hideInfoPage, hideMenu } from './uicontrol';
 import { panTo } from './mapcontrol';
 import { lauttaLegs, lauttaRoutes } from './routes';
@@ -139,7 +138,6 @@ export function initSettings() {
 }
 
 export function onLocaleChanged() {
-  console.log('onLocaleChanged');
   if (objects) {
     objects.forEach(function (object) { if (object.init) object.init(); });
     rerender(map, true);
@@ -308,8 +306,6 @@ function setInfoContent(targets, dontPushState) {
     selectedRoute = data;
     store.dispatch({ type: "INFOCONTENT_SELECTED", payload: fdata.routes[route] });
   } else {
-    var uniqueNames = targets.map(function (target) { return target.name; }).filter(onlyUnique);
-    const data = { names: uniqueNames, contents: targets };
     store.dispatch({ type: "INFOCONTENT2_SELECTED", payload: targets });
     if (!dontPushState) history.pushState({ route: targets.map(function (r) { return r.id; }), timetables: null }, null, null);
   }
