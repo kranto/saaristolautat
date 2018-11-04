@@ -77,6 +77,6 @@ export function cancelHeaderBarToggle() {
     headerBarTimeout = null;
 }
 
-export function closeInfoPage() {
+export function hideInfoPage() {
     $('#infopage').fadeOut();
 }

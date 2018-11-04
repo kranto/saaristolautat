@@ -1,6 +1,6 @@
 import { routeInfo } from './datarenderer';
 import { onlyUnique } from './datautils';
-import { toggleScrollIndicator, cancelHeaderBarToggle, toggleHeaderbar, hideMenuAndSettings, hideSettings, closeInfoPage, hideMenu } from './uicontrol';
+import { toggleScrollIndicator, cancelHeaderBarToggle, toggleHeaderbar, hideMenuAndSettings, hideSettings, hideInfoPage, hideMenu } from './uicontrol';
 import { panTo } from './mapcontrol';
 import { lauttaLegs, lauttaRoutes } from './routes';
 import { currentLang } from './localizer';
@@ -8,6 +8,7 @@ import store from '../store';
 import { getMapStyle } from './styles';
 
 let google;
+let map;
 
 const { $, history, location } = window;
 
@@ -102,16 +103,13 @@ function openInfoPage(target) {
   hideMenu();
 }
 
-export function initInfoPage() {
-  $('#closeInfoPageButton').click(function () { history.go(-history.state.depth); });
-  $('#infopage').click(function () { history.go(-history.state.depth); });
-  $('#infopagecontent').click(function (event) { event.stopPropagation(); });
+export function closeInfoPage() {
+    history.go(-history.state.depth);
+}
 
-  $(".showLive").click(function () {
+export function showLivePage() {
     var liveMapUri = "live.html?lng=" + map.getCenter().lng() + "&lat=" + map.getCenter().lat() + "&zoom=" + map.getZoom();
     window.open(liveMapUri, "livemap");
-    $('.navbar-toggle').click();
-  });
 }
 
 export function menuItemClicked(infoPage) {
@@ -222,7 +220,7 @@ $(document).keyup(function (e) {
     if (hideMenuAndSettings()) {
       // nothing
     } else if (history.state.infoPage) {
-      history.go(-history.state.depth);
+      closeInfoPage();
     } else if (history.state.timetable) {
       history.back();
     } else if (history.state.route) {
@@ -329,10 +327,6 @@ function setInfoContent(targets, dontPushState) {
     $(".infocontent:not(.removing)").find(".infotitle, .headerbox").css({ borderBottom: "none" });
   }
 
-  $('.closeInfoButton:not(#closeInfoPageButton)').click(function () {
-    unselectAll();
-  });
-
   initPierLinks();
 
   $(".infocontent.removing").fadeOut('fast', function () {
@@ -357,7 +351,7 @@ function navigateTo(state) {
     closeTimetables();
   }
   if (!state || !state.infoPage) {
-    closeInfoPage();
+    hideInfoPage();
   }
   if (state && state.route) {
     if (typeof state.route === 'string') {
@@ -487,8 +481,6 @@ export const layers = localStorgageLayers ? JSON.parse(localStorgageLayers) : {
 };
 
 localStorage.setItem("layers", JSON.stringify(layers));
-
-let map;
 
 function updateMapStyles() {
   map.setOptions({ styles: getMapStyle(map.getMapTypeId(), map.getZoom(), {}) });

@@ -1,14 +1,7 @@
 import React, { Component } from 'react';
+import {unselectAll} from '../lib/ferries';
 
 export default class InfoContent2 extends Component {
-
-  componentDidMount() {
-    if (this.props.callback) this.props.callback();
-  }
-
-  shouldComponentUpdate() {
-    return false;
-  }
 
   render() {
     const nameItems = this.props.names.map(name => 
@@ -30,7 +23,7 @@ export default class InfoContent2 extends Component {
     return (
       <div className="infocontent">
 
-        <button type="button" className="btn btn-secondary closeInfoButton"><i className="fa fa-times" aria-hidden="true"></i></button>
+        <button type="button" className="btn btn-secondary closeInfoButton" onClick={unselectAll}><i className="fa fa-times" aria-hidden="true"></i></button>
 
         <div className="headerbox">{nameItems}</div>
         <div className="contentsbox">{contentItems}</div>

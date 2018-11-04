@@ -1,15 +1,8 @@
 import React, { Component } from 'react';
 import {L2 as L} from '../lib/localizer';
+import {unselectAll} from '../lib/ferries';
 
 export default class InfoContent extends Component {
-
-  componentDidMount() {
-    if (this.props.callback) this.props.callback();
-  }
-
-  shouldComponentUpdate() {
-    return false;
-  }
 
   render() {
 
@@ -70,7 +63,7 @@ export default class InfoContent extends Component {
     return (
       <div className="infocontent">
 
-        <button type="button" className="btn btn-secondary closeInfoButton"><i className="fa fa-times" aria-hidden="true"></i></button>
+        <button type="button" className="btn btn-secondary closeInfoButton" onClick={unselectAll}><i className="fa fa-times" aria-hidden="true"></i></button>
 
         <div className="row"><div className="col-11 col-sm-11">{titleLine}</div></div>
 

@@ -12,7 +12,7 @@ import { initRoutes } from './lib/routes';
 import './lib/uicontrol';
 import './lib/mapcontrol';
 import  {initFullscreen} from './lib/fullscreen';
-import { createMap, initMap, initSettings, initInfoPage } from './lib/ferries';
+import { createMap, initMap, initSettings } from './lib/ferries';
 
 window.initApplication = () => {
 	txtol.init(window.google.maps.OverlayView);
@@ -31,7 +31,6 @@ const loadGoogleMaps = () => {
 
 const initElements = () => {
 	initSettings();
-	initInfoPage();
 }
 
 //--
