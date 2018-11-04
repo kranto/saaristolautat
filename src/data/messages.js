@@ -95,7 +95,7 @@ const messagesRaw = { // FI SV EN
         mapdata: ["Karttatiedot", "Karta data", "Map data"],
         icons: ["Ikonit", "Ikoner", "Icons by"],
         appicon: ["Sovellusikoni", "App ikon", "Application icon"],
-        trafficinfo: ["", "", "Source of traffic information"],
+        trafficinfo: ["Liikennetietojen lähde", "Trafikuppgifternas källa", "Source of traffic information"],
     },
     mapTypes: {
         roadmap: ["Google tiekartta", "Google vägkarta", "Google Roadmap"],
