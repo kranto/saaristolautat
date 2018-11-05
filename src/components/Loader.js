@@ -3,14 +3,6 @@ import {L2} from '../lib/localizer';
 
 export default class Loader extends Component {
 
-  componentDidMount() {
-    if (this.props.callback) this.props.callback();
-  }
-
-  shouldComponentUpdate() {
-    return false;
-  }
-
   render() {
     return (
       <div id="loader">

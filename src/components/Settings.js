@@ -10,10 +10,6 @@ export default class Settings extends Component {
     if (this.props.callback) this.props.callback();
   }
 
-  shouldComponentUpdate() {
-    return false;
-  }
-
   render() {
     return (
       <div id="settings">

@@ -1,5 +1,5 @@
 import { shortName, description } from './datautils';
-import { layers, select } from './ferries';
+import { select } from './ferries';
 
 export let lauttaLegs;
 export let lauttaRoutes;
@@ -57,7 +57,7 @@ export function initRoutes(map, data) {
     this.line.addListener('click', function(event) {
       select(that.routes, event);
     });
-    this.rerender = function(zoom, mapTypeId) {
+    this.rerender = function(zoom, mapTypeId, layers) {
       this.line.setVisible(this.isSelected || (layers.longdistanceferries && zoom >= 7 && zoom <= 11));
       this.line.setOptions({icons: [{
         icon: zoom <= 9? lauttaLineSymbol: lauttaLineSymbolDimmed,
@@ -95,7 +95,7 @@ export function initRoutes(map, data) {
     this.legs.forEach(function(leg) { leg.highlight(doHighlight); });
   }
 
-  Route.prototype.rerender = function(zoom, mapTypeId) {
+  Route.prototype.rerender = function(zoom, mapTypeId, layers) {
     this.legs.forEach(function(leg) { leg.rerender(zoom, mapTypeId); });
   }
 

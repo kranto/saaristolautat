@@ -1,5 +1,5 @@
 import { shortName, longName, description } from './datautils';
-import { layers, select, tooltip } from './ferries';
+import { select, tooltip } from './ferries';
 import styles from './styles';
 export function initObjectRenderer(map, txtol) {
 
@@ -39,7 +39,7 @@ export function initObjectRenderer(map, txtol) {
     var minZ = feature.properties.minZ || 8;
     var maxZ = feature.properties.maxZ || 8;
     return {
-      rerender: function(zoom, mapTypeId) {
+      rerender: function(zoom, mapTypeId, layers) {
         var addZ = mapTypeId === 'hybrid'? 2: 0;
         roadObject.setVisible(zoom >= minZ + addZ && zoom <= maxZ + addZ);
         roadObject.setOptions(styles.road.update(zoom, mapTypeId));
@@ -57,7 +57,7 @@ export function initObjectRenderer(map, txtol) {
       clickable: true
     });
     return {
-      rerender: function(zoom, mapTypeId) {
+      rerender: function(zoom, mapTypeId, layers) {
         object.setVisible(layers.ringroads && zoom >= 8);
         object.setOptions(styles.route.update(zoom, mapTypeId));
       }
@@ -73,7 +73,7 @@ export function initObjectRenderer(map, txtol) {
       clickable: false,
     });
     return {
-      rerender: function(zoom, mapTypeId) {
+      rerender: function(zoom, mapTypeId, layers) {
         object.setVisible(zoom >= 7 && zoom <= 30);
         object.setOptions(styles.border.update(zoom, mapTypeId));
       }
@@ -188,7 +188,7 @@ export function initObjectRenderer(map, txtol) {
         marker.setVisible(false);
         label.hide();
       },
-      rerender: function(zoom, mapTypeId) {
+      rerender: function(zoom, mapTypeId, layers) {
         marker.setIcon(styler.icon(zoom));
         marker.setClickable(styler.clickable(zoom));
         marker.setVisible(zoom >= markerVisibleFrom);
@@ -319,10 +319,6 @@ export function initObjectRenderer(map, txtol) {
     var subtype = connection.properties.ssubtype;
     var connectionStyler = subtype? connectionStylers[subtype]: baseStyler;
     var layer = connectionStyler.layer || baseStyler.layer;
-    var layerSelector = function() {
-      return layers[layer]; 
-    };
-
     var legFeatures = connection.type === 'FeatureCollection'? connection.features: [connection];
     var connectionObject = { ref: connection.properties.ref, bounds: {} };
     var legObjects = legFeatures.map(function(leg) {
@@ -360,19 +356,19 @@ export function initObjectRenderer(map, txtol) {
       var highlight = function(doHighlight) {
         isSelected = doHighlight;
         lineb.setOptions({strokeOpacity: doHighlight? properties.highlightOpacity: 0});
-        rerender(map.getZoom(), map.getMapTypeId());
+        // rerender(map.getZoom(), map.getMapTypeId());
       };
       lineb.addListener('click', function(event) {
         select([connectionObject], event);
       });
-      var rerender = function(zoom, mapTypeId) {
+      var rerender = function(zoom, mapTypeId, layers) {
         if (properties.icons) {
           properties.icons[0].icon.strokeOpacity = layers.live? 0.4: 1;
           line.setOptions({icons: properties.icons});
         } else {
           line.setOptions({strokeOpacity: Math.min(properties.opacity, layers.live? 0.2: 1)});
         }
-        var lineIsVisible = isSelected || (layerSelector() && zoom >= properties.visibleFrom && zoom <= properties.visibleTo);
+        var lineIsVisible = isSelected || (layers[layer] && zoom >= properties.visibleFrom && zoom <= properties.visibleTo);
         line.setVisible(lineIsVisible);
         lineb.setVisible(lineIsVisible);        
       }
@@ -382,8 +378,8 @@ export function initObjectRenderer(map, txtol) {
       legObjects.forEach(function(leg) { leg.highlight(doHighlight); });
     }
 
-    connectionObject.rerender = function(zoom, mapTypeId) {
-      legObjects.forEach(function(leg) { leg.rerender(zoom, mapTypeId); });
+    connectionObject.rerender = function(zoom, mapTypeId, layers) {
+      legObjects.forEach(function(leg) { leg.rerender(zoom, mapTypeId, layers); });
     }
 
     connectionObject.init = function() {
@@ -426,7 +422,7 @@ export function initObjectRenderer(map, txtol) {
       hide: function() {
         marker.setVisible(false);
       },
-      rerender: function(zoom, mapTypeId) {
+      rerender: function(zoom, mapTypeId, layers) {
         marker.setVisible(layers.distances && zoom >= 11);
       }
     };
@@ -473,7 +469,7 @@ export function initObjectRenderer(map, txtol) {
       hide: function(zoom) {
         if (zoom >= properties.labelVisibleFrom && zoom <= properties.labelVisibleTo) label.show(); else label.hide();
       },
-      rerender: function(zoom, mapTypeId) {
+      rerender: function(zoom, mapTypeId, layers) {
         label.setInnerHTML(zoom >= properties.longNameFrom? longName_: shortName_);
         if (zoom >= properties.labelVisibleFrom && zoom <= properties.labelVisibleTo && ["roadmap", "hybrid", "terrain", "satellite"].indexOf(mapTypeId)>=0) label.show(); else label.hide();      
       }
@@ -502,7 +498,7 @@ export function initObjectRenderer(map, txtol) {
       hide: function() {
         box.hide();
       },
-      rerender: function(zoom, mapTypeId) {
+      rerender: function(zoom, mapTypeId, layers) {
         if (layers.distances && zoom >= visibleFrom && zoom <= visibleTo) box.show(); else box.hide();
       }
     };

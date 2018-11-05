@@ -1,4 +1,3 @@
-import { layers } from './ferries';
 import store from '../store';
 
 const LIVE_MIN_ZOOM = 8;
@@ -52,7 +51,15 @@ export default class LiveLayer {
     this.initStyle();
     this.refreshLiveLayer();
     map.addListener('idle', this.updateLiveInd.bind(this));
-    window.addEventListener('layersChanged', () => this.refreshLiveLayer(), false);
+    store.subscribe(this.stateListener.bind(this));
+  }
+
+  layers = store.getState().settings.layers;
+  
+  stateListener() {
+    console.log(store.getState());
+    this.layers = store.getState().settings.layers;
+    this.refreshLiveLayer();
   }
 
   map = null;
@@ -62,8 +69,8 @@ export default class LiveLayer {
   liveLayerEnabled = null;
 
   refreshLiveLayer() {
-    if (layers.live === this.liveLayerEnabled) return; // state not changed
-    this.liveLayerEnabled = layers.live;
+    if (this.layers.live === this.liveLayerEnabled) return; // state not changed
+    this.liveLayerEnabled = this.layers.live;
 
     if (this.liveInterval) {
       clearInterval(this.liveInterval);
@@ -135,7 +142,7 @@ export default class LiveLayer {
 
   updateLiveInd() {
     if (!this.liveLoadCount) return;
-    if (!layers.live) {
+    if (!this.layers.live) {
       store.dispatch({ type: "UPDATE_INDICATOR_MSG", payload: "" });
       return;
     }

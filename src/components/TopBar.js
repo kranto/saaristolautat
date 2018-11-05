@@ -3,14 +3,6 @@ import {toggleMenu, toggleSettings} from '../lib/uicontrol';
 
 export default class TopBar extends Component {
 
-  componentDidMount() {
-    if (this.props.callback) this.props.callback();
-  }
-
-  shouldComponentUpdate() {
-    return false;
-  }
-
   render() {
     return (
       <div id="topbar">

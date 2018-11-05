@@ -123,21 +123,28 @@ export function initSettings() {
     const newValue = this.options[this.selectedIndex].value;
     map.setMapTypeId(newValue);
   });
-
-  for (var key in layers) {
-    $("input[type=checkbox][data-target=" + key + "]").prop("checked", layers[key]);
-  }
-
-  $("input[type=checkbox]").change(function () {
-    var layer = this.getAttribute("data-target");
-    layers[layer] = this.checked;
-    localStorage.setItem("layers", JSON.stringify(layers));
-    window.dispatchEvent(new Event('layersChanged'));
-    rerender(map, true);
-  });
 }
 
-export function onLocaleChanged() {
+let layers = store.getState().settings.layers;
+let locale = store.getState().settings.locale;
+function onStateChanged() {
+  const newState = store.getState();
+  if (newState.settings.layers !== layers) {
+    layers = newState.settings.layers;
+    onLayersChanged();
+  }
+  if (newState.settings.locale !== locale) {
+    locale = newState.settings.locale;
+    onLocaleChanged();
+  }
+}
+setTimeout(() => store.subscribe(onStateChanged), 1000);
+
+function onLayersChanged() {
+  rerender(map, true);
+}
+
+function onLocaleChanged() {
   if (objects) {
     objects.forEach(function (object) { if (object.init) object.init(); });
     rerender(map, true);
@@ -294,7 +301,7 @@ function initPierLinks() {
 var lastInfoContent = false;
 function setInfoContent(targets, dontPushState) {
 
-  if (lastInfoContent) store.dispatch({type:"INFOCONTENT_UNSELECTED", payload: null});
+  if (lastInfoContent) store.dispatch({ type: "INFOCONTENT_UNSELECTED", payload: null });
   lastInfoContent = true;
 
   var route;
@@ -384,7 +391,7 @@ export function select(targets, mouseEvent, dontPushState) {
   if (!targets.length) return;
 
   var selectedCountWas = selected.length;
-  selected.forEach(function (target) { target.highlight(false); if (target.rerender) target.rerender(map.getZoom(), map.getMapTypeId()); });
+  selected.forEach(function (target) { target.highlight(false); if (target.rerender) target.rerender(map.getZoom(), map.getMapTypeId(), layers); });
   selected = [];
 
   targets = (targets.constructor === Array) ? targets : [targets];
@@ -442,7 +449,7 @@ export function unselectAll(pushState) {
       $(".info").animate({ left: -400 }, 'fast', function () {
         $(".info").css({ left: "" });
         $("#wrapper2").toggleClass("info-open", false);
-        store.dispatch({type:"INFOCONTENT_UNSELECTED", payload: null});
+        store.dispatch({ type: "INFOCONTENT_UNSELECTED", payload: null });
       });
     } else {
       $("#wrapper2").animate({ scrollTop: 0 }, 'fast', function () {
@@ -450,29 +457,15 @@ export function unselectAll(pushState) {
           $(".info").css({ top: "" });
         });
         $("#wrapper2").toggleClass("info-open", false);
-        store.dispatch({type:"INFOCONTENT_UNSELECTED", payload: null});
+        store.dispatch({ type: "INFOCONTENT_UNSELECTED", payload: null });
         toggleScrollIndicator();
       });
     }
   });
   lastInfoContent = false;
-  selected.forEach(function (target) { target.highlight(false); if (target.rerender) target.rerender(map.getZoom(), map.getMapTypeId()); });
+  selected.forEach(function (target) { target.highlight(false); if (target.rerender) target.rerender(map.getZoom(), map.getMapTypeId(), layers); });
   selected = [];
 }
-
-const localStorgageLayers = localStorage.getItem("layers");
-
-export const layers = localStorgageLayers ? JSON.parse(localStorgageLayers) : {
-  ringroads: false,
-  distances: true,
-  roadferries: true,
-  conn4: true,
-  conn5: false,
-  longdistanceferries: false,
-  live: false,
-};
-
-localStorage.setItem("layers", JSON.stringify(layers));
 
 function updateMapStyles() {
   map.setOptions({ styles: getMapStyle(map.getMapTypeId(), map.getZoom(), {}) });
@@ -491,8 +484,8 @@ function rerender(map, force) {
   var newRerender = mapTypeId + ":" + zoom;
   if (prevRerender === newRerender && !force) return;
   prevRerender = newRerender;
-  objects.forEach(function (object) { object.rerender(zoom, mapTypeId); });
-  if (lauttaLegs) lauttaLegs.forEach(function (leg) { leg.rerender(zoom, mapTypeId); });
+  objects.forEach(function (object) { object.rerender(zoom, mapTypeId, layers); });
+  if (lauttaLegs) lauttaLegs.forEach(function (leg) { leg.rerender(zoom, mapTypeId, layers); });
   hidden = false;
   prevRenderZoom = zoom;
 }
