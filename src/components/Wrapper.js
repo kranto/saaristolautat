@@ -8,13 +8,18 @@ import Timetables from './Timetables';
 import MapContainer from './MapContainer';
 import InfoContent from './InfoContent';
 import InfoContent2 from './InfoContent2';
+import { toggleScrollIndicator } from '../lib/uicontrol';
 
 export default class Wrapper extends Component {
+
+  componentDidMount() {
+    window.addEventListener("resize", toggleScrollIndicator);
+  }
 
   render() {
     return (
       <div id="wrapper">
-        <div id="wrapper2">
+        <div id="wrapper2" onScroll={toggleScrollIndicator}>
           <InfoPage />
           <div className="mapoverlay"></div>
           <div className="info" id="infoholder"><InfoContent /><InfoContent2 /></div>
@@ -29,7 +34,7 @@ export default class Wrapper extends Component {
         <Settings />
         <div id="liveindpos"><LiveIndicator /></div>
         <Timetables />
-      </div>
+      </div >
     );
   }
 }

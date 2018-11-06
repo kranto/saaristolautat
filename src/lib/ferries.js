@@ -50,7 +50,6 @@ $(document).ready(function () {
 });
 
 $(window).resize(function () {
-  toggleScrollIndicator();
   keepCenter();
 });
 

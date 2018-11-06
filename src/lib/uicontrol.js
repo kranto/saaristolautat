@@ -3,10 +3,6 @@ const $ = window.$;
 
 var scrollLimit = 22;
 
-$(document).ready(function () {
-    $('#wrapper2').bind('scroll', toggleScrollIndicator);
-});
-
 export function toggleScrollIndicator() {
     var elem = $("#wrapper2");
     var isBottom = (elem[0].scrollHeight - elem.scrollTop() - scrollLimit <= elem.outerHeight());
