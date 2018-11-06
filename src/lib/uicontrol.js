@@ -5,7 +5,6 @@ var scrollLimit = 22;
 
 $(document).ready(function () {
     $('#wrapper2').bind('scroll', toggleScrollIndicator);
-    $("#timetables").click(function (event) { if (event.target === this) { window.history.back(); } });
 });
 
 export function toggleScrollIndicator() {

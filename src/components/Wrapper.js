@@ -28,7 +28,7 @@ export default class Wrapper extends Component {
         <Menu />
         <Settings />
         <div id="liveindpos"><LiveIndicator /></div>
-        <div id="timetables" className="fmodal" style={{display: "none"}}><Timetables /></div>
+        <Timetables />
       </div>
     );
   }
