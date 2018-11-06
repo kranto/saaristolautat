@@ -8,12 +8,12 @@ class InfoContent extends Component {
 
     render() {
 
-        const route = this.props.route;
+        const route = this.props.routeid;
         if (!route) {
             return <div />;
         }
 
-        const data = routeInfo(route, currentLang);
+        const data = routeInfo(this.props.data.routes[route], currentLang);
 
         const titleLine = data.specifier ?
             (<div className="infotitle">{data.name}: <span className="specifier">{data.specifier}</span></div>) :
@@ -98,7 +98,8 @@ class InfoContent extends Component {
 const mapStateToProps = (state) => {
     return {
         locale: state.settings.locale,
-        route: state.selection.infoContent
+        routeid: state.selection.infoContent,
+        data: state.data.data
     };
 };
 

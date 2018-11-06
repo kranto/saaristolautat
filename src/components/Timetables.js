@@ -1,12 +1,10 @@
 import React, { Component } from 'react';
-import { L2 as L } from '../lib/localizer';
+import { L2 as L, currentLang } from '../lib/localizer';
 import { connect } from 'react-redux';
+import { routeInfo } from '../lib/datarenderer';
+
 
 class Timetables extends Component {
-
-  componentDidMount() {
-    if (this.props.callback) this.props.callback();
-  }
 
   onCloseClicked() {
     window.history.back();
@@ -14,10 +12,13 @@ class Timetables extends Component {
 
   render() {
 
-    const data = this.props.data;
-    if (!data) return "";
+    if (!this.props.timetableid || !this.props.routeid) return "";
+    const route = this.props.data.routes[this.props.routeid];
+    const routeData = routeInfo(route, currentLang);
+    const timetable = routeData.timetables.filter(tt => tt.id === this.props.timetableid)[0];
 
-    console.log(data);
+    const data = timetable;
+    if (!data) return "";
 
     const tabItems = data.tables.map(table =>
       <li key={table.tabid} className="nav-item">
@@ -84,7 +85,9 @@ class Timetables extends Component {
 const mapStateToProps = (state) => {
   return {
     locale: state.settings.locale,
-    data: state.selection.timetables
+    timetableid: state.selection.timetables,
+    routeid: state.selection.infoContent,
+    data: state.data.data
   };
 };
 

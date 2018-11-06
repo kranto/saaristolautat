@@ -1,8 +1,6 @@
-import { routeInfo } from './datarenderer';
 import { toggleScrollIndicator, cancelHeaderBarToggle, toggleHeaderbar, hideMenuAndSettings, hideSettings, hideInfoPage, hideMenu } from './uicontrol';
 import { panTo } from './mapcontrol';
 import { lauttaLegs, lauttaRoutes } from './routes';
-import { currentLang } from './localizer';
 import store from '../store';
 import { getMapStyle } from './styles';
 
@@ -240,14 +238,11 @@ function closeTimetables() {
 }
 
 function openTimetable(id) {
-  var timetable = selectedRoute.timetables.filter(function (tt) { return tt.id === id; })[0];
-  store.dispatch({ type: "TIMETABLE_OPENED", payload: timetable });
+  store.dispatch({ type: "TIMETABLE_OPENED", payload: id });
   $('#timetables').fadeIn();
   hideMenu();
   hideSettings();
 }
-
-var selectedRoute = null;
 
 var pierlinkDown = false;
 
@@ -300,20 +295,15 @@ function initPierLinks() {
   });
 }
 
-var lastInfoContent = false;
-function setInfoContent(targets, dontPushState) {
 
-  if (lastInfoContent) store.dispatch({ type: "INFOCONTENT_UNSELECTED", payload: null });
-  lastInfoContent = true;
+function setInfoContent(targets, dontPushState) {
 
   var route;
   if (targets[0].ref) {
     route = targets[0].ref;
     if (!dontPushState) history.pushState({ route: route, timetables: null }, null, null);
 
-    const data = routeInfo(fdata.routes[route], currentLang);
-    selectedRoute = data;
-    store.dispatch({ type: "INFOCONTENT_SELECTED", payload: fdata.routes[route] });
+    store.dispatch({ type: "INFOCONTENT_SELECTED", payload: route });
   } else {
     store.dispatch({ type: "INFOCONTENT2_SELECTED", payload: targets });
     if (!dontPushState) history.pushState({ route: targets.map(function (r) { return r.id; }), timetables: null }, null, null);
@@ -464,7 +454,6 @@ export function unselectAll(pushState) {
       });
     }
   });
-  lastInfoContent = false;
   selected.forEach(function (target) { target.highlight(false); if (target.rerender) target.rerender(map.getZoom(), map.getMapTypeId(), layers); });
   selected = [];
 }
@@ -495,7 +484,7 @@ function hideObjects(map) {
   if (hidden) return;
   var zoom = map.getZoom();
   if (zoom === prevRenderZoom) return;
-  objects.forEach(function (object) { if (object.hide) object.hide(); });
+  objects.filter(o => o.hide).forEach(o => o.hide());
   hidden = true;
 }
 
