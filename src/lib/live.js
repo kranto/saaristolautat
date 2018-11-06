@@ -57,7 +57,6 @@ export default class LiveLayer {
   layers = store.getState().settings.layers;
   
   stateListener() {
-    console.log(store.getState());
     this.layers = store.getState().settings.layers;
     this.refreshLiveLayer();
   }

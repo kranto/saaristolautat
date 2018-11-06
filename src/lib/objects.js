@@ -1,6 +1,8 @@
 import { shortName, longName, description } from './datautils';
-import { select, tooltip } from './ferries';
+import { select, tooltip, objects } from './ferries';
 import styles from './styles';
+import store from '../store';
+
 export function initObjectRenderer(map, txtol) {
 
   const google = window.google;
@@ -525,11 +527,17 @@ export function initObjectRenderer(map, txtol) {
     });
   }
 
-  return {
-    renderData: function(geojson, data, objects) {
+  let unsubscribe;
+  function onStateChange() {
+    const {data, geojson} = store.getState().data;
+    if (data.mun && geojson.length) {
+      if (unsubscribe) unsubscribe();
       geojson.forEach(function(featureCollection) {
         renderFeatureCollection(featureCollection, data, objects);
-      });
+      });      
+    } else if (!unsubscribe) {
+      unsubscribe = store.subscribe(onStateChange);
     }
   }
+  onStateChange();
 }

@@ -5,19 +5,20 @@ import txtol from './lib/txtol';
 import { initMapTypes } from './lib/maptypes';
 import LiveLayer from './lib/live';
 import { initObjectRenderer } from './lib/objects';
-import { loadFerriesData } from './lib/dataloader';
-import { initRoutes } from './lib/routes';
 import './lib/uicontrol';
 import './lib/mapcontrol';
 import  {initFullscreen} from './lib/fullscreen';
-import { createMap, initMap, initSettings } from './lib/ferries';
+import { createMap, initSettings } from './lib/ferries';
+import './lib/dataloader';
+import { initRoutes } from './lib/routes';
+
 
 window.initApplication = () => {
 	txtol.init(window.google.maps.OverlayView);
 	const map = createMap();
 	initMapTypes(map);
-	const objectRenderer = initObjectRenderer(map, txtol);
-	initMap(map, objectRenderer, initRoutes, loadFerriesData);
+	initObjectRenderer(map, txtol);
+	initRoutes(map);
 	new LiveLayer().init(map, txtol);
 }
 

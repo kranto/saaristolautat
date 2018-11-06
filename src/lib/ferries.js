@@ -126,6 +126,8 @@ export function initSettings() {
 
 let layers = store.getState().settings.layers;
 let locale = store.getState().settings.locale;
+let fdata = store.getState().data.data;
+
 function onStateChanged() {
   const newState = store.getState();
   if (newState.settings.layers !== layers) {
@@ -136,8 +138,9 @@ function onStateChanged() {
     locale = newState.settings.locale;
     onLocaleChanged();
   }
+  fdata = newState.data.data;
 }
-setTimeout(() => store.subscribe(onStateChanged), 1000);
+setTimeout(() => store.subscribe(onStateChanged), 100);
 
 function onLayersChanged() {
   rerender(map, true);
@@ -471,16 +474,15 @@ function updateMapStyles() {
   $("div.gm-style").css({ 'font-size': map.getZoom() + 1 });
 }
 
-var objects = [];
+export const objects = [];
 var prevRerender = "";
 var hidden = true;
 var prevRenderZoom = 0;
 
 function rerender(map, force) {
-  if (!dataLoaded) return;
   var zoom = map.getZoom();
   var mapTypeId = map.getMapTypeId();
-  var newRerender = mapTypeId + ":" + zoom;
+  var newRerender = mapTypeId + ":" + zoom + ":" + objects.length;
   if (prevRerender === newRerender && !force) return;
   prevRerender = newRerender;
   objects.forEach(function (object) { object.rerender(zoom, mapTypeId, layers); });
@@ -525,21 +527,6 @@ export function createMap() {
   tooltip = new google.maps.InfoWindow({
     content: "",
     disableAutoPan: true
-  });
-
-  return map;
-}
-
-let fdata;
-let dataLoaded = false;
-export function initMap(map, objectRenderer, initRoutes, loadFerriesData) {
-  loadFerriesData(function (data, geojson) {
-    fdata = data;
-    setTimeout(function () {
-      objectRenderer.renderData(geojson, data, objects);
-      initRoutes(map, data);
-      dataLoaded = true;
-    }, 1000);
   });
 
   map.addListener('zoom_changed', function () {
