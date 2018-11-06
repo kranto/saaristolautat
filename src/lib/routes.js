@@ -16,13 +16,6 @@ export function initRoutes(map) {
     scale: 1.5
   };
 
-  var lauttaLineSymbolDimmed = {
-    path: 'M 0,-1 0,1',
-    strokeOpacity: 0.4,
-    strokeColor: '#d00000',
-    scale: 1
-  };
-
   function Leg(object) {
     this.id = object.id;
     this.name = object.name;
@@ -60,13 +53,6 @@ export function initRoutes(map) {
     });
     this.rerender = function (zoom, mapTypeId, layers) {
       this.line.setVisible(this.isSelected || (layers.longdistanceferries && zoom >= 7 && zoom <= 11));
-      this.line.setOptions({
-        icons: [{
-          icon: zoom <= 9 ? lauttaLineSymbol : lauttaLineSymbolDimmed,
-          offset: '4',
-          repeat: '4px'
-        }]
-      })
       if (!this.line.getVisible()) this.highlightLine.setVisible(false);
     }
   }
