@@ -1,55 +1,35 @@
 import { shortName, description } from './datautils';
 import { select } from './ferries';
 import store from '../store';
+import styles from './styles';
 
 export let lauttaLegs;
 export let lauttaRoutes;
 
 export function initRoutes(map) {
-
   const google = window.google;
 
-  var lauttaLineSymbol = {
-    path: 'M 0,-1 0,1',
-    strokeOpacity: 0.4,
-    strokeColor: '#e08080',
-    scale: 1.5
-  };
-
-  function Leg(object) {
-    this.id = object.id;
-    this.name = object.name;
-    this.path = object.path.split(" ").map(function (coord) {
+  function Leg(legData) {
+    this.id = legData.id;
+    this.name = legData.name;
+    this.path = legData.path.split(" ").map(function (coord) {
       var latLong = coord.split(",");
       return new google.maps.LatLng(parseFloat(latLong[1]), parseFloat(latLong[0]));
     });
     this.isSelected = false;
     this.line = new google.maps.Polyline({
+      ...styles.lauttaLine.init,
       path: new google.maps.MVCArray(this.path),
-      zIndex: 1,
-      strokeOpacity: 0,
-      strokeWeight: 15,
-      icons: [{
-        icon: lauttaLineSymbol,
-        offset: '4',
-        repeat: '4px'
-      }],
-      cursor: 'context-menu',
       map: map
     });
     this.highlightLine = new google.maps.Polyline({
+      ...styles.lauttaHighlightLine.init,
       path: new google.maps.MVCArray(this.path),
-      zIndex: 0,
-      strokeOpacity: 0.7,
-      strokeWeight: 7,
-      strokeColor: '#f97cdc',
-      visible: false,
-      map: map,
+      map: map
     });
     this.routes = [];
-    var that = this;
-    this.line.addListener('click', function (event) {
-      select(that.routes, event);
+    this.line.addListener('click', (event) => {
+      select(this.routes, event);
     });
     this.rerender = function (zoom, mapTypeId, layers) {
       this.line.setVisible(this.isSelected || (layers.longdistanceferries && zoom >= 7 && zoom <= 11));
@@ -66,16 +46,16 @@ export function initRoutes(map) {
     this.routes.push(route);
   }
 
-  function Route(object) {
-    this.operators = object.operators;
-    this.legs = object.legs.map(function (id) { return lauttaLegIndex[id]; });
-    this.id = object.id;
+  function Route(routeData) {
+    this.operators = routeData.operators;
+    this.legs = routeData.legs.map(id => lauttaLegIndex[id]);
+    this.id = routeData.id;
+    this.operatorId = this.operators[0];
+    this.operator = data.lauttaOperators[this.operatorId];
+    this.style = { color: '#e08080', weight: 1.5, style: "dotted", opacity: .7 };
     this.init = function () {
-      this.name = shortName(object);
-      this.details = description(object);
-      this.operatorId = this.operators[0];
-      this.operator = data.lauttaOperators[this.operatorId];
-      this.style = { color: "#e08080", weight: 1.5, style: "dotted", opacity: .7 };
+      this.name = shortName(routeData);
+      this.details = description(routeData);
     }
     this.init();
   }
@@ -94,10 +74,10 @@ export function initRoutes(map) {
       return new Leg(leg);
     });
 
-    lauttaLegs.forEach(function (leg) { lauttaLegIndex[leg.id] = leg });
+    lauttaLegs.forEach(leg => { lauttaLegIndex[leg.id] = leg });
 
-    lauttaRoutes = data.lauttaRoutes.map(function (route) {
-      route = new Route(route);
+    lauttaRoutes = data.lauttaRoutes.map(function (routeData) {
+      let route = new Route(routeData);
       route.legs.forEach(function (leg) { leg.addRoute(route); });
       return route;
     });
