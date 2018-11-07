@@ -519,7 +519,7 @@ export function initObjectRenderer(map, txtol) {
 
   function renderFeatureCollection(featureCollection, data, objects) {
     var features = featureCollection.features;
-    features.forEach(function(feature) {
+    features.forEach(feature => {
       var type = feature.properties.stype;
       if (typeof renderers[type] !== 'undefined') {
         objects.push(renderers[type](feature, map, data));

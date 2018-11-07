@@ -9,13 +9,13 @@ let map;
 
 const { $, history, location } = window;
 
-$(document).ready(function () {
-  $(".info").on("mouseleave", function (e) {
+$(document).ready(() => {
+  $(".info").on("mouseleave", () => {
     $("#wrapper2").css({ pointerEvents: "none" });
     $(".mapoverlay").css({ pointerEvents: "none" });
   });
 
-  $(".info").on("mouseenter mousedown touchstart", function (e) {
+  $(".info").on("mouseenter mousedown touchstart", (e) => {
     $("#wrapper2").css({ pointerEvents: "auto" });
     $(".mapoverlay").css({ pointerEvents: "auto" });
     $("#wrapper2").trigger(e.type, e);
@@ -32,13 +32,13 @@ $(document).ready(function () {
   }
 
   var el = $(".mapoverlay");
-  el.bind(getAllEvents(el[0]), function (e) {
+  el.bind(getAllEvents(el[0]), e => {
     $("#wrapper2").css({ pointerEvents: "none" });
     $(".mapoverlay").css({ pointerEvents: "none" });
     $("#mapcontainer").trigger(e.type, e);
   });
 
-  $("body").mouseup(function (event) {
+  $("body").mouseup(() => {
     if (pierlinkDown) {
       $(".info").animate({ opacity: 1 });
       pierlinkDown = false;
@@ -47,9 +47,7 @@ $(document).ready(function () {
 
 });
 
-$(window).resize(function () {
-  keepCenter();
-});
+$(window).resize(keepCenter);
 
 var mapCenter;
 var leftInfo = false;
@@ -63,19 +61,19 @@ function rememberCenter() {
 
 function keepCenter() {
   var oldCenter = mapCenter;
-  if (map && mapCenter) setTimeout(function () {
+  if (map && mapCenter) setTimeout(() => {
     map.setCenter(oldCenter);
     if (leftInfo && $("#map").outerWidth() < 768) map.panBy(200, 0);
     if (bottomInfo && $("#map").outerWidth() >= 768) map.panBy(-200, 0);
   }, 50);
 }
 
-$(document).ready(function () {
-  if (window.location.hash) setTimeout(function () { onhashchange(); }, 2000);
+$(document).ready(() => {
+  if (window.location.hash) setTimeout(onhashchange, 2000);
   else history.replaceState({}, null);
 });
 
-window.onhashchange = function () {
+window.onhashchange = () => {
   var hash = location.hash.substring(1);
   if (fdata.routes[hash]) {
     var newState = { route: hash, timetable: null };
@@ -84,7 +82,7 @@ window.onhashchange = function () {
     navigateTo(newState);
   } else if (fdata.piers[hash]) {
     history.go(-1);
-    objects.filter(function (o) { return o.id === hash; })[0].showTooltip(true);
+    objects.filter( o => o.id === hash)[0].showTooltip(true);
   }
 }
 
@@ -146,17 +144,17 @@ function onLayersChanged() {
 
 function onLocaleChanged() {
   if (objects) {
-    objects.forEach(function (object) { if (object.init) object.init(); });
+    objects.filter(o => o.init).forEach(o => o.init());
     rerender(map, true);
   }
 
   if (typeof lauttaRoutes !== 'undefined') {
-    lauttaRoutes.forEach(function (route) { if (route.init) route.init(); });
+    lauttaRoutes.filter(r => r.init).forEach(r => r.init());
   }
 }
 
 function addMapListeners(map) {
-  google.maps.event.addListener(map, 'maptypeid_changed', function () {
+  google.maps.event.addListener(map, 'maptypeid_changed', () => {
     var isSatellite = map.getMapTypeId() === 'satellite' || map.getMapTypeId() === 'hybrid';
     if (isSatellite) {
       $('#setMapTypeMap').removeClass('active');
@@ -167,9 +165,7 @@ function addMapListeners(map) {
     }
   });
 
-  map.addListener('click', function () {
-    toggleHeaderbar(unselectAll);
-  });
+  map.addListener('click', () => toggleHeaderbar(unselectAll));
   map.addListener('idle', rememberCenter);
 }
 
@@ -178,7 +174,7 @@ var mapInitialized = false;
 
 // if (window.location.hostname === "localhost") $("#loader").fadeOut(500);
 
-setTimeout(function () { loaderTimeout = true; hideLoader(); }, 3000);
+setTimeout(() => { loaderTimeout = true; hideLoader(); }, 3000);
 
 function onMapIdle() {
   if (map.getZoom() < 8) {
@@ -187,7 +183,7 @@ function onMapIdle() {
   } else {
     var z = map.getZoom();
     map.setZoom(z - 1);
-    setTimeout(function () { map.setZoom(z); }, 100);
+    setTimeout(() => map.setZoom(z), 100);
   }
   mapInitialized = true;
   hideLoader();
@@ -203,20 +199,20 @@ function hideLoader() {
     $("#loader").fadeOut(1000);
     if (dontShowAgainVersion < currentBannerVersion && !location.hash && !selected.length) {
       $('#bannerModal').modal({});
-      setTimeout(function () { $('#bannerModal').modal({}); }, 500);
+      setTimeout(() => $('#bannerModal').modal({}), 500);
     }
   }
 }
 
-$(document).ready(function () {
-  $("#bannerModal").on('hidden.bs.modal', function () {
+$(document).ready(() => {
+  $("#bannerModal").on('hidden.bs.modal', () => {
     if ($("#dont-show-again-cb").is(":checked")) {
       localStorage.setItem("dontShowAgainVersion", currentBannerVersion);
     }
   });
 });
 
-$(document).keyup(function (e) {
+$(document).keyup((e) => {
   if (e.keyCode === 27) { // escape key maps to keycode `27`
     if (hideMenuAndSettings()) {
       // nothing
@@ -231,9 +227,7 @@ $(document).keyup(function (e) {
 });
 
 function closeTimetables() {
-  $('#timetables').fadeOut(function () {
-    store.dispatch({ type: "TIMETABLE_CLOSED" });
-  });
+  $('#timetables').fadeOut(() => store.dispatch({ type: "TIMETABLE_CLOSED" }));
   $('#timetables').scrollTop(0);
 }
 
@@ -252,22 +246,22 @@ function initPierLinks() {
   $("div.pierlink").mouseover(function (event) {
     if (!isTouch) {
       var dataTarget = this.getAttribute("data-target");
-      objects.filter(function (o) { return o.id === dataTarget; })[0].showTooltip(false);
+      objects.filter(o => o.id === dataTarget)[0].showTooltip(false);
     }
   });
 
-  $("div.pierlink").mouseout(function (event) {
+  $("div.pierlink").mouseout(() => {
     if (!pierlinkDown) tooltip.close();
   });
 
-  $("div.pierlink").mousedown(function (event) {
+  $("div.pierlink").mousedown(() => {
     if (!isTouch) {
       $(".info").animate({ opacity: 0 });
       pierlinkDown = true;
     }
   });
 
-  $("div.pierlink").mouseup(function (event) {
+  $("div.pierlink").mouseup(() => {
     if (!isTouch) {
       $(".info").animate({ opacity: 1 });
       pierlinkDown = false;
@@ -278,26 +272,24 @@ function initPierLinks() {
   $("div.pierlink").bind("touchstart", function (event) {
     isTouch = true;
     var dataTarget = this.getAttribute("data-target");
-    objects.filter(function (o) { return o.id === dataTarget; })[0].showTooltip(false);
-    touchstartTimeout = setTimeout(function () {
+    objects.filter(o => o.id === dataTarget)[0].showTooltip(false);
+    touchstartTimeout = setTimeout(() => {
       $(".info").animate({ opacity: 0 });
       pierlinkDown = true;
     }, 200);
   });
 
-  $("div.pierlink").bind("touchend", function (event) {
+  $("div.pierlink").bind("touchend", () => {
     if (touchstartTimeout) clearTimeout(touchstartTimeout);
     touchstartTimeout = null;
-    setTimeout(function () {
+    setTimeout(() => {
       $(".info").animate({ opacity: 1 });
       pierlinkDown = false;
-    }, 700);
+    }, 500);
   });
 }
 
-
 function setInfoContent(targets, dontPushState) {
-
   var route;
   if (targets[0].ref) {
     route = targets[0].ref;
@@ -306,7 +298,7 @@ function setInfoContent(targets, dontPushState) {
     store.dispatch({ type: "INFOCONTENT_SELECTED", payload: route });
   } else {
     store.dispatch({ type: "INFOCONTENT2_SELECTED", payload: targets });
-    if (!dontPushState) history.pushState({ route: targets.map(function (r) { return r.id; }), timetables: null }, null, null);
+    if (!dontPushState) history.pushState({ route: targets.map(r => r.id), timetables: null }, null, null);
   }
 
   if ($(".infocontent.removing").length) $(".infocontent:not(.removing)").hide();
@@ -320,7 +312,7 @@ function setInfoContent(targets, dontPushState) {
 
   initPierLinks();
 
-  $(".infocontent.removing").fadeOut('fast', function () {
+  $(".infocontent.removing").fadeOut('fast', () => {
     $(".infocontent.removing").remove();
     $(".infocontent").fadeIn('fast');
   });
@@ -348,7 +340,7 @@ function navigateTo(state) {
     if (typeof state.route === 'string') {
       selectByIds([state.route]);
     } else if (Array.isArray(state.route)) {
-      select(lauttaRoutes.filter(function (lr) { return state.route.indexOf(lr.id) >= 0; }), null, true);
+      select(lauttaRoutes.filter(r => state.route.indexOf(r.id) >= 0), null, true);
     }
     if (state.timetable) {
       openTimetable(state.timetable);
@@ -360,9 +352,9 @@ function navigateTo(state) {
   }
 }
 
-window.onpopstate = function (event) {
+window.onpopstate = (event) => {
   if (location.hash) return;
-  $("#wrapper2").animate({ scrollTop: 0 }, 'fast', function () {
+  $("#wrapper2").animate({ scrollTop: 0 }, 'fast', () => {
     navigateTo(event.state);
   });
 };
@@ -370,7 +362,7 @@ window.onpopstate = function (event) {
 var selected = [];
 
 function selectByIds(ids) {
-  var matching = objects.filter(function (o) { return o.ref && ids.indexOf(o.ref) >= 0; });
+  var matching = objects.filter(o => o.ref && ids.indexOf(o.ref) >= 0);
   if (matching.length) {
     select(matching, null, true);
   } else {
@@ -383,11 +375,11 @@ export function select(targets, mouseEvent, dontPushState) {
   if (!targets.length) return;
 
   var selectedCountWas = selected.length;
-  selected.forEach(function (target) { target.highlight(false); if (target.rerender) target.rerender(map.getZoom(), map.getMapTypeId(), layers); });
+  selected.forEach(target => { target.highlight(false); if (target.rerender) target.rerender(map.getZoom(), map.getMapTypeId(), layers); });
   selected = [];
 
   targets = (targets.constructor === Array) ? targets : [targets];
-  targets.forEach(function (target) {
+  targets.forEach(target => {
     target.highlight(true);
     selected.push(target);
   });
@@ -403,12 +395,12 @@ export function select(targets, mouseEvent, dontPushState) {
       $("#wrapper2").toggleClass("info-open", true);
       if ($("body").outerWidth() >= 768) {
         $(".info").css({ left: -400 });
-        $(".info").animate({ left: 0 }, 'fast', function () { $(".info").css({ left: "" }); });
+        $(".info").animate({ left: 0 }, 'fast', () => $(".info").css({ left: "" }));
         var clientX = mouseEvent ? latLng2Point(mouseEvent.latLng, map).x : 500;
         if (clientX < (400 + 50)) map.panBy(clientX - (($("#map").width() - 400) / 3 + 400), 0);
       } else {
         $(".info").css({ top: '100%' });
-        $(".info").animate({ top: '80%' }, 'fast', function () { $(".info").css({ top: "" }); toggleScrollIndicator() });
+        $(".info").animate({ top: '80%' }, 'fast', () => { $(".info").css({ top: "" }); toggleScrollIndicator() });
         var clientY = mouseEvent ? latLng2Point(mouseEvent.latLng, map).y : 0;
         if ($("#map").height() * 0.80 < clientY) map.panBy(0, $("#map").height() * 0.2);
       }
@@ -438,23 +430,21 @@ export function unselectAll(pushState) {
 
   $(function () {
     if ($("body").outerWidth() >= 768) {
-      $(".info").animate({ left: -400 }, 'fast', function () {
+      $(".info").animate({ left: -400 }, 'fast', () => {
         $(".info").css({ left: "" });
         $("#wrapper2").toggleClass("info-open", false);
         store.dispatch({ type: "INFOCONTENT_UNSELECTED", payload: null });
       });
     } else {
-      $("#wrapper2").animate({ scrollTop: 0 }, 'fast', function () {
-        $(".info").animate({ top: '100%' }, 200, function () {
-          $(".info").css({ top: "" });
-        });
+      $("#wrapper2").animate({ scrollTop: 0 }, 'fast', () => {
+        $(".info").animate({ top: '100%' }, 200, () => $(".info").css({ top: "" }));
         $("#wrapper2").toggleClass("info-open", false);
         store.dispatch({ type: "INFOCONTENT_UNSELECTED", payload: null });
         toggleScrollIndicator();
       });
     }
   });
-  selected.forEach(function (target) { target.highlight(false); if (target.rerender) target.rerender(map.getZoom(), map.getMapTypeId(), layers); });
+  selected.forEach(target => { target.highlight(false); if (target.rerender) target.rerender(map.getZoom(), map.getMapTypeId(), layers); });
   selected = [];
 }
 
@@ -474,8 +464,8 @@ function rerender(map, force) {
   var newRerender = mapTypeId + ":" + zoom + ":" + objects.length;
   if (prevRerender === newRerender && !force) return;
   prevRerender = newRerender;
-  objects.forEach(function (object) { object.rerender(zoom, mapTypeId, layers); });
-  if (lauttaLegs) lauttaLegs.forEach(function (leg) { leg.rerender(zoom, mapTypeId, layers); });
+  objects.forEach(object => object.rerender(zoom, mapTypeId, layers));
+  if (lauttaLegs) lauttaLegs.forEach(leg => leg.rerender(zoom, mapTypeId, layers));
   hidden = false;
   prevRenderZoom = zoom;
 }
@@ -518,13 +508,13 @@ export function createMap() {
     disableAutoPan: true
   });
 
-  map.addListener('zoom_changed', function () {
+  map.addListener('zoom_changed', () => {
     cancelHeaderBarToggle();
     hideObjects(map);
-    setTimeout(function () { rerender(map); }, 50);
+    setTimeout(() => { rerender(map); }, 50);
   });
 
-  map.addListener('maptypeid_changed', function () {
+  map.addListener('maptypeid_changed', () => {
     $(".map").toggleClass("satellite", map.getMapTypeId() === 'satellite' || map.getMapTypeId() === 'hybrid');
     updateMapStyles();
     rerender(map, true);
