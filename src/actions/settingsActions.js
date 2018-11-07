@@ -8,3 +8,7 @@ export function setLayer(layer, isActive) {
   change[layer] = isActive;
   return {type: "LAYER_SET", payload: change};
 }
+
+export function selectMapType(mapTypeId) {
+  return {type: "MAP_TYPE_SELECTED", payload: mapTypeId};
+} 

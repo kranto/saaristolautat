@@ -15,7 +15,8 @@ localStorage.setItem("layers", JSON.stringify(layers));
 export default function reducer(state = {
   locale: "fi",
   isFullScreen: false,
-  layers: layers
+  layers: layers,
+  mapTypeId: 'roadmap'
 }, action) {
   switch (action.type) {
     case "LOCALE_SET":
@@ -26,6 +27,8 @@ export default function reducer(state = {
       const layers = Object.assign({}, state.layers, action.payload);
       localStorage.setItem("layers", JSON.stringify(layers));
       return { ...state, layers: layers };
+    case "MAP_TYPE_SELECTED":
+      return { ...state, mapTypeId: action.payload };
     default:
       return state;
   }

@@ -113,13 +113,6 @@ export function menuItemClicked(infoPage) {
   navigateTo(newState);
 }
 
-export function initSettings() {
-  $(".mapTypeSelect").bind('change', function () {
-    const newValue = this.options[this.selectedIndex].value;
-    map.setMapTypeId(newValue);
-  });
-}
-
 let layers = store.getState().settings.layers;
 let locale = store.getState().settings.locale;
 let fdata = store.getState().data.data;
@@ -135,6 +128,9 @@ function onStateChanged() {
     onLocaleChanged();
   }
   fdata = newState.data.data;
+  if (map && map.getMapTypeId() !== newState.settings.mapTypeId) {
+    map.setMapTypeId(newState.settings.mapTypeId);
+  }
 }
 setTimeout(() => store.subscribe(onStateChanged), 100);
 
@@ -371,7 +367,6 @@ function selectByIds(ids) {
 }
 
 export function select(targets, mouseEvent, dontPushState) {
-
   if (!targets.length) return;
 
   var selectedCountWas = selected.length;
@@ -495,7 +490,7 @@ export let tooltip;
 export function createMap() {
   google = window.google;
   map = new google.maps.Map(document.getElementById('map'), mapOptions);
-  map.setMapTypeId(google.maps.MapTypeId.ROADMAP);
+  map.setMapTypeId(store.getState().settings.mapTypeId);
   map.fitBounds({ south: 60, north: 60.5, west: 20, east: 22.3 });
   updateMapStyles();
 

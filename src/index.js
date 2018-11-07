@@ -8,7 +8,7 @@ import { initObjectRenderer } from './lib/objects';
 import './lib/uicontrol';
 import './lib/mapcontrol';
 import  {initFullscreen} from './lib/fullscreen';
-import { createMap, initSettings } from './lib/ferries';
+import { createMap } from './lib/ferries';
 import './lib/dataloader';
 import { initRoutes } from './lib/routes';
 
@@ -28,14 +28,9 @@ const loadGoogleMaps = () => {
 	document.body.appendChild(googleMapScript);	
 }
 
-const initElements = () => {
-	initSettings();
-}
-
 //--
 
 ReactDOM.render(<App />, document.getElementById('app'));	
 
 initFullscreen(document.getElementById('wrapper'));
-initElements();
 loadGoogleMaps();

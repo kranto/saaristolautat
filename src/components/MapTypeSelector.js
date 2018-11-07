@@ -1,10 +1,15 @@
 import React, { Component } from 'react';
 import { L2 } from '../lib/localizer';
 import { connect } from 'react-redux';
+import { selectMapType } from '../actions/settingsActions';
 
 class MapTypeSelector extends Component {
 
     mapTypes = ["roadmap", "satellite", "hybrid", "terrain", "OSM", "MMLTAUSTA", "MMLMAASTO"];
+
+    onChange(event) {
+        this.props.dispatch(selectMapType(this.mapTypes[event.target.selectedIndex]));
+    }
 
     render() {
         const options = this.mapTypes.map(mapType =>
@@ -12,7 +17,7 @@ class MapTypeSelector extends Component {
         );
         return (
             <div className="MapTypeSelector" >
-                <select className="mapTypeSelect">{options}</select>
+                <select className="mapTypeSelect" value={this.props.mapTypeId} onChange={this.onChange.bind(this)}>{options}</select>
             </div>
         );
     }
@@ -20,7 +25,8 @@ class MapTypeSelector extends Component {
 
 const mapStateToProps = (state) => {
     return {
-        locale: state.settings.locale
+        locale: state.settings.locale,
+        mapTypeId: state.settings.mapTypeId
     };
 };
 
