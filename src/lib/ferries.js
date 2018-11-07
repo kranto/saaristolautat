@@ -1,4 +1,4 @@
-import { toggleScrollIndicator, cancelHeaderBarToggle, toggleHeaderbar, hideMenuAndSettings, hideSettings, hideInfoPage, hideMenu } from './uicontrol';
+import { toggleScrollIndicator, cancelHeaderBarToggle, toggleHeaderbar, hideMenuAndSettings, hideSettings, hideInfoPage, hideMenu, openInfoPanel, closeInfoPanel } from './uicontrol';
 import { panTo } from './mapcontrol';
 import { lauttaLegs, lauttaRoutes } from './routes';
 import store from '../store';
@@ -8,44 +8,6 @@ let google;
 let map;
 
 const { $, history, location } = window;
-
-$(document).ready(() => {
-  $(".info").on("mouseleave", () => {
-    $("#wrapper2").css({ pointerEvents: "none" });
-    $(".mapoverlay").css({ pointerEvents: "none" });
-  });
-
-  $(".info").on("mouseenter mousedown touchstart", (e) => {
-    $("#wrapper2").css({ pointerEvents: "auto" });
-    $(".mapoverlay").css({ pointerEvents: "auto" });
-    $("#wrapper2").trigger(e.type, e);
-  });
-
-  function getAllEvents(element) {
-    var result = [];
-    for (var key in element) {
-      if (key.indexOf('on') === 0) {
-        result.push(key.slice(2));
-      }
-    }
-    return result.join(' ');
-  }
-
-  var el = $(".mapoverlay");
-  el.bind(getAllEvents(el[0]), e => {
-    $("#wrapper2").css({ pointerEvents: "none" });
-    $(".mapoverlay").css({ pointerEvents: "none" });
-    $("#mapcontainer").trigger(e.type, e);
-  });
-
-  $("body").mouseup(() => {
-    if (pierlinkDown) {
-      $(".info").animate({ opacity: 1 });
-      pierlinkDown = false;
-    }
-  });
-
-});
 
 $(window).resize(keepCenter);
 
@@ -82,7 +44,7 @@ window.onhashchange = () => {
     navigateTo(newState);
   } else if (fdata.piers[hash]) {
     history.go(-1);
-    objects.filter( o => o.id === hash)[0].showTooltip(true);
+    objects.filter(o => o.id === hash)[0].showTooltip(true);
   }
 }
 
@@ -285,6 +247,16 @@ function initPierLinks() {
   });
 }
 
+$(document).ready(() => {
+  $("body").mouseup(() => {
+    if (pierlinkDown) {
+      $(".info").animate({ opacity: 1 });
+      pierlinkDown = false;
+    }
+  });
+});
+
+
 function setInfoContent(targets, dontPushState) {
   var route;
   if (targets[0].ref) {
@@ -385,22 +357,16 @@ export function select(targets, mouseEvent, dontPushState) {
   $(".info").scrollTop(0);
 
   if (selectedCountWas === 0) {
-
-    $(function () {
-      $("#wrapper2").toggleClass("info-open", true);
-      if ($("body").outerWidth() >= 768) {
-        $(".info").css({ left: -400 });
-        $(".info").animate({ left: 0 }, 'fast', () => $(".info").css({ left: "" }));
-        var clientX = mouseEvent ? latLng2Point(mouseEvent.latLng, map).x : 500;
-        if (clientX < (400 + 50)) map.panBy(clientX - (($("#map").width() - 400) / 3 + 400), 0);
-      } else {
-        $(".info").css({ top: '100%' });
-        $(".info").animate({ top: '80%' }, 'fast', () => { $(".info").css({ top: "" }); toggleScrollIndicator() });
-        var clientY = mouseEvent ? latLng2Point(mouseEvent.latLng, map).y : 0;
-        if ($("#map").height() * 0.80 < clientY) map.panBy(0, $("#map").height() * 0.2);
-      }
-    });
+    openInfoPanel();
+    if ($("body").outerWidth() >= 768) {
+      var clientX = mouseEvent ? latLng2Point(mouseEvent.latLng, map).x : 500;
+      if (clientX < (400 + 50)) map.panBy(clientX - (($("#map").width() - 400) / 3 + 400), 0);
+    } else {
+      var clientY = mouseEvent ? latLng2Point(mouseEvent.latLng, map).y : 0;
+      if ($("#map").height() * 0.80 < clientY) map.panBy(0, $("#map").height() * 0.2);
+    }
   }
+
   if (!mouseEvent && targets[0].bounds) {
     panTo(map, targets[0].bounds, $("#mapcontainer").outerWidth());
   }
@@ -423,22 +389,11 @@ export function unselectAll(pushState) {
 
   if (pushState) history.pushState({ route: null }, null, null);
 
-  $(function () {
-    if ($("body").outerWidth() >= 768) {
-      $(".info").animate({ left: -400 }, 'fast', () => {
-        $(".info").css({ left: "" });
-        $("#wrapper2").toggleClass("info-open", false);
-        store.dispatch({ type: "INFOCONTENT_UNSELECTED", payload: null });
-      });
-    } else {
-      $("#wrapper2").animate({ scrollTop: 0 }, 'fast', () => {
-        $(".info").animate({ top: '100%' }, 200, () => $(".info").css({ top: "" }));
-        $("#wrapper2").toggleClass("info-open", false);
-        store.dispatch({ type: "INFOCONTENT_UNSELECTED", payload: null });
-        toggleScrollIndicator();
-      });
-    }
+  closeInfoPanel(() => {
+    store.dispatch({ type: "INFOCONTENT_UNSELECTED", payload: null });
+    toggleScrollIndicator();
   });
+
   selected.forEach(target => { target.highlight(false); if (target.rerender) target.rerender(map.getZoom(), map.getMapTypeId(), layers); });
   selected = [];
 }
