@@ -385,7 +385,7 @@ export function initObjectRenderer(map, txtol) {
     }
 
     connectionObject.init = function() {
-      connectionObject.name = shortName(connection.properties);
+      connectionObject.name = shortName(connection.properties, store.getState);
     }
 
     return connectionObject;

@@ -12,14 +12,18 @@ export const layers = localStorgageLayers ? JSON.parse(localStorgageLayers) : {
 
 localStorage.setItem("layers", JSON.stringify(layers));
 
+const initialLocale = localStorage.getItem('language') || window.navigator.language.split("-")[0] || "fi";
+localStorage.setItem('language', initialLocale);
+
 export default function reducer(state = {
-  locale: "fi",
+  locale: initialLocale,
   isFullScreen: false,
   layers: layers,
   mapTypeId: 'roadmap'
 }, action) {
   switch (action.type) {
     case "LOCALE_SET":
+      localStorage.setItem('language', action.payload);
       return { ...state, locale: action.payload };
     case "FULLSCREEN_CHANGED":
       return { ...state, isFullScreen: action.payload };

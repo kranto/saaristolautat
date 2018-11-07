@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { L2 as L, currentLang } from '../lib/localizer';
+import { L2 as L } from '../lib/localizer';
 import { connect } from 'react-redux';
 import { routeInfo } from '../lib/datarenderer';
 
@@ -14,7 +14,7 @@ class Timetables extends Component {
 
     if (!this.props.timetableid || !this.props.routeid) return "";
     const route = this.props.data.routes[this.props.routeid];
-    const routeData = routeInfo(route, currentLang);
+    const routeData = routeInfo(route, this.props.locale);
     const timetable = routeData.timetables.filter(tt => tt.id === this.props.timetableid)[0];
 
     const data = timetable;

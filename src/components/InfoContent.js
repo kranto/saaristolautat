@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { L2 as L, currentLang } from '../lib/localizer';
+import { L2 as L } from '../lib/localizer';
 import { unselectAll } from '../lib/ferries';
 import { connect } from 'react-redux';
 import { routeInfo } from '../lib/datarenderer';
@@ -13,7 +13,7 @@ class InfoContent extends Component {
             return <div />;
         }
 
-        const data = routeInfo(this.props.data.routes[route], currentLang);
+        const data = routeInfo(this.props.data.routes[route], this.props.locale);
 
         const titleLine = data.specifier ?
             (<div className="infotitle">{data.name}: <span className="specifier">{data.specifier}</span></div>) :
