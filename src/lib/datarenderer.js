@@ -9,18 +9,15 @@ function phoneUri(num) {
 }
 
 function getPhones(item) {
-    if (item.phones) {
-        var phones = Array.isArray(item.phones) ? item.phones : [item.phones];
-        return phones.map(function (phone) {
-            if (typeof phone === 'object') {
-                return { class: "phone", specifier: " - " + phone.name, text: sanitizePhone(phone.tel), uri: phoneUri(phone.tel) };
-            } else {
-                return { class: "phone", specifier: "", text: sanitizePhone(phone), uri: phoneUri(phone) };
-            }
-        });
-    } else {
-        return [];
-    }
+    return [item.phones || []].flat().map(phone => {
+        let tel = phone.tel || phone;
+        return {
+            class: "phone",
+            specifier: phone.name ? " - " + phone.name : "",
+            text: sanitizePhone(tel),
+            uri: phoneUri(tel)
+        };
+    });
 }
 
 function getLocalizedItem(item, lang) {
