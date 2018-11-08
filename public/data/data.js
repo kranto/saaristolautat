@@ -1230,7 +1230,8 @@ fdata = {
       link_sv: "https://www.finferries.fi/sv/farjetrafik/farjplatserna-och-tidtabellerna/nagu-norra-rutt-falko.html#timetables",
       link_en: "https://www.finferries.fi/en/ferry-traffic/ferries-and-schedules/nauvo-northern-route-falko.html#timetables",
       tables: [
-      { validFrom: "2018-09-03", validTo: "2019-05-16", images: ["FalkoVinter2019.jpeg"]}
+        { validFrom: "2018-05-17", validTo: "2018-12-31", images: ["FalkoVinter2019.jpeg"]},
+        { validFrom: "2018-09-03", validTo: "2019-05-16", images: ["FalkoVinter2019.jpeg"]}
       ],
     },
     nagutvar: {
