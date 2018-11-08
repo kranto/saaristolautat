@@ -1,8 +1,17 @@
 import React, { Component } from 'react';
-import { L2 as L } from '../lib/localizer';
+import { L2 as L, LP } from '../lib/localizer';
 import { connect } from 'react-redux';
-import { routeInfo } from '../lib/datarenderer';
+import { filterTimetables } from '../lib/datarenderer';
 
+function renderDate(date, lang) {
+  if (!date) return "";
+  var parts = date.split("-");
+  return parts[2] + "." + parts[1] + ".";
+}
+
+function renderDates(fromD, toD, lang) {
+  return renderDate(fromD, lang) + " - " + renderDate(toD, lang);
+}
 
 class Timetables extends Component {
 
@@ -13,22 +22,29 @@ class Timetables extends Component {
   render() {
 
     if (!this.props.timetableid || !this.props.routeid) return "";
-    const route = this.props.data.routes[this.props.routeid];
-    const routeData = routeInfo(route, this.props.locale);
-    const timetable = routeData.timetables.filter(tt => tt.id === this.props.timetableid)[0];
+    const route = this.props.data.routes[this.props.routeid];    
+    const timetable = {...this.props.data.timetables[this.props.timetableid] };
+    const name = timetable.name || route.name;
+    const specifier = timetable.specifier || route.specifier;
+    const tables = filterTimetables(timetable.tables).map((table,index) => {return {
+      ...table,
+      active: "",
+      show: "",
+      dates: renderDates(table.validFrom, table.validTo),
+      tabid: "tab" + index
+    }});
+    if (!tables.length) return "";
+    tables[0] = {...tables[0], active: "active", show: "show"};
 
-    const data = timetable;
-    if (!data) return "";
-
-    const tabItems = data.tables.map(table =>
+    const tabItems = tables.map(table =>
       <li key={table.tabid} className="nav-item">
         <a className={"nav-link " + table.active} data-toggle="tab" href={"#" + table.tabid} role="tab">
-          {table.dates}
+          {renderDates(table.validFrom, table.validTo)}
         </a>
       </li>
     );
 
-    const tableItems = data.tables.map(table => {
+    const tableItems = tables.map(table => {
       const images = table.images.map(image =>
         <div className="timetablelink" key={image}>
           <a href={"timetables_jpg/" + image} target="timetable">
@@ -48,9 +64,9 @@ class Timetables extends Component {
     }
     );
 
-    const titleLine = data.specifier ?
-      (<div className="infotitle">{data.name}: <span className="specifier">{data.specifier}</span></div>) :
-      (<div className="infotitle">{data.name}</div>);
+    const titleLine = specifier ?
+      (<div className="infotitle">{name}: <span className="specifier">{specifier}</span></div>) :
+      (<div className="infotitle">{name}</div>);
 
     return (
       <div id="timetables" className="fmodal" style={{ display: "none" }} onClick={this.onCloseClicked}>
@@ -64,7 +80,7 @@ class Timetables extends Component {
           <div className="fmodalbody">
             <div className="alert alert-warning">
               {L('unofficialcopy')}&nbsp;
-            <a target="info" href={data.link}>{L('fromoriginal')}&nbsp;
+            <a target="info" href={LP(timetable, "link")}>{L('fromoriginal')}&nbsp;
             <i className="fa fa-external-link" aria-hidden="true"></i></a>.
           </div>
             <div className="navtabswrapper">

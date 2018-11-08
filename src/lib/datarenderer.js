@@ -1,4 +1,4 @@
-import { L } from './localizer';
+import { L, currentLang } from './localizer';
 
 function sanitizePhone(num) {
     return num.replace(/\(.*\)/g, "").replace(/[-]/g, " ");
@@ -25,21 +25,9 @@ function getPhones(item) {
 
 function getLocalizedItem(item, lang) {
 
-    if (!(item instanceof Object)) {
-        if (typeof item === 'string' && item.indexOf("ref_") === 0) {
-            console.error('should not come here');
-            // var parts = item.split("_");
-            // var sub = ferrydata[parts[1]][parts[2]];
-            // sub.id = parts[2];
-            // return getLocalizedItem(deepCopy(sub), lang);
-        } else {
-            return item;
-        }
-    }
+    if (!(item instanceof Object)) return item;
 
-    if (item instanceof Array) {
-        return item.map(function (i) { return getLocalizedItem(i, lang); });
-    }
+    if (item instanceof Array) return item.map(i => getLocalizedItem(i, lang));
 
     var result = {};
     var keys = Object.keys(item);
@@ -92,29 +80,18 @@ function deepCopy(object) {
     return JSON.parse(JSON.stringify(object));
 }
 
-function renderDate(date, lang) {
-    if (!date) return "";
-    var parts = date.split("-");
-    // var currentYear = new Date().getFullYear();
-    return parts[2] + "." + parts[1] + "."; //+(parts[0] != currentYear? parts[0]: "");
-}
-
-function renderDates(fromD, toD, lang) {
-    return renderDate(fromD, lang) + " - " + renderDate(toD, lang);
-}
-
 function flatten(array) {
     return array.reduce(function (a, b) { return a.concat(b); }, []);
 }
 
-function filterTimetables(tables) {
+export function filterTimetables(tables) {
     if (!tables) return null;
     var today = new Date().toISOString().substring(0, 10);
     tables = tables.filter(function (table) { return !table.validTo || table.validTo >= today; });
     return tables.length ? tables : null;
 }
 
-export function routeInfo(route, lang) {
+export function routeInfo(route, lang = currentLang) {
     route = getLocalizedItem(deepCopy(route), lang);
     var info = {};
     var contacts = [];
@@ -157,26 +134,13 @@ export function routeInfo(route, lang) {
         contacts.push(op.contact);
     });
 
-    var timetables = route.timetables;
-
-    timetables.forEach(function (timetable) {
-        timetable.buttonspecifier = timetables.length > 1 ? timetable.name ? timetable.name : timetable.specifier : "";
-        timetable.name = timetable.name ? timetable.name : route.name;
-        timetable.specifier = timetable.specifier ? timetable.specifier : route.specifier;
-        timetable.tables = filterTimetables(timetable.tables);
-        timetable.exttimetables = timetable.tables ? false : "external";
-        var first = true;
-        var id = 1;
-        if (timetable.tables) timetable.tables.forEach(function (table) {
-            table.dates = renderDates(table.validFrom, table.validTo, lang);
-            table.active = first ? "active" : "";
-            table.show = first ? "show" : "";
-            table.tabid = "tab" + id++;
-            first = false;
-        });
+    info.timetables = route.timetables.map(timetable => {
+        return {
+            ...timetable,
+            buttonspecifier: route.timetables.length > 1 ? timetable.name ? timetable.name : timetable.specifier : "",
+            exttimetables: filterTimetables(timetable.tables) ? false : "external"
+        };
     });
-
-    info.timetables = timetables;
 
     info.pricelists = route.pricelists;
 

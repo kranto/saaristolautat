@@ -261,12 +261,12 @@ function setInfoContent(targets, dontPushState) {
   var route;
   if (targets[0].ref) {
     route = targets[0].ref;
-    if (!dontPushState) history.pushState({ route: route, timetables: null }, null, null);
+    if (!dontPushState) history.pushState({ route: route, timetable: null }, null, null);
 
     store.dispatch({ type: "INFOCONTENT_SELECTED", payload: route });
   } else {
     store.dispatch({ type: "INFOCONTENT2_SELECTED", payload: targets });
-    if (!dontPushState) history.pushState({ route: targets.map(r => r.id), timetables: null }, null, null);
+    if (!dontPushState) history.pushState({ route: targets.map(r => r.id), timetable: null }, null, null);
   }
 
   if ($(".infocontent.removing").length) $(".infocontent:not(.removing)").hide();

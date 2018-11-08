@@ -18,6 +18,17 @@ export const L = (lang, args) => {
 
 export const L2 = (msg) => L(currentLang, msg);
 
+export const LP = (object, property, lang = currentLang) => {
+  const keys = Object.keys(object);
+  if (keys.includes(property + "_L")) {
+    return L(lang, object[property + "_L"]);
+  } else if (keys.includes(property + "_" + lang)) {
+    return object[property + "_" + lang];
+  } else {
+    return object[property];
+  }
+}
+
 function deepGet(obj, properties) {
   if (obj === undefined || obj === null || properties.length === 0) {
     return obj;

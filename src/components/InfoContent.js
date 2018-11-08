@@ -13,7 +13,7 @@ class InfoContent extends Component {
             return <div />;
         }
 
-        const data = routeInfo(this.props.data.routes[route], this.props.locale);
+        const data = routeInfo(this.props.data.routes[route]);
 
         const titleLine = data.specifier ?
             (<div className="infotitle">{data.name}: <span className="specifier">{data.specifier}</span></div>) :
