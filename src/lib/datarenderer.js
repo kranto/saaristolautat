@@ -77,14 +77,10 @@ function deepCopy(object) {
     return JSON.parse(JSON.stringify(object));
 }
 
-function flatten(array) {
-    return array.reduce(function (a, b) { return a.concat(b); }, []);
-}
-
 export function filterTimetables(tables) {
     if (!tables) return null;
     var today = new Date().toISOString().substring(0, 10);
-    tables = tables.filter(function (table) { return !table.validTo || table.validTo >= today; });
+    tables = tables.filter(table => !table.validTo || table.validTo >= today);
     return tables.length ? tables : null;
 }
 
@@ -113,23 +109,20 @@ export function routeInfo(route, lang = currentLang) {
 
     info.features =
         ["interval", "duration", "order", "booking", "cost", "seasonal", "limit", "seealso"]
-            .filter(function (type) { return route.features[type]; })
-            .map(function (type) { return { class: type, value: route.features[type] }; });
+            .filter(type => route.features[type])
+            .map(type => { return { class: type, value: route.features[type] }; });
 
     var piers = route.piers;
-    piers.forEach(function (pier) {
-        pier.class = pier.type === 1 ? "mainpier" : "";
-        pier.specifier = pier.type === 1 && pier.mun.name !== pier.name ? "(" + pier.mun.name + ")" : "";
+    piers.forEach(pier => {
+        pier.class = pier.type === "1" ? "mainpier" : "";
+        pier.specifier = pier.type === "1" && pier.mun.name !== pier.name ? "(" + pier.mun.name + ")" : "";
     });
     piers[piers.length - 1].last = true;
     info.piers = piers;
 
     info.notes = route.notes;
 
-    route.operator.forEach(function (op) {
-        op.contact.name = op.name;
-        contacts.push(op.contact);
-    });
+    contacts = contacts.concat(route.operator.map(op => { return { ...op.contact, name: op.name }; }));
 
     info.timetables = route.timetables.map(timetable => {
         return {
@@ -141,17 +134,12 @@ export function routeInfo(route, lang = currentLang) {
 
     info.pricelists = route.pricelists;
 
-    contacts = contacts.map(function (contact) {
-
-        var contactItems = flatten([getPhones, getEmail, getWww, getFb].map(function (f) { return f(contact); }));
-
+    info.contacts = contacts.map(contact => {
         return {
             name: contact.name,
-            items: contactItems
+            items: [getPhones, getEmail, getWww, getFb].map(f => f(contact)).flat()
         };
     });
-
-    info.contacts = contacts;
 
     return info;
 }
