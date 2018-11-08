@@ -15,26 +15,33 @@ function renderDates(fromD, toD, lang) {
 
 class Timetables extends Component {
 
-  onCloseClicked() {
+  onCloseClicked(event) {
+    event.stopPropagation();
     window.history.back();
+  }
+
+  stopPropagation(event) {
+    event.stopPropagation();
   }
 
   render() {
 
     if (!this.props.timetableid || !this.props.routeid) return "";
-    const route = this.props.data.routes[this.props.routeid];    
-    const timetable = {...this.props.data.timetables[this.props.timetableid] };
+    const route = this.props.data.routes[this.props.routeid];
+    const timetable = { ...this.props.data.timetables[this.props.timetableid] };
     const name = timetable.name || route.name;
     const specifier = timetable.specifier || route.specifier;
-    const tables = filterTimetables(timetable.tables).map((table,index) => {return {
-      ...table,
-      active: "",
-      show: "",
-      dates: renderDates(table.validFrom, table.validTo),
-      tabid: "tab" + index
-    }});
+    const tables = filterTimetables(timetable.tables).map((table, index) => {
+      return {
+        ...table,
+        active: "",
+        show: "",
+        dates: renderDates(table.validFrom, table.validTo),
+        tabid: "tab" + index
+      }
+    });
     if (!tables.length) return "";
-    tables[0] = {...tables[0], active: "active", show: "show"};
+    tables[0] = { ...tables[0], active: "active", show: "show" };
 
     const tabItems = tables.map(table =>
       <li key={table.tabid} className="nav-item">
@@ -69,8 +76,8 @@ class Timetables extends Component {
       (<div className="infotitle">{name}</div>);
 
     return (
-      <div id="timetables" className="fmodal" style={{ display: "none" }} onClick={this.onCloseClicked}>
-        <div className="fmodalcontent timetablescontent">
+      <div id="timetables" className="fmodal" onClick={this.onCloseClicked}>
+        <div className="fmodalcontent timetablescontent" onClick={this.stopPropagation}>
           <button type="button" className="btn btn-secondary closeInfoButton" onClick={this.onCloseClicked} id="closeTimetablesButton">
             <i className="fa fa-times" aria-hidden="true"></i>
           </button>

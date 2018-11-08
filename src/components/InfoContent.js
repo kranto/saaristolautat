@@ -3,6 +3,7 @@ import { L2 as L } from '../lib/localizer';
 import { unselectAll } from '../lib/ferries';
 import { connect } from 'react-redux';
 import { routeInfo } from '../lib/datarenderer';
+import { onTimetableButtonClicked } from '../lib/ferries';
 
 class InfoContent extends Component {
 
@@ -39,7 +40,8 @@ class InfoContent extends Component {
 
         const timetableItems = data.timetables.map(timetable =>
             <div key={timetable.id} className="col-12 col-sm-12 col-md-12">
-                <button type="button" linktype={timetable.exttimetables.toString()} data-target={timetable.id} className={"btn btn-info btn-md timetablebutton " + timetable.exttimetables} href={timetable.link}>
+                <button type="button" className={"btn btn-info btn-md timetablebutton " + timetable.exttimetables}
+                    onClick={() => onTimetableButtonClicked(timetable.exttimetables? timetable.link: null, route, timetable.id)}>
                     &nbsp;{L('infocontent.timetables')} {timetable.buttonspecifier ? "-" : ""} {timetable.buttonspecifier}
                 </button>
             </div>

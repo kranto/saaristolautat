@@ -35,11 +35,19 @@ $(document).ready(() => {
   else history.replaceState({}, null);
 });
 
+export function onTimetableButtonClicked(href, route, timetable) {
+  if (href) {
+    window.open(href, "info");
+  } else {
+    history.pushState({ route: route, timetable: timetable }, null, null);
+    openTimetable(timetable);
+  }
+}
+
 window.onhashchange = () => {
   var hash = location.hash.substring(1);
   if (fdata.routes[hash]) {
     var newState = { route: hash, timetable: null };
-    // console.log('onhashchange: replacing state to', newState);
     history.replaceState(newState, null, "/");
     navigateTo(newState);
   } else if (fdata.piers[hash]) {
@@ -191,7 +199,7 @@ function closeTimetables() {
 
 function openTimetable(id) {
   store.dispatch({ type: "TIMETABLE_OPENED", payload: id });
-  $('#timetables').fadeIn();
+  setTimeout(() => $('#timetables').fadeIn(), 50); // TODO: why is timeout needed. i don't know.
   hideMenu();
   hideSettings();
 }
@@ -283,16 +291,6 @@ function setInfoContent(targets, dontPushState) {
   $(".infocontent.removing").fadeOut('fast', () => {
     $(".infocontent.removing").remove();
     $(".infocontent").fadeIn('fast');
-  });
-
-  $(".timetablebutton").click(function () {
-    if (this.getAttribute("linktype") === "external") {
-      window.open(this.getAttribute("href"), "info");
-    } else {
-      var timetable = this.getAttribute("data-target");
-      history.pushState({ route: route, timetable: timetable }, null, null);
-      openTimetable(timetable);
-    }
   });
 }
 
