@@ -1,5 +1,5 @@
 import { toggleScrollIndicator, cancelHeaderBarToggle, toggleHeaderbar, hideMenuAndSettings, hideSettings, hideInfoPage, hideMenu, openInfoPanel, closeInfoPanel } from './uicontrol';
-import { panTo } from './mapcontrol';
+import { panTo, initKeepCenter } from './mapcontrol';
 import { lauttaLegs, lauttaRoutes } from './routes';
 import store from '../store';
 import { getMapStyle } from './styles';
@@ -8,68 +8,6 @@ let google;
 let map;
 
 const { $, history, location } = window;
-
-$(window).resize(keepCenter);
-
-var mapCenter;
-var leftInfo = false;
-var bottomInfo = false;
-
-function rememberCenter() {
-  mapCenter = map.getCenter();
-  leftInfo = $("body").outerWidth() >= 768 && selected.length > 0;
-  bottomInfo = $("body").outerWidth() < 768 && selected.length > 0;
-}
-
-function keepCenter() {
-  var oldCenter = mapCenter;
-  if (map && mapCenter) setTimeout(() => {
-    map.setCenter(oldCenter);
-    if (leftInfo && $("#map").outerWidth() < 768) map.panBy(200, 0);
-    if (bottomInfo && $("#map").outerWidth() >= 768) map.panBy(-200, 0);
-  }, 50);
-}
-
-$(document).ready(() => {
-  if (window.location.hash) setTimeout(onhashchange, 2000);
-  else history.replaceState({}, null);
-});
-
-export function onTimetableButtonClicked(href, route, timetable) {
-  if (href) {
-    window.open(href, "info");
-  } else {
-    history.pushState({ route: route, timetable: timetable }, null, null);
-    openTimetable(timetable);
-  }
-}
-
-window.onhashchange = () => {
-  var hash = location.hash.substring(1);
-  if (fdata.routes[hash]) {
-    var newState = { route: hash, timetable: null };
-    history.replaceState(newState, null, "/");
-    navigateTo(newState);
-  } else if (fdata.piers[hash]) {
-    history.go(-1);
-    objects.filter(o => o.id === hash)[0].showTooltip(true);
-  }
-}
-
-function openInfoPage(target) {
-  $('#infopage').fadeIn();
-  $("#infopage").scrollTop(0);
-  $(".infosection").hide();
-  if (target !== "none") {
-    $(target).show();
-    unselectAll(false);
-  }
-  hideMenu();
-}
-
-export function closeInfoPage() {
-  history.go(-history.state.depth);
-}
 
 export function showLivePage() {
   var liveMapUri = "live.html?lng=" + map.getCenter().lng() + "&lat=" + map.getCenter().lat() + "&zoom=" + map.getZoom();
@@ -132,7 +70,6 @@ function addMapListeners(map) {
   });
 
   map.addListener('click', () => toggleHeaderbar(unselectAll));
-  map.addListener('idle', rememberCenter);
 }
 
 var loaderTimeout = false;
@@ -178,6 +115,69 @@ $(document).ready(() => {
   });
 });
 
+$(document).ready(() => {
+  if (window.location.hash) setTimeout(onhashchange, 2000);
+  else history.replaceState({}, null);
+});
+
+window.onhashchange = () => {
+  var hash = location.hash.substring(1);
+  if (fdata.routes[hash]) {
+    var newState = { route: hash, timetable: null };
+    history.replaceState(newState, null, "/");
+    navigateTo(newState);
+  } else if (fdata.piers[hash]) {
+    history.go(-1);
+    objects.filter(o => o.id === hash)[0].showTooltip(true);
+  }
+}
+
+function openInfoPage(target) {
+  $('#infopage').fadeIn();
+  $("#infopage").scrollTop(0);
+  $(".infosection").hide();
+  if (target !== "none") {
+    $(target).show();
+    unselectAll(false);
+  }
+  hideMenu();
+}
+
+export function closeInfoPage() {
+  history.go(-history.state.depth);
+}
+
+function navigateTo(state) {
+  // console.log('navigateTo', state);
+  if (!state || !state.timetable) {
+    closeTimetables();
+  }
+  if (!state || !state.infoPage) {
+    hideInfoPage();
+  }
+  if (state && state.route) {
+    if (typeof state.route === 'string') {
+      selectByIds([state.route]);
+    } else if (Array.isArray(state.route)) {
+      select(lauttaRoutes.filter(r => state.route.indexOf(r.id) >= 0), null, true);
+    }
+    if (state.timetable) {
+      openTimetable(state.timetable);
+    }
+  } else if (state && state.infoPage) {
+    openInfoPage(state.infoPage);
+  } else {
+    unselectAll(false);
+  }
+}
+
+window.onpopstate = (event) => {
+  if (location.hash) return;
+  $("#wrapper2").animate({ scrollTop: 0 }, 'fast', () => {
+    navigateTo(event.state);
+  });
+};
+
 $(document).keyup((e) => {
   if (e.keyCode === 27) { // escape key maps to keycode `27`
     if (hideMenuAndSettings()) {
@@ -192,16 +192,25 @@ $(document).keyup((e) => {
   }
 });
 
-function closeTimetables() {
-  $('#timetables').fadeOut(() => store.dispatch({ type: "TIMETABLE_CLOSED" }));
-  $('#timetables').scrollTop(0);
+export function onTimetableButtonClicked(href, route, timetable) {
+  if (href) {
+    window.open(href, "info");
+  } else {
+    history.pushState({ route: route, timetable: timetable }, null, null);
+    openTimetable(timetable);
+  }
 }
 
 function openTimetable(id) {
   store.dispatch({ type: "TIMETABLE_OPENED", payload: id });
-  setTimeout(() => $('#timetables').fadeIn(), 50); // TODO: why is timeout needed. i don't know.
+  $('#timetables').fadeIn();
   hideMenu();
   hideSettings();
+}
+
+function closeTimetables() {
+  $('#timetables').fadeOut(() => store.dispatch({ type: "TIMETABLE_CLOSED" }));
+  $('#timetables').scrollTop(0);
 }
 
 var pierlinkDown = false;
@@ -293,37 +302,6 @@ function setInfoContent(targets, dontPushState) {
     $(".infocontent").fadeIn('fast');
   });
 }
-
-function navigateTo(state) {
-  // console.log('navigateTo', state);
-  if (!state || !state.timetable) {
-    closeTimetables();
-  }
-  if (!state || !state.infoPage) {
-    hideInfoPage();
-  }
-  if (state && state.route) {
-    if (typeof state.route === 'string') {
-      selectByIds([state.route]);
-    } else if (Array.isArray(state.route)) {
-      select(lauttaRoutes.filter(r => state.route.indexOf(r.id) >= 0), null, true);
-    }
-    if (state.timetable) {
-      openTimetable(state.timetable);
-    }
-  } else if (state && state.infoPage) {
-    openInfoPage(state.infoPage);
-  } else {
-    unselectAll(false);
-  }
-}
-
-window.onpopstate = (event) => {
-  if (location.hash) return;
-  $("#wrapper2").animate({ scrollTop: 0 }, 'fast', () => {
-    navigateTo(event.state);
-  });
-};
 
 var selected = [];
 
@@ -470,5 +448,6 @@ export function createMap() {
 
   addMapListeners(map);
 
+  // initKeepCenter(map, () => selected.length);
   return map;
 }

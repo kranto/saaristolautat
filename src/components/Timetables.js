@@ -24,7 +24,7 @@ class Timetables extends Component {
     event.stopPropagation();
   }
 
-  render() {
+  renderContents() {
 
     if (!this.props.timetableid || !this.props.routeid) return "";
     const route = this.props.data.routes[this.props.routeid];
@@ -76,33 +76,40 @@ class Timetables extends Component {
       (<div className="infotitle">{name}</div>);
 
     return (
-      <div id="timetables" className="fmodal" onClick={this.onCloseClicked}>
-        <div className="fmodalcontent timetablescontent" onClick={this.stopPropagation}>
-          <button type="button" className="btn btn-secondary closeInfoButton" onClick={this.onCloseClicked} id="closeTimetablesButton">
-            <i className="fa fa-times" aria-hidden="true"></i>
-          </button>
-          <div className="fmodalheader">
-            {titleLine}
-          </div>
-          <div className="fmodalbody">
-            <div className="alert alert-warning">
-              {L('unofficialcopy')}&nbsp;
+      <div className="fmodalcontent timetablescontent" onClick={this.stopPropagation}>
+        <button type="button" className="btn btn-secondary closeInfoButton" onClick={this.onCloseClicked} id="closeTimetablesButton">
+          <i className="fa fa-times" aria-hidden="true"></i>
+        </button>
+        <div className="fmodalheader">
+          {titleLine}
+        </div>
+        <div className="fmodalbody">
+          <div className="alert alert-warning">
+            {L('unofficialcopy')}&nbsp;
             <a target="info" href={LP(timetable, "link")}>{L('fromoriginal')}&nbsp;
             <i className="fa fa-external-link" aria-hidden="true"></i></a>.
           </div>
-            <div className="navtabswrapper">
-              <ul className="nav nav-tabs" role="tablist">
-                {tabItems}
-              </ul>
-            </div>
-            <div className="tab-content">
-              {tableItems}
-            </div>
+          <div className="navtabswrapper">
+            <ul className="nav nav-tabs" role="tablist">
+              {tabItems}
+            </ul>
+          </div>
+          <div className="tab-content">
+            {tableItems}
           </div>
         </div>
       </div>
     );
   }
+  
+  render() {
+    return (
+      <div id="timetables" className="fmodal" onClick={this.onCloseClicked} style={{ display: "none" }}>
+        {this.renderContents()}
+      </div>
+    );
+  }
+
 }
 
 const mapStateToProps = (state) => {
