@@ -366,10 +366,8 @@ export function unselectAll(pushState) {
 
   if (pushState) history.pushState({ route: null }, null, null);
 
-  closeInfoPanel(() => {
-    store.dispatch({ type: "INFOCONTENT_UNSELECTED", payload: null });
-    toggleScrollIndicator();
-  });
+  closeInfoPanel();
+  store.dispatch({ type: "INFOCONTENT_UNSELECTED", payload: null });
 
   selected.forEach(target => { target.highlight(false); if (target.rerender) target.rerender(map.getZoom(), map.getMapTypeId(), layers); });
   selected = [];

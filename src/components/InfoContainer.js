@@ -3,9 +3,6 @@ import InfoContent from './InfoContent';
 import InfoContent2 from './InfoContent2';
 
 export default class MapContainer extends Component {
-  componentDidMount() {
-    console.log('infocontainer mounted');
-  }
   render() {
     return (
       <div id="infoholder" className="info">

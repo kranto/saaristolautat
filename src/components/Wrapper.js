@@ -23,6 +23,7 @@ class Wrapper extends Component {
   componentDidUpdate() {
     if (this.infoOpen && !this.prevInfoOpen) initMapOverlayEvents();
     this.prevInfoOpen = this.infoOpen;
+    toggleScrollIndicator();
   }
 
   render() {

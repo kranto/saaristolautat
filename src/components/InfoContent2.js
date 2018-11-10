@@ -2,8 +2,17 @@ import React, { Component } from 'react';
 import {unselectAll} from '../lib/ferries';
 import { onlyUnique } from '../lib/datautils';
 import { connect } from 'react-redux';
+import { toggleScrollIndicator } from '../lib/uicontrol';
 
 class InfoContent2 extends Component {
+
+  componentDidUpdate() {
+    toggleScrollIndicator();
+  }
+  
+  shouldComponentUpdate(props) {
+    return props.targets;
+  }
 
   render() {
     if (!this.props.targets) return <div />;
