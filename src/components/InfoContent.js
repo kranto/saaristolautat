@@ -7,6 +7,10 @@ import { onTimetableButtonClicked } from '../lib/ferries';
 
 class InfoContent extends Component {
 
+    shouldComponentUpdate(props) {
+        return props.routeid;
+    }
+
     render() {
 
         const route = this.props.routeid;

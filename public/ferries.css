@@ -857,7 +857,6 @@ h4 {
 }
 
 .info {
-  display: none;
   position: absolute;
   top: 100%;
   width: 100%; 
@@ -868,10 +867,6 @@ h4 {
   box-shadow: 0 -3px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
   z-index: 110;
   pointer-events: auto;
-}
-
-#wrapper2.info-open .info {
-  display: block;
 }
 
 #mapcontainer {
@@ -890,9 +885,10 @@ h4 {
 
   #wrapper2.info-open .mapoverlay {
     display: block;
+    pointer-events: auto;
   }
 
-  #wrapper2.info-open .info {
+  .info {
     top: 80%;
   }
 
@@ -906,11 +902,12 @@ h4 {
 
 @media screen and (min-width: 768px) {
 
-  #wrapper2.info-open .info {
+  .info {
     top: 50px;
     bottom: 0px;
     width: 400px;
     overflow-y: scroll;
+    left: 0px;
   }
 }
 
@@ -960,7 +957,7 @@ h4 {
 }
 
 @media screen and (min-width: 768px) and (max-height: 500px) {
-  #wrapper2.info-open .info {
+  .info {
     top: 40px;
   }
 }
@@ -997,4 +994,44 @@ h4 {
   border-radius: 5px;
   padding: 5px;
   color: white;
+}
+
+.timetable-enter {
+  opacity: 0.01;
+}
+
+.timetable-enter.timetable-enter-active {
+  opacity: 1;
+  transition: opacity 500ms ease-in;
+}
+
+.timetable-leave {
+  opacity: 1;
+}
+
+.timetable-leave.timetable-leave-active {
+  opacity: 0.01;
+  transition: opacity 300ms ease-in;
+}
+
+@media screen and (min-width: 768px) {
+
+.info-enter {
+  left: -400px;
+}
+
+.info-enter.info-enter-active {
+  left: 0px;
+  transition: left 200ms ease-in;
+}
+
+.info-leave {
+  left: 0px;
+}
+
+.info-leave.info-leave-active {
+  left: -400px;
+  transition: left 200ms linear;
+}
+
 }

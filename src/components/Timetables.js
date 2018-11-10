@@ -101,12 +101,12 @@ class Timetables extends Component {
       </div>
     );
   }
-  
+
   render() {
     return (
-      <div id="timetables" className="fmodal" onClick={this.onCloseClicked} style={{ display: "none" }}>
-        {this.renderContents()}
-      </div>
+        <div id="timetables" className="fmodal" onClick={this.onCloseClicked}>
+          {this.renderContents()}
+        </div>
     );
   }
 

@@ -203,13 +203,14 @@ export function onTimetableButtonClicked(href, route, timetable) {
 
 function openTimetable(id) {
   store.dispatch({ type: "TIMETABLE_OPENED", payload: id });
-  $('#timetables').fadeIn();
+  // $('#timetables').fadeIn();
   hideMenu();
   hideSettings();
 }
 
 function closeTimetables() {
-  $('#timetables').fadeOut(() => store.dispatch({ type: "TIMETABLE_CLOSED" }));
+  // $('#timetables').fadeOut(() => store.dispatch({ type: "TIMETABLE_CLOSED" }));
+  store.dispatch({ type: "TIMETABLE_CLOSED" });
   $('#timetables').scrollTop(0);
 }
 

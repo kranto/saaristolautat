@@ -79,8 +79,8 @@ export function openInfoPanel() {
   $(function () {
     $("#wrapper2").toggleClass("info-open", true);
     if ($("body").outerWidth() >= 768) {
-      $(".info").css({ left: -400 });
-      $(".info").animate({ left: 0 }, 'fast', () => $(".info").css({ left: "" }));
+    //   $(".info").css({ left: -400 });
+    //   $(".info").animate({ left: 0 }, 'fast', () => $(".info").css({ left: "" }));
     } else {
       $(".info").css({ top: '100%' });
       $(".info").animate({ top: '80%' }, 'fast', () => { $(".info").css({ top: "" }); toggleScrollIndicator() });
@@ -91,11 +91,11 @@ export function openInfoPanel() {
 export function closeInfoPanel(callback) {
   $(function () {
     if ($("body").outerWidth() >= 768) {
-      $(".info").animate({ left: -400 }, 'fast', () => {
-        $(".info").css({ left: "" });
+      // $(".info").animate({ left: -400 }, 'fast', () => {
+      //   $(".info").css({ left: "" });
         $("#wrapper2").toggleClass("info-open", false);
         if (callback) callback();
-      });
+      // });
     } else {
       $("#wrapper2").animate({ scrollTop: 0 }, 'fast', () => {
         $(".info").animate({ top: '100%' }, 200, () => $(".info").css({ top: "" }));
@@ -106,7 +106,7 @@ export function closeInfoPanel(callback) {
   });
 }
 
-$(document).ready(() => {
+export function initMapOverlayEvents() { 
   $(".info").on("mouseleave", () => {
     $("#wrapper2").css({ pointerEvents: "none" });
     $(".mapoverlay").css({ pointerEvents: "none" });
@@ -134,4 +134,4 @@ $(document).ready(() => {
     $(".mapoverlay").css({ pointerEvents: "none" });
     $("#mapcontainer").trigger(e.type, e);
   });
-});
+}
