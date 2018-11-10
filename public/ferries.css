@@ -962,16 +962,16 @@ h4 {
   color: white;
 }
 
-.timetable-enter {
+.fmodal-enter {
   opacity: 0.01;
 }
 
-.timetable-enter.timetable-enter-active {
+.fmodal-enter.fmodal-enter-active {
   opacity: 1;
   transition: opacity 500ms ease-in;
 }
 
-.timetable-leave.timetable-leave-active {
+.fmodal-leave.fmodal-leave-active {
   opacity: 0.01;
   transition: opacity 300ms ease-in;
 }

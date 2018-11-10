@@ -50,12 +50,7 @@ class Wrapper extends Component {
         <Menu />
         <Settings />
         <div id="liveindpos"><LiveIndicator /></div>
-
-        <ReactCSSTransitionGroup transitionName="timetable"
-          transitionEnterTimeout={500}
-          transitionLeaveTimeout={300}>
-          {(this.props.timetableid) ? <Timetables key="1" /> : ""}
-        </ReactCSSTransitionGroup>
+        <Timetables />
       </div >
     );
   }

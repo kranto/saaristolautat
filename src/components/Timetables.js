@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { L2 as L, LP } from '../lib/localizer';
 import { connect } from 'react-redux';
 import { filterTimetables } from '../lib/datarenderer';
+import FModal from './FModal';
 
 function renderDate(date, lang) {
   if (!date) return "";
@@ -15,8 +16,7 @@ function renderDates(fromD, toD, lang) {
 
 class Timetables extends Component {
 
-  onCloseClicked(event) {
-    event.stopPropagation();
+  onClose(event) {
     window.history.back();
   }
 
@@ -24,13 +24,20 @@ class Timetables extends Component {
     event.stopPropagation();
   }
 
-  renderContents() {
-
+  getHeader() {
     if (!this.props.timetableid || !this.props.routeid) return "";
     const route = this.props.data.routes[this.props.routeid];
-    const timetable = { ...this.props.data.timetables[this.props.timetableid] };
+    const timetable = this.props.data.timetables[this.props.timetableid];
     const name = timetable.name || route.name;
     const specifier = timetable.specifier || route.specifier;
+    return specifier ?
+      (<div className="infotitle">{name}: <span className="specifier">{specifier}</span></div>) :
+      (<div className="infotitle">{name}</div>);
+  }
+
+  getBody() {
+    if (!this.props.timetableid) return "";
+    const timetable = { ...this.props.data.timetables[this.props.timetableid] };
     const tables = filterTimetables(timetable.tables).map((table, index) => {
       return {
         ...table,
@@ -70,43 +77,34 @@ class Timetables extends Component {
         </div>);
     }
     );
-
-    const titleLine = specifier ?
-      (<div className="infotitle">{name}: <span className="specifier">{specifier}</span></div>) :
-      (<div className="infotitle">{name}</div>);
-
     return (
-      <div className="fmodalcontent timetablescontent" onClick={this.stopPropagation}>
-        <button type="button" className="btn btn-secondary closeInfoButton" onClick={this.onCloseClicked} id="closeTimetablesButton">
-          <i className="fa fa-times" aria-hidden="true"></i>
-        </button>
-        <div className="fmodalheader">
-          {titleLine}
-        </div>
-        <div className="fmodalbody">
-          <div className="alert alert-warning">
-            {L('unofficialcopy')}&nbsp;
+      <div>
+        <div className="alert alert-warning">
+          {L('unofficialcopy')}&nbsp;
             <a target="info" href={LP(timetable, "link")}>{L('fromoriginal')}&nbsp;
             <i className="fa fa-external-link" aria-hidden="true"></i></a>.
           </div>
-          <div className="navtabswrapper">
-            <ul className="nav nav-tabs" role="tablist">
-              {tabItems}
-            </ul>
-          </div>
-          <div className="tab-content">
-            {tableItems}
-          </div>
+        <div className="navtabswrapper">
+          <ul className="nav nav-tabs" role="tablist">
+            {tabItems}
+          </ul>
+        </div>
+        <div className="tab-content">
+          {tableItems}
         </div>
       </div>
     );
   }
 
   render() {
+    const show = (this.props.timetableid && this.props.routeid);
     return (
-        <div id="timetables" className="fmodal" onClick={this.onCloseClicked}>
-          {this.renderContents()}
-        </div>
+      <FModal
+        show={show}
+        onClose={window.history.back.bind(window.history)}
+        header={show ? this.getHeader() : ""}
+        body={show ? this.getBody() : ""}>
+      </FModal>
     );
   }
 
