@@ -19,7 +19,15 @@ const link = (urls, target, linkTexts, descriptions, locale) => (
 );
 
 class InfoPage extends Component {
-  
+  constructor(props) {
+    super(props);
+    this.state={page: null, scrollTop: false};
+  }
+
+  static getDerivedStateFromProps(nextProps, prevState) {
+    return {page: nextProps.page, scrollTop: prevState && nextProps.page !== prevState.page};
+  }
+
   renderContents(page) {
     const { locale: lang } = this.props;
     const onlyInFinnish = lang === "fi" ? "" : lang === "sv" ? (<span>Bara på finska...</span>) : (<span>Only in Finnish...</span>);
@@ -241,7 +249,7 @@ class InfoPage extends Component {
 
   render() {
     return (
-      <FModal id="infopage" style={{ display: "none" }} show={this.props.page} onClose={closeInfoPage} header="" body={this.renderContents(this.props.page)}>
+      <FModal id="infopage" style={{ display: "none" }} scrollTop={this.state.scrollTop} show={this.state.page} onClose={closeInfoPage} header="" body={this.renderContents(this.props.page)}>
       </FModal>
     );
 
