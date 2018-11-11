@@ -10,8 +10,10 @@ export default function reducer(state = {
       return { ...state, infoContent: action.payload };
     case "INFOCONTENT2_SELECTED":
       return { ...state, infoContent2: action.payload };
-      case "INFOCONTENT_UNSELECTED":
+    case "INFOCONTENT_UNSELECTED":
       return { ...state, infoContent: null, infoContent2: null };
+    case "INFOPAGE_SELECTED":
+      return { ...state, infoPage: action.payload };
     default:
       return state;
   }

@@ -133,22 +133,17 @@ window.onhashchange = () => {
 }
 
 function openInfoPage(target) {
-  $('#infopage').fadeIn();
-  $("#infopage").scrollTop(0);
-  $(".infosection").hide();
-  if (target !== "none") {
-    $(target).show();
-    unselectAll(false);
-  }
+  store.dispatch({type: "INFOPAGE_SELECTED", payload: target.substring(1)});
+  unselectAll(false);
   hideMenu();
 }
 
 export function closeInfoPage() {
+  store.dispatch({type: "INFOPAGE_SELECTED", payload: null});
   history.go(-history.state.depth);
 }
 
 function navigateTo(state) {
-  // console.log('navigateTo', state);
   if (!state || !state.timetable) {
     closeTimetables();
   }

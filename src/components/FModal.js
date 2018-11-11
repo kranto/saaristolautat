@@ -14,7 +14,7 @@ export default class FModal extends Component {
 
   contents() {
     return (
-      <div className="fmodal" onClick={this.onCloseClicked.bind(this)} key="1">
+      <div id={this.props.id} className="fmodal" onClick={this.onCloseClicked.bind(this)} key="1">
         <div className="fmodalcontent" onClick={this.stopPropagation}>
           <button type="button" className="btn btn-secondary closeInfoButton" onClick={this.onCloseClicked.bind(this)}>
             <i className="fa fa-times" aria-hidden="true"></i>

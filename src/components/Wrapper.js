@@ -31,14 +31,13 @@ class Wrapper extends Component {
     return (
       <div id="wrapper">
         <div id="wrapper2" onScroll={toggleScrollIndicator}>
-            {/* <div className="info" id="infoholder" key={1}><InfoContent /><InfoContent2 /></div> */}
-            <InfoPage />
+          <InfoPage />
           <div className="mapoverlay"></div>
 
           <ReactCSSTransitionGroup transitionName="info"
             transitionEnterTimeout={200}
             transitionLeaveTimeout={200}>
-            {this.infoOpen ? <InfoContainer key="1" /> : "" }
+            {this.infoOpen ? <InfoContainer key="1" /> : ""}
           </ReactCSSTransitionGroup>
         </div>
 

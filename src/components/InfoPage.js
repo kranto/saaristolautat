@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { L2 } from '../lib/localizer';
 import { showLivePage, closeInfoPage } from '../lib/ferries';
+import FModal from './FModal';
 
 const locales = ["fi", "sv", "en"];
 
@@ -18,21 +19,15 @@ const link = (urls, target, linkTexts, descriptions, locale) => (
 );
 
 class InfoPage extends Component {
-
-  stopPropagation(event) {
-    event.stopPropagation();
-  }
-
-  render() {
+  
+  renderContents(page) {
     const { locale: lang } = this.props;
     const onlyInFinnish = lang === "fi" ? "" : lang === "sv" ? (<span>Bara på finska...</span>) : (<span>Only in Finnish...</span>);
 
     return (
-      <div id="infopage" className="fmodal" style={{ display: "none" }} onClick={closeInfoPage}>
-        <div id="infopagecontent" onClick={this.stopPropagation}>
-          <button type="button" className="btn btn-secondary closeInfoButton" onClick={closeInfoPage}><i className="fa fa-times" aria-hidden="true"></i></button>
-
-          <div id="gettingthere" className="infosection">
+      <div>
+        {page === "gettingthere" ?
+          <div className="infosection">
             <h2>{L2("menu.gettingthere")}</h2>
             {onlyInFinnish}
             <h3>Autolla ja moottoripyörällä</h3>
@@ -49,8 +44,10 @@ class InfoPage extends Component {
             <p>Korppoosta ja Kustavista on helppo siirtyä Ahvenanmaan lautoille ja jatkaa matkaa Brändöhön tai eteläisellä linjalla vaikkapa Kökariin ja Föglöhön. Ahvenanmaan matkan voi taittaa myös suoraan autolautalla Turusta, Helsingistä tai Naantalista. Ahvenanmaalta voi myös piipahtaa Ruotsin puolella Grisslehamnissa tai Kapellskärissä.</p>
             <p>Pyöräilijälle on vaihtoehtoja saaristossa lähes loputtomasti. Kesän 2018 uutuus on yhteys Hangon ja Kemiönsaaren Kasnäsin välillä. Lähes kaikki alukset ottavat polkupyörän kyytiin. Varmista tarvittaessa suoraan alukselta.</p>
           </div>
+          : ""}
 
-          <div id="alandferriesinfo" className="infosection">
+        {page === "alandferriesinfo" ?
+          <div className="infosection">
             <h2>{L2("menu.alandferriesinfo")} <img src="img/alandstrafiken.png" width="120px" alt="Ålandstrafiken" /></h2>
             {onlyInFinnish}
             <h3>Lauttareitit</h3>
@@ -84,8 +81,10 @@ class InfoPage extends Component {
               Useimmille lautoille voi varata paikan moottoriajoneuvolle ja suosituimpiin aikoihin se on ehdottomasti suositeltavaa. Varauksen voi tehdä <a href="http://online.alandstrafiken.ax/Login/Customer.aspx" rel="noopener noreferrer" target="other">verkossa</a> tai<br />puhelimitse <i className="fa fa-phone" aria-hidden="true"></i>&nbsp;<a className="tel" href="tel:+3581825600">+358&nbsp;18&nbsp;25&nbsp;600</a>.
           </p>
           </div >
+          : ""}
 
-          <div id="finlandferriesinfo" className="infosection">
+        {page === "finlandferriesinfo" ?
+          <div className="infosection">
             <h2>{L2("menu.finlandferriesinfo")}</h2>
             {onlyInFinnish}
             <h3>Lauttareitit</h3>
@@ -105,8 +104,10 @@ class InfoPage extends Component {
               Maantie- ja yhteysalusliikenteen järjestäjä on Varsinais-Suomen ELY-keskus. Useimpia maantielauttoja ja losseja operoi Finferries. Yhteysaluksilla on useita eri operaattoreita. Risteilyreitit ovat yksityisten yritysten järjestämiä. Kunkin linjan operaattorin näet linjan tiedoista.
           </p>
           </div>
+          : ""}
 
-          <div id="live" className="infosection">
+        {page === "live" ?
+          <div className="infosection">
             <h2>{L2("menu.live")}</h2>
             {lang === "fi" && (
               <div>
@@ -136,8 +137,10 @@ class InfoPage extends Component {
 
             <button type="button" className="btn btn-secondary linkbutton external showLive" style={{ width: "100%" }} onClick={showLivePage}>Live by Marinetraffic.com!!!</button>
           </div >
+          : ""}
 
-          <div id="linksinfo" className="infosection">
+        {page === "linksinfo" ?
+          <div className="infosection">
             <h2>{L2("menu.linksinfo")}</h2>
 
             <h3>{L2("infopage.ferries")}</h3>
@@ -195,8 +198,10 @@ class InfoPage extends Component {
               ], lang)}
 
           </div>
+          : ""}
 
-          <div id="appinfo" className="infosection">
+        {page === "appinfo" ?
+          <div className="infosection">
             <h2>{L2("menu.appinfo")}</h2>
             {onlyInFinnish}
             <p>
@@ -229,15 +234,24 @@ class InfoPage extends Component {
               {L2("infopage.trafficinfo")} <a href="http://www.liikennevirasto.fi" rel="noopener noreferrer" target="livi">Finnish Transport Agency</a> / <a href="http://digitraffic.liikennevirasto.fi/meriliikenne/" rel="noopener noreferrer" target="digitraffic">meri.digitraffic.fi</a>, license <a href="http://creativecommons.org/licenses/by/4.0/" rel="noopener noreferrer" target="license">CC 4.0 BY</a>
             </div>
           </div>
-        </div>
+          : ""}
       </div>
     );
+  }
+
+  render() {
+    return (
+      <FModal id="infopage" style={{ display: "none" }} show={this.props.page} onClose={closeInfoPage} header="" body={this.renderContents(this.props.page)}>
+      </FModal>
+    );
+
   }
 }
 
 const mapStateToProps = (state) => {
   return {
-    locale: state.settings.locale
+    locale: state.settings.locale,
+    page: state.selection.infoPage
   };
 };
 

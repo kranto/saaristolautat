@@ -1,374 +1,367 @@
-    h3 {
-      font-size: 20px;
-    }
+h3 {
+  font-size: 20px;
+}
 
-    div#loader {
-      background-image: url("asterholma1.jpg");
-      background-size: auto 100%;
-      background-repeat: repeat;
-      display: block;
-      position: fixed;
-      width: 100%;
-      height: 100%;
-      z-index: 2;
-      background-color: #ffffff;
-      opacity: 1;
-      font-family: sans-serif;
-    }
+div#loader {
+  background-image: url("asterholma1.jpg");
+  background-size: auto 100%;
+  background-repeat: repeat;
+  display: block;
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+  background-color: #ffffff;
+  opacity: 1;
+  font-family: sans-serif;
+}
 
-    div#loaderbox {
-      display: block;
-      width: 100%;
-      position: absolute;
-      top: 50px;
-    }
+div#loaderbox {
+  display: block;
+  width: 100%;
+  position: absolute;
+  top: 50px;
+}
 
-    div#loaderheader {
-      top: 50px;
-      width: 100%;
-      display: block;
-    }
+div#loaderheader {
+  top: 50px;
+  width: 100%;
+  display: block;
+}
 
-    div#loaderheader img {
-      display: block;
-      margin: auto;
-    }
+div#loaderheader img {
+  display: block;
+  margin: auto;
+}
 
-    div#loadercontent {
-      text-align: center;
-      margin-left: auto;
-      margin-right: auto; 
-      width: 100%;
-      font-size: 18px;
-      background-color: rgba(255, 255, 255, 0.5);
-    }
+div#loadercontent {
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto; 
+  width: 100%;
+  font-size: 18px;
+  background-color: rgba(255, 255, 255, 0.5);
+}
 
-    #loadercontent #h1 {
-      font-size: 24px;
-    }
+#loadercontent #h1 {
+  font-size: 24px;
+}
 
-    .fmodal {
-      position: fixed;
-      top: 0px;
-      width: 100%;
-      text-align: center;
-      bottom: 0px;
-      padding: 10px;
-      background-color: rgba(0,0,0, 0.6);
-      z-index: 110;
-      overflow-y: scroll;
-    }
-    #infopage {
-      top: 50px;
-      pointer-events: auto;
-    }
+.fmodal {
+  position: fixed;
+  top: 0px;
+  width: 100%;
+  text-align: center;
+  bottom: 0px;
+  padding: 10px;
+  background-color: rgba(0,0,0, 0.6);
+  z-index: 110;
+  overflow-y: scroll;
+}
 
-    .fmodalcontent {
-      max-width: 630px;
-      min-height: 100%;
-      margin: auto;
-      text-align: left;
-      background-color: white;
-      padding: 15px;
-    }
+.fmodalcontent {
+  max-width: 630px;
+  min-height: 100%;
+  margin: auto;
+  text-align: left;
+  background-color: white;
+  padding: 15px;
+}
 
-    .fmodalheader {
-      margin-bottom: 20px;
-    }
+.fmodalheader {
+  margin-bottom: 20px;
+}
 
-    .timetablescontent {
-      max-width: 730px;
-    }
+.timetablescontent {
+  max-width: 730px;
+}
 
-    .timetablelink {
-      overflow-x: scroll;
-    }
+.timetablelink {
+  overflow-x: scroll;
+}
 
-    .timetable {
-      max-width: 700px;
-    }
-    
-    div#infopagecontent {
-      position: relative;
-      max-width:600px;
-      min-height: 100%;
-      margin: auto;
-      text-align: left;
-      background-color: white;
-      padding: 15px;
-    }
+.timetable {
+  max-width: 700px;
+}
 
-    #infopage td, #infopage th {
-      padding: 5px;
-    }
+#infopage {
+  top: 50px;
+  pointer-events: auto;
+}
 
-    #infopage h3, #infopage h4 {
-      margin-top: 30px;
-    }
-    
-    #infopagecontent .footer {
-      position: absolute;
-      bottom: 5px;
-      width: 95%;
-      color: #808080;
-      border-top: 1px ridge #a0a0a0;
-    }
+div#infopagecontent {
+  position: relative;
+  max-width:600px;
+  min-height: 100%;
+  margin: auto;
+  text-align: left;
+  background-color: white;
+  padding: 15px;
+}
 
-    #appinfo #followbox {
-      margin-top: 30px;
-    }
+#infopage td, #infopage th {
+  padding: 5px;
+}
 
-    #appinfo ul {
-      list-style-type: none;
-      margin-top: 25px;
-      margin-bottom: 30px;
-    }
+#infopage h3, #infopage h4 {
+  margin-top: 30px;
+}
 
-    #appinfo ul li i {
-      font-size: 1.5em;
-      margin-right: 20px;
-      margin-top: 5px;
-    }
+#appinfo #followbox {
+  margin-top: 30px;
+}
 
-    #appinfo #licensebox {
-      border-top: solid 1px;
-      border-color: #bbb;
-      margin-top: 40px;
-      padding-top: 10px;
-    }
+#appinfo ul {
+  list-style-type: none;
+  margin-top: 25px;
+  margin-bottom: 30px;
+}
 
-    .fbcolor {
-      color: #3B5998;
-    }
+#appinfo ul li i {
+  font-size: 1.5em;
+  margin-right: 20px;
+  margin-top: 5px;
+}
 
-    .twittercolor {
-      color: #00aced;
-    }
+#appinfo #licensebox {
+  border-top: solid 1px;
+  border-color: #bbb;
+  margin-top: 40px;
+  padding-top: 10px;
+}
 
-    .infosection h1, .infosection h2 {
-      margin-bottom: 30px;
-    }
-    .closeInfoButton {
-      float: right;
-      background-color: #eeeeee;
-      font-size: 20px;
-      width: 40px;
-      height: 40px;
-      padding: 0;
-      color: #000;
-    }
+.fbcolor {
+  color: #3B5998;
+}
 
-    #scrollIndicator {
-      height: 25px;
-      width: 100%;
-      display: none;
-      z-index: 130;
-      background-color: #ecececad;
-      position: fixed;
-      bottom: 0px;
-      padding-left: 50%;
-      pointer-events: none;
-    }
+.twittercolor {
+  color: #00aced;
+}
 
-    #scrollIndicator.can-scroll {
-      display: block;
-    }
+.infosection h1, .infosection h2 {
+  margin-bottom: 30px;
+}
+.closeInfoButton {
+  float: right;
+  background-color: #eeeeee;
+  font-size: 20px;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  color: #000;
+}
 
-    #scrollIndicator i {
-      position: relative;
-      font-size: 40px;
-      left: -20px;
-      top: -6px;
-      color: #822928;
-    }
+#scrollIndicator {
+  height: 25px;
+  width: 100%;
+  display: none;
+  z-index: 130;
+  background-color: #ecececad;
+  position: fixed;
+  bottom: 0px;
+  padding-left: 50%;
+  pointer-events: none;
+}
 
-    .map div {
-      text-shadow:
-      -1px -1px 0px rgba(255, 255, 255, 0.3),
-      1px -1px 0px rgba(255, 255, 255, 0.3),
-      -1px 1px 0px rgba(255, 255, 255, 0.3),
-      1px 1px 0px rgba(255, 255, 255, 0.3),
-      -1px 0px 0px rgba(255, 255, 255, 0.3),
-      1px 0px 0px rgba(255, 255, 255, 0.3),
-      0px -1px 0px rgba(255, 255, 255, 0.3),
-      0px 1px 0px rgba(255, 255, 255, 0.3);
-    }
+#scrollIndicator.can-scroll {
+  display: block;
+}
 
-    .map.satellite div {
-      text-shadow:
-      -1px -1px 0px rgba(0, 0, 0, 0.3),
-      1px -1px 0px rgba(0, 0, 0, 0.3),
-      -1px 1px 0px rgba(0, 0, 0, 0.3),
-      1px 1px 0px rgba(0, 0, 0, 0.3),
-      -1px 0px 0px rgba(0, 0, 0, 0.3),
-      1px 0px 0px rgba(0, 0, 0, 0.3),
-      0px -1px 0px rgba(0, 0, 0, 0.3),
-      0px 1px 0px rgba(0, 0, 0, 0.3);
-    }
+#scrollIndicator i {
+  position: relative;
+  font-size: 40px;
+  left: -20px;
+  top: -6px;
+  color: #822928;
+}
 
-    #map.hide {
-      opacity: 0;
-    }
+.map div {
+  text-shadow:
+  -1px -1px 0px rgba(255, 255, 255, 0.3),
+  1px -1px 0px rgba(255, 255, 255, 0.3),
+  -1px 1px 0px rgba(255, 255, 255, 0.3),
+  1px 1px 0px rgba(255, 255, 255, 0.3),
+  -1px 0px 0px rgba(255, 255, 255, 0.3),
+  1px 0px 0px rgba(255, 255, 255, 0.3),
+  0px -1px 0px rgba(255, 255, 255, 0.3),
+  0px 1px 0px rgba(255, 255, 255, 0.3);
+}
 
-    #map .gm-iv-address div {
-      text-shadow: none;
-    }
-    #map .gm-style-cc div {
-      text-shadow: none;
-    }
-    #map .gm-style-iw div {
-      text-shadow: none;
-    }
+.map.satellite div {
+  text-shadow:
+  -1px -1px 0px rgba(0, 0, 0, 0.3),
+  1px -1px 0px rgba(0, 0, 0, 0.3),
+  -1px 1px 0px rgba(0, 0, 0, 0.3),
+  1px 1px 0px rgba(0, 0, 0, 0.3),
+  -1px 0px 0px rgba(0, 0, 0, 0.3),
+  1px 0px 0px rgba(0, 0, 0, 0.3),
+  0px -1px 0px rgba(0, 0, 0, 0.3),
+  0px 1px 0px rgba(0, 0, 0, 0.3);
+}
 
-    .map .txtol {
-      position: absolute;
-      white-space: nowrap;
-      font-style: normal;
-      font-family: 'Roboto', sans-serif;
-      line-height: 1;
-      -webkit-touch-callout: none;
-      -webkit-user-select: none; 
-      -moz-user-select: none; 
-    }
+#map.hide {
+  opacity: 0;
+}
 
-    .map .area {
-      color: #202030;
-      opacity: 0.6;
-    }
+#map .gm-iv-address div {
+  text-shadow: none;
+}
+#map .gm-style-cc div {
+  text-shadow: none;
+}
+#map .gm-style-iw div {
+  text-shadow: none;
+}
 
-    .map.satellite .area {
-      color: #ffffff;
-    }
+.map .txtol {
+  position: absolute;
+  white-space: nowrap;
+  font-style: normal;
+  font-family: 'Roboto', sans-serif;
+  line-height: 1;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none; 
+  -moz-user-select: none; 
+}
 
-    .map .area.bg {
-      background-color: rgba(255, 255, 255, 0.5);
-    }
+.map .area {
+  color: #202030;
+  opacity: 0.6;
+}
 
-    .map.satellite .area.bg {
-      background-color: transparent;
-    }
+.map.satellite .area {
+  color: #ffffff;
+}
 
-    .map .area.province {
-      font-weight: bold;
-      font-size: 2em;
-    }
+.map .area.bg {
+  background-color: rgba(255, 255, 255, 0.5);
+}
 
-    .map .area.mun1 {
-      font-weight: bold;
-      font-size: 1.8em;
-    }
+.map.satellite .area.bg {
+  background-color: transparent;
+}
 
-    .map .area.mun2 {
-      font-weight: bold;
-      font-size: 1.4em;
-    }
+.map .area.province {
+  font-weight: bold;
+  font-size: 2em;
+}
 
-    .map .area.island1 {
-      font-weight: normal;
-      font-size: 1em;
-      font-family: 'Trebuchet MS';
-      color: #101010;
-      opacity: 0.8;
-    }
+.map .area.mun1 {
+  font-weight: bold;
+  font-size: 1.8em;
+}
 
-    .map.satellite .area.island1 {
-      color: #ddd;
-    }
+.map .area.mun2 {
+  font-weight: bold;
+  font-size: 1.4em;
+}
 
-    .map .pier {
-      color: #002080;
-      opacity: 0.9;
-      cursor: pointer;
-    }
+.map .area.island1 {
+  font-weight: normal;
+  font-size: 1em;
+  font-family: 'Trebuchet MS';
+  color: #101010;
+  opacity: 0.8;
+}
 
-    .map.satellite .pier {
-      color: #6ac1fc;
-    }
-    .map .pier-1 {
-      font-size: 1.2em;
-      font-weight: 600;
-    }
+.map.satellite .area.island1 {
+  color: #ddd;
+}
 
-    .map .pier-2 {
-      font-size: 1.1em;
-      font-weight: 600;
-    }
+.map .pier {
+  color: #002080;
+  opacity: 0.9;
+  cursor: pointer;
+}
 
-    .map .pier-3 {
-      font-size: 1.1em;
-      font-weight: 500;
-    }
+.map.satellite .pier {
+  color: #6ac1fc;
+}
+.map .pier-1 {
+  font-size: 1.2em;
+  font-weight: 600;
+}
 
-    .map .pier-4 {
-      font-size: 1em;
-    }
+.map .pier-2 {
+  font-size: 1.1em;
+  font-weight: 600;
+}
 
-    .map .vessel {
-      color: #800080;
-      font-size: 1.1em;
-      font-weight: 400;
-      background-color: rgba(255,255,255,0.2);
-      padding: 1px;
-      z-index: 11;
-    }
+.map .pier-3 {
+  font-size: 1.1em;
+  font-weight: 500;
+}
 
-    .map.satellite .vessel {
-      color: #80b0a0;
-      background-color: initial;
-    }
+.map .pier-4 {
+  font-size: 1em;
+}
 
-    .map .vessel.stopped {
-      font-size: 0.7em;
-      font-weight: 600;
-      z-index: 10;
-    }
+.map .vessel {
+  color: #800080;
+  font-size: 1.1em;
+  font-weight: 400;
+  background-color: rgba(255,255,255,0.2);
+  padding: 1px;
+  z-index: 11;
+}
 
-    .map .vessel.old{
-      opacity: 0.4;
-      z-index: 9;
-    }
+.map.satellite .vessel {
+  color: #80b0a0;
+  background-color: initial;
+}
 
-    .map .distancebox {
-      visibility: hidden;
-      background-color:rgba(0, 101, 189, 0.7);
-      border-radius: 3px;
-      border: 2.5px solid white;
-      position: absolute;
-      padding: 4px;
-      font-style: normal;
-      font-family: 'Roboto', sans-serif;
-      white-space: nowrap;
-      font-size: 0.9em;
-      line-height: 1.1;
-      color: #ffffff;
-      text-shadow: none;
-      -webkit-touch-callout: none; 
-      -webkit-user-select: none; 
-      -moz-user-select: none; 
-    }
+.map .vessel.stopped {
+  font-size: 0.7em;
+  font-weight: 600;
+  z-index: 10;
+}
 
-    div#info {
-      overflow-y: hidden; 
-      width: 100%; 
-      min-height: 10%;
-      position: absolute;
-      top: 100%;
-      display: none;
-      padding-top: 20px;
-      padding-left: 10px;
-      padding-right: 10px;
-      padding-bottom: 30px;
-      background-color: #fbfcfd;
-    }
+.map .vessel.old{
+  opacity: 0.4;
+  z-index: 9;
+}
 
-    .map {
-      height: 100%;
-      width: 100%; 
-      transform: scale(1); 
-      position: absolute; 
-      left: -0px; 
-      top: -0px; 
-    }
+.map .distancebox {
+  visibility: hidden;
+  background-color:rgba(0, 101, 189, 0.7);
+  border-radius: 3px;
+  border: 2.5px solid white;
+  position: absolute;
+  padding: 4px;
+  font-style: normal;
+  font-family: 'Roboto', sans-serif;
+  white-space: nowrap;
+  font-size: 0.9em;
+  line-height: 1.1;
+  color: #ffffff;
+  text-shadow: none;
+  -webkit-touch-callout: none; 
+  -webkit-user-select: none; 
+  -moz-user-select: none; 
+}
+
+div#info {
+  overflow-y: hidden; 
+  width: 100%; 
+  min-height: 10%;
+  position: absolute;
+  top: 100%;
+  display: none;
+  padding-top: 20px;
+  padding-left: 10px;
+  padding-right: 10px;
+  padding-bottom: 30px;
+  background-color: #fbfcfd;
+}
+
+.map {
+  height: 100%;
+  width: 100%; 
+  transform: scale(1); 
+  position: absolute; 
+  left: -0px; 
+  top: -0px; 
+}
 
 .btn:focus, .btn.active:focus, button:focus, select:focus {outline:0;}
 
@@ -582,15 +575,6 @@ div#wrapper2 {
   overflow-y: scroll;
   z-index: 110;
   pointer-events: none;
-}
-
-.closeInfoButton {
-  float: right;
-  background-color: #eeeeee;
-  font-size: 20px;
-  width: 40px;
-  height: 40px;
-  padding: 0;
 }
 
 .infocontent {
