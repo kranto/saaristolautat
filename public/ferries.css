@@ -489,12 +489,6 @@ div#info {
   cursor: pointer;
 }
 
-.box:not([data-target]) {
-  cursor: inherit;
-  color: #ccc;
-  pointer-events: none;
-}
-
 .boxs {
   user-select: none;
   margin: 5px;

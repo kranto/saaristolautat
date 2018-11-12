@@ -133,7 +133,7 @@ window.onhashchange = () => {
 }
 
 function openInfoPage(target) {
-  store.dispatch({type: "INFOPAGE_SELECTED", payload: target.substring(1)});
+  store.dispatch({type: "INFOPAGE_SELECTED", payload: target});
   unselectAll(false);
   hideMenu();
 }
@@ -144,6 +144,7 @@ export function closeInfoPage() {
 }
 
 function navigateTo(state) {
+  console.log('navigateTo', state);
   if (!state || !state.timetable) {
     closeTimetables();
   }
@@ -157,6 +158,7 @@ function navigateTo(state) {
       select(lauttaRoutes.filter(r => state.route.indexOf(r.id) >= 0), null, true);
     }
     if (state.timetable) {
+      console.log('openTimetable');
       openTimetable(state.timetable);
     }
   } else if (state && state.infoPage) {
@@ -191,22 +193,20 @@ export function onTimetableButtonClicked(href, route, timetable) {
   if (href) {
     window.open(href, "info");
   } else {
-    history.pushState({ route: route, timetable: timetable }, null, null);
-    openTimetable(timetable);
+    const newState = { route: route, timetable: timetable };
+    history.pushState(newState, null, null);
+    navigateTo(newState);
   }
 }
 
 function openTimetable(id) {
   store.dispatch({ type: "TIMETABLE_OPENED", payload: id });
-  // $('#timetables').fadeIn();
   hideMenu();
   hideSettings();
 }
 
 function closeTimetables() {
-  // $('#timetables').fadeOut(() => store.dispatch({ type: "TIMETABLE_CLOSED" }));
   store.dispatch({ type: "TIMETABLE_CLOSED" });
-  $('#timetables').scrollTop(0);
 }
 
 var pierlinkDown = false;
@@ -312,6 +312,9 @@ function selectByIds(ids) {
 
 export function select(targets, mouseEvent, dontPushState) {
   if (!targets.length) return;
+
+  hideMenu();
+  hideSettings();
 
   var selectedCountWas = selected.length;
   selected.forEach(target => { target.highlight(false); if (target.rerender) target.rerender(map.getZoom(), map.getMapTypeId(), layers); });
