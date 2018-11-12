@@ -1,5 +1,5 @@
-import { toggleScrollIndicator, cancelHeaderBarToggle, toggleHeaderbar, hideMenuAndSettings, hideSettings, hideInfoPage, hideMenu } from './uicontrol';
-import { panTo, initKeepCenter } from './mapcontrol';
+import { toggleScrollIndicator, toggleHeaderbar, hideMenuAndSettings, hideSettings, hideMenu } from './uicontrol';
+import { panTo } from './mapcontrol';
 import { lauttaLegs, lauttaRoutes } from './routes';
 import store from '../store';
 import { getMapStyle } from './styles';
@@ -132,14 +132,7 @@ window.onhashchange = () => {
   }
 }
 
-function openInfoPage(target) {
-  store.dispatch({type: "INFOPAGE_SELECTED", payload: target});
-  unselectAll(false);
-  hideMenu();
-}
-
 export function closeInfoPage() {
-  store.dispatch({type: "INFOPAGE_SELECTED", payload: null});
   history.go(-history.state.depth);
 }
 
@@ -149,7 +142,7 @@ function navigateTo(state) {
     closeTimetables();
   }
   if (!state || !state.infoPage) {
-    hideInfoPage();
+    store.dispatch({type: "INFOPAGE_SELECTED", payload: null});    
   }
   if (state && state.route) {
     if (typeof state.route === 'string') {
@@ -162,7 +155,8 @@ function navigateTo(state) {
       openTimetable(state.timetable);
     }
   } else if (state && state.infoPage) {
-    openInfoPage(state.infoPage);
+    store.dispatch({type: "INFOPAGE_SELECTED", payload: state.infoPage});
+    hideMenu();
   } else {
     unselectAll(false);
   }
@@ -170,9 +164,7 @@ function navigateTo(state) {
 
 window.onpopstate = (event) => {
   if (location.hash) return;
-  $("#wrapper2").animate({ scrollTop: 0 }, 'fast', () => {
-    navigateTo(event.state);
-  });
+  navigateTo(event.state);
 };
 
 $(document).keyup((e) => {
@@ -426,7 +418,6 @@ export function createMap() {
   });
 
   map.addListener('zoom_changed', () => {
-    cancelHeaderBarToggle();
     hideObjects(map);
     setTimeout(() => { rerender(map); }, 50);
   });

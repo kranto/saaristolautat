@@ -52,27 +52,13 @@ export function toggleSettings() {
   }
 }
 
-function doToggleHeaderbar(callback) {
+export function toggleHeaderbar(callback) {
   if (!$("#menu").is(":hidden") || !$("#settings").is(":hidden")) {
     hideMenu();
     hideSettings();
   } else if (callback) {
     callback();
   }
-}
-
-var headerBarTimeout = null;
-export function toggleHeaderbar(callback) {
-  headerBarTimeout = setTimeout(function () { doToggleHeaderbar(callback); }, 200);
-}
-
-export function cancelHeaderBarToggle() {
-  if (headerBarTimeout) clearTimeout(headerBarTimeout);
-  headerBarTimeout = null;
-}
-
-export function hideInfoPage() {
-  $('#infopage').fadeOut();
 }
 
 export function initMapOverlayEvents() {

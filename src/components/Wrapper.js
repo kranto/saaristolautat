@@ -27,7 +27,7 @@ class Wrapper extends Component {
   }
 
   render() {
-    this.infoOpen = this.props.routeid || this.props.infoContent2;
+    this.infoOpen = (this.props.routeid || this.props.infoContent2) && !this.props.infoPage;
     return (
       <div id="wrapper">
         <div id="wrapper2" className={this.infoOpen? "info-open" : ""} onScroll={toggleScrollIndicator}>
@@ -61,6 +61,7 @@ const mapStateToProps = (state) => {
     timetableid: state.selection.timetables,
     routeid: state.selection.infoContent,
     infoContent2: state.selection.infoContent2,
+    infoPage: state.selection.infoPage,
     data: state.data.data
   };
 };
