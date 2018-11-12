@@ -957,6 +957,15 @@ h4 {
   box-shadow: 0 -3px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
   z-index: 110;
   pointer-events: auto;
+  opacity: 1;
+  transition: opacity 200ms ease-in;
+  transition-delay: 400ms;
+}
+
+.info.hidden {
+  opacity: 0.01;
+  transition: opacity 200ms ease-in;
+  transition-delay: 100ms;
 }
 
 @media screen and (min-width: 768px) {

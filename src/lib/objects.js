@@ -1,11 +1,32 @@
 import { shortName, longName, description } from './datautils';
-import { select, tooltip, objects } from './ferries';
+import { select } from './ferries';
 import styles from './styles';
 import store from '../store';
+
+export const objects = [];
+
+let tooltip;
+let lastTooltipId = null;
+export function showPierTooltip(id, panTo=true) {
+  if (id === lastTooltipId) return;
+  objects.filter(o => o.id === id).forEach(o => o.showTooltip(panTo));
+  lastTooltipId = id;
+}
+
+export function closePierTooltip(id) {
+  if (tooltip && id === lastTooltipId) {
+    tooltip.close();
+    lastTooltipId = null;
+  }
+}
 
 export function initObjectRenderer(map, txtol) {
 
   const google = window.google;
+  tooltip = new google.maps.InfoWindow({
+    content: "",
+    disableAutoPan: true
+  });
 
   function createCircleIcon(color, opacity, scale, labelOrigin) {
     return {
@@ -24,14 +45,14 @@ export function initObjectRenderer(map, txtol) {
       clickable: clickable,
       icon: icon,
       map: map,
-      cursor: clickable? 'pointer': 'default',
+      cursor: clickable ? 'pointer' : 'default',
     });
   }
 
   // object renderers
 
   function road(feature, map) {
-    var roadCoords = feature.geometry.coordinates.map(function(coord) { return new google.maps.LatLng(coord[1], coord[0]); });
+    var roadCoords = feature.geometry.coordinates.map(function (coord) { return new google.maps.LatLng(coord[1], coord[0]); });
     var roadObject = new google.maps.Polyline({
       ...styles.road.init,
       path: new google.maps.MVCArray(roadCoords),
@@ -41,8 +62,8 @@ export function initObjectRenderer(map, txtol) {
     var minZ = feature.properties.minZ || 8;
     var maxZ = feature.properties.maxZ || 8;
     return {
-      rerender: function(zoom, mapTypeId, layers) {
-        var addZ = mapTypeId === 'hybrid'? 2: 0;
+      rerender: function (zoom, mapTypeId, layers) {
+        var addZ = mapTypeId === 'hybrid' ? 2 : 0;
         roadObject.setVisible(zoom >= minZ + addZ && zoom <= maxZ + addZ);
         roadObject.setOptions(styles.road.update(zoom, mapTypeId));
       }
@@ -50,7 +71,7 @@ export function initObjectRenderer(map, txtol) {
   }
 
   function route(feature, map) {
-    var coords = feature.geometry.coordinates.map(function(coord) { return new google.maps.LatLng(coord[1], coord[0]); });
+    var coords = feature.geometry.coordinates.map(function (coord) { return new google.maps.LatLng(coord[1], coord[0]); });
     var object = new google.maps.Polyline({
       ...styles.route.init,
       path: new google.maps.MVCArray(coords),
@@ -59,7 +80,7 @@ export function initObjectRenderer(map, txtol) {
       clickable: true
     });
     return {
-      rerender: function(zoom, mapTypeId, layers) {
+      rerender: function (zoom, mapTypeId, layers) {
         object.setVisible(layers.ringroads && zoom >= 8);
         object.setOptions(styles.route.update(zoom, mapTypeId));
       }
@@ -67,7 +88,7 @@ export function initObjectRenderer(map, txtol) {
   }
 
   function border(feature, map) {
-    var coords = feature.geometry.coordinates.map(function(coord) { return new google.maps.LatLng(coord[1], coord[0]); });
+    var coords = feature.geometry.coordinates.map(function (coord) { return new google.maps.LatLng(coord[1], coord[0]); });
     var object = new google.maps.Polyline({
       ...styles.border.init,
       path: new google.maps.MVCArray(coords),
@@ -75,7 +96,7 @@ export function initObjectRenderer(map, txtol) {
       clickable: false,
     });
     return {
-      rerender: function(zoom, mapTypeId, layers) {
+      rerender: function (zoom, mapTypeId, layers) {
         object.setVisible(zoom >= 7 && zoom <= 30);
         object.setOptions(styles.border.update(zoom, mapTypeId));
       }
@@ -113,42 +134,42 @@ export function initObjectRenderer(map, txtol) {
     "1": {
       markerVisibleFrom: 8,
       labelVisibleFrom: 8,
-      markerScale: function(zoom) {return zoom <= 8? 3: zoom <= 10? 4: zoom <= 11? 5: 6;},
-      markerOpacity: function(zoom) {return zoom <= 10? 1 : 0.8;},
-      icon: function(zoom) { return getPierIcons()[zoom <= 8? "a1_08": zoom <= 10? "a1_10": zoom <= 11? "a1_11": "a1_30"]; },
-      clickable: function(zoom) { return true; }
+      markerScale: function (zoom) { return zoom <= 8 ? 3 : zoom <= 10 ? 4 : zoom <= 11 ? 5 : 6; },
+      markerOpacity: function (zoom) { return zoom <= 10 ? 1 : 0.8; },
+      icon: function (zoom) { return getPierIcons()[zoom <= 8 ? "a1_08" : zoom <= 10 ? "a1_10" : zoom <= 11 ? "a1_11" : "a1_30"]; },
+      clickable: function (zoom) { return true; }
     },
-    "2":  {
+    "2": {
       markerVisibleFrom: 9,
       labelVisibleFrom: 9,
-      markerScale:  function(zoom) {return zoom <= 9? 3: zoom <= 10? 3.5: zoom <= 12? 4: 5;},
-      markerOpacity: function(zoom) {return zoom <= 11? 0.5: 0.8; },
-      icon: function(zoom) { return getPierIcons()[zoom <= 9? "a2_09": zoom <= 10? "a2_10": zoom <= 11? "a2_11": zoom <= 12? "a2_12": "a2_30"]; },
-      clickable: function(zoom) { return true; }
+      markerScale: function (zoom) { return zoom <= 9 ? 3 : zoom <= 10 ? 3.5 : zoom <= 12 ? 4 : 5; },
+      markerOpacity: function (zoom) { return zoom <= 11 ? 0.5 : 0.8; },
+      icon: function (zoom) { return getPierIcons()[zoom <= 9 ? "a2_09" : zoom <= 10 ? "a2_10" : zoom <= 11 ? "a2_11" : zoom <= 12 ? "a2_12" : "a2_30"]; },
+      clickable: function (zoom) { return true; }
     },
     "3": {
       markerVisibleFrom: 9,
       labelVisibleFrom: 10,
-      markerScale:  function(zoom) {return (zoom <= 9? 2.5: zoom <= 10? 3: zoom <= 12? 3.5: 4.5);},
-      markerOpacity: function(zoom) {return zoom <= 12? 0.5: 0.8; },
-      icon: function(zoom) { return getPierIcons()[zoom <= 9? "a3_09": zoom <= 10? "a3_10": zoom <= 12? "a3_12": "a3_30"]; },
-      clickable: function(zoom) { return true; }
+      markerScale: function (zoom) { return (zoom <= 9 ? 2.5 : zoom <= 10 ? 3 : zoom <= 12 ? 3.5 : 4.5); },
+      markerOpacity: function (zoom) { return zoom <= 12 ? 0.5 : 0.8; },
+      icon: function (zoom) { return getPierIcons()[zoom <= 9 ? "a3_09" : zoom <= 10 ? "a3_10" : zoom <= 12 ? "a3_12" : "a3_30"]; },
+      clickable: function (zoom) { return true; }
     },
     "4": {
       markerVisibleFrom: 9,
       labelVisibleFrom: 11,
-      markerScale:  function(zoom) {return (zoom <= 9? 1: zoom <= 10? 2: zoom <= 11? 3: 4);},
-      markerOpacity: function(zoom) {return  zoom <= 12? 0.5: 0.8},
-      icon: function(zoom) { return getPierIcons()[zoom <= 9? "a4_09": zoom <= 10? "a4_10": zoom <= 11? "a4_11": zoom <= 12? "a4_12": "a4_30"]; },
-      clickable: function(zoom) { return zoom >= 10; }
+      markerScale: function (zoom) { return (zoom <= 9 ? 1 : zoom <= 10 ? 2 : zoom <= 11 ? 3 : 4); },
+      markerOpacity: function (zoom) { return zoom <= 12 ? 0.5 : 0.8 },
+      icon: function (zoom) { return getPierIcons()[zoom <= 9 ? "a4_09" : zoom <= 10 ? "a4_10" : zoom <= 11 ? "a4_11" : zoom <= 12 ? "a4_12" : "a4_30"]; },
+      clickable: function (zoom) { return zoom >= 10; }
     },
     "5": {
       markerVisibleFrom: 30,
       labelVisibleFrom: 11,
-      markerScale:  function(zoom) {return 0;},
-      markerOpacity: function(zoom) {return  0;},
-      icon: function(zoom) { return getPierIcons()["a5_30"]; },
-      clickable: function(zoom) { return true; }
+      markerScale: function (zoom) { return 0; },
+      markerOpacity: function (zoom) { return 0; },
+      icon: function (zoom) { return getPierIcons()["a5_30"]; },
+      clickable: function (zoom) { return true; }
     }
   };
 
@@ -164,7 +185,7 @@ export function initObjectRenderer(map, txtol) {
     var dataObject = null;
     if (feature.properties.ref) {
       ref = feature.properties.ref;
-      dataObject = data.piers[ref];    
+      dataObject = data.piers[ref];
     }
     var longName_ = longName(dataObject).replace('/', '<br/>');
     var label = new txtol.TxtOverlay(position, longName_, "pier pier-" + feature.properties.ssubtype, map, feature.properties.labelAnchor);
@@ -179,18 +200,18 @@ export function initObjectRenderer(map, txtol) {
     }
 
     marker.addListener('click', showTooltip);
-    label.addEventListener('click', function(event) { event.stopPropagation(); event.preventDefault(); showTooltip(); });
+    label.addEventListener('click', function (event) { event.stopPropagation(); event.preventDefault(); showTooltip(); });
     return {
       ref: ref,
-      init: function() {
+      init: function () {
         longName_ = longName(dataObject).replace('/', '<br/>');
         label.setInnerHTML(longName_);
       },
-      hide: function() {
+      hide: function () {
         marker.setVisible(false);
         label.hide();
       },
-      rerender: function(zoom, mapTypeId, layers) {
+      rerender: function (zoom, mapTypeId, layers) {
         marker.setIcon(styler.icon(zoom));
         marker.setClickable(styler.clickable(zoom));
         marker.setVisible(zoom >= markerVisibleFrom);
@@ -283,12 +304,12 @@ export function initObjectRenderer(map, txtol) {
           scale: 1.5 * lineWeightUnit
         },
         offset: '0',
-        repeat: (3*lineWeightUnit) + 'px'
+        repeat: (3 * lineWeightUnit) + 'px'
       }],
       highlightWeight: 10,
       zIndex: 11,
       layer: "roadferries",
-      style: { color: "#00a050", weight: 3*lineWeightUnit, style: "dotted", opacity: 1 },
+      style: { color: "#00a050", weight: 3 * lineWeightUnit, style: "dotted", opacity: 1 },
     }
 
   };
@@ -301,33 +322,33 @@ export function initObjectRenderer(map, txtol) {
 
   function pickProperties(names, sources) {
     var result = {};
-    names.forEach(function(name) {
+    names.forEach(function (name) {
       result[name] = pickProperty(name, sources);
     });
     return result;
   }
 
   function addToBounds(bounds, coords) {
-    coords.forEach(function(coord) {
-      bounds.west = bounds.west? Math.min(bounds.west, coord[0]): coord[0];
-      bounds.east = bounds.east? Math.max(bounds.east, coord[0]): coord[0];
-      bounds.south = bounds.south? Math.min(bounds.south, coord[1]): coord[1];
-      bounds.north = bounds.north? Math.max(bounds.north, coord[1]): coord[1];
+    coords.forEach(function (coord) {
+      bounds.west = bounds.west ? Math.min(bounds.west, coord[0]) : coord[0];
+      bounds.east = bounds.east ? Math.max(bounds.east, coord[0]) : coord[0];
+      bounds.south = bounds.south ? Math.min(bounds.south, coord[1]) : coord[1];
+      bounds.north = bounds.north ? Math.max(bounds.north, coord[1]) : coord[1];
     });
   }
 
   function connection(connection, map) {
     var baseStyler = connectionStylers["base"];
     var subtype = connection.properties.ssubtype;
-    var connectionStyler = subtype? connectionStylers[subtype]: baseStyler;
+    var connectionStyler = subtype ? connectionStylers[subtype] : baseStyler;
     var layer = connectionStyler.layer || baseStyler.layer;
-    var legFeatures = connection.type === 'FeatureCollection'? connection.features: [connection];
+    var legFeatures = connection.type === 'FeatureCollection' ? connection.features : [connection];
     var connectionObject = { ref: connection.properties.ref, bounds: {} };
-    var legObjects = legFeatures.map(function(leg) {
+    var legObjects = legFeatures.map(function (leg) {
 
-      var coords = leg.geometry.coordinates.map(function(coord) { return new google.maps.LatLng(coord[1], coord[0]); });
+      var coords = leg.geometry.coordinates.map(function (coord) { return new google.maps.LatLng(coord[1], coord[0]); });
       addToBounds(connectionObject.bounds, leg.geometry.coordinates);
-      var legStyler = leg.properties.ssubtype? connectionStylers[leg.properties.ssubtype]: {};
+      var legStyler = leg.properties.ssubtype ? connectionStylers[leg.properties.ssubtype] : {};
       var propertyNames = ["weight", "opacity", "color", "zIndex", "visibleFrom", "visibleTo", "highlightColor", "highlightWeight", "highlightOpacity", "icons"];
       var propertySources = [leg.properties, legStyler, connection.properties, connectionStyler, baseStyler]
       var properties = pickProperties(propertyNames, propertySources);
@@ -338,7 +359,7 @@ export function initObjectRenderer(map, txtol) {
         path: new google.maps.MVCArray(coords),
         geodesic: false,
         strokeColor: properties.color,
-        strokeOpacity: !properties.icons? properties.opacity: 0,
+        strokeOpacity: !properties.icons ? properties.opacity : 0,
         strokeWeight: properties.weight,
         zIndex: properties.zIndex,
         clickable: false,
@@ -355,36 +376,36 @@ export function initObjectRenderer(map, txtol) {
         cursor: 'context-menu',
         map: map
       });
-      var highlight = function(doHighlight) {
+      var highlight = function (doHighlight) {
         isSelected = doHighlight;
-        lineb.setOptions({strokeOpacity: doHighlight? properties.highlightOpacity: 0});
+        lineb.setOptions({ strokeOpacity: doHighlight ? properties.highlightOpacity : 0 });
         // rerender(map.getZoom(), map.getMapTypeId());
       };
-      lineb.addListener('click', function(event) {
+      lineb.addListener('click', function (event) {
         select([connectionObject], event);
       });
-      var rerender = function(zoom, mapTypeId, layers) {
+      var rerender = function (zoom, mapTypeId, layers) {
         if (properties.icons) {
-          properties.icons[0].icon.strokeOpacity = layers.live? 0.4: 1;
-          line.setOptions({icons: properties.icons});
+          properties.icons[0].icon.strokeOpacity = layers.live ? 0.4 : 1;
+          line.setOptions({ icons: properties.icons });
         } else {
-          line.setOptions({strokeOpacity: Math.min(properties.opacity, layers.live? 0.2: 1)});
+          line.setOptions({ strokeOpacity: Math.min(properties.opacity, layers.live ? 0.2 : 1) });
         }
         var lineIsVisible = isSelected || (layers[layer] && zoom >= properties.visibleFrom && zoom <= properties.visibleTo);
         line.setVisible(lineIsVisible);
-        lineb.setVisible(lineIsVisible);        
+        lineb.setVisible(lineIsVisible);
       }
-      return {highlight: highlight, rerender: rerender };
+      return { highlight: highlight, rerender: rerender };
     });
-    connectionObject.highlight = function(doHighlight) {
-      legObjects.forEach(function(leg) { leg.highlight(doHighlight); });
+    connectionObject.highlight = function (doHighlight) {
+      legObjects.forEach(function (leg) { leg.highlight(doHighlight); });
     }
 
-    connectionObject.rerender = function(zoom, mapTypeId, layers) {
-      legObjects.forEach(function(leg) { leg.rerender(zoom, mapTypeId, layers); });
+    connectionObject.rerender = function (zoom, mapTypeId, layers) {
+      legObjects.forEach(function (leg) { leg.rerender(zoom, mapTypeId, layers); });
     }
 
-    connectionObject.init = function() {
+    connectionObject.init = function () {
       connectionObject.name = shortName(connection.properties, store.getState);
     }
 
@@ -392,10 +413,10 @@ export function initObjectRenderer(map, txtol) {
   }
 
   var _pinPaths = {
-    n:  "M 0 0 L -1.4 -27 A 6 6, 0, 1, 1, 1.4 -27 L 0 0 Z",
-    e:  "M 0 0 L 27 -1.4 A 6 6, 0, 1, 1, 27 1.4 L 0 0 Z",
-    s:  "M 0 0 L -1.4 27 A 6 6, 0, 1, 0, 1.4 27 L 0 0 Z",
-    w:  "M 0 0 L -27 -1.4 A 6 6, 0, 1, 0, -27 1.4 L 0 0 Z",
+    n: "M 0 0 L -1.4 -27 A 6 6, 0, 1, 1, 1.4 -27 L 0 0 Z",
+    e: "M 0 0 L 27 -1.4 A 6 6, 0, 1, 1, 27 1.4 L 0 0 Z",
+    s: "M 0 0 L -1.4 27 A 6 6, 0, 1, 0, 1.4 27 L 0 0 Z",
+    w: "M 0 0 L -27 -1.4 A 6 6, 0, 1, 0, -27 1.4 L 0 0 Z",
     se: "M 0 0 L 18 20 A 6 6, 0, 1, 0, 20 18 L 0 0 Z",
     ne: "M 0 0 L 18 -20 A 6 6, 0, 1, 1, 20 -18 L 0 0 Z",
     nw: "M 0 0 L -18 -20 A 6 6, 0, 1, 0, -20 -18 L 0 0 Z",
@@ -421,10 +442,10 @@ export function initObjectRenderer(map, txtol) {
     var position = new google.maps.LatLng(coords[1], coords[0]);
     var marker = createMarker(position, false, pinSymbol(feature.properties.ssubtype), map);
     return {
-      hide: function() {
+      hide: function () {
         marker.setVisible(false);
       },
-      rerender: function(zoom, mapTypeId, layers) {
+      rerender: function (zoom, mapTypeId, layers) {
         marker.setVisible(layers.distances && zoom >= 11);
       }
     };
@@ -462,18 +483,18 @@ export function initObjectRenderer(map, txtol) {
     var shortName_ = shortName(feature.properties);
     var longName_ = longName(feature.properties).replace('/', '<br/>');
     var label = new txtol.TxtOverlay(
-      position, longName_, "area " + feature.properties.ssubtype + (feature.properties.background? " bg": ""), map, feature.properties.labelAnchor);
+      position, longName_, "area " + feature.properties.ssubtype + (feature.properties.background ? " bg" : ""), map, feature.properties.labelAnchor);
     return {
-      init: function() {
+      init: function () {
         shortName_ = shortName(feature.properties);
         longName_ = longName(feature.properties).replace('/', '<br/>');
       },
-      hide: function(zoom) {
+      hide: function (zoom) {
         if (zoom >= properties.labelVisibleFrom && zoom <= properties.labelVisibleTo) label.show(); else label.hide();
       },
-      rerender: function(zoom, mapTypeId, layers) {
-        label.setInnerHTML(zoom >= properties.longNameFrom? longName_: shortName_);
-        if (zoom >= properties.labelVisibleFrom && zoom <= properties.labelVisibleTo && ["roadmap", "hybrid", "terrain", "satellite"].indexOf(mapTypeId)>=0) label.show(); else label.hide();      
+      rerender: function (zoom, mapTypeId, layers) {
+        label.setInnerHTML(zoom >= properties.longNameFrom ? longName_ : shortName_);
+        if (zoom >= properties.labelVisibleFrom && zoom <= properties.labelVisibleTo && ["roadmap", "hybrid", "terrain", "satellite"].indexOf(mapTypeId) >= 0) label.show(); else label.hide();
       }
     };
   }
@@ -494,13 +515,13 @@ export function initObjectRenderer(map, txtol) {
     var box = new txtol.TxtOverlay(
       position, description(feature.properties), "distancebox", map, feature.properties.anchor);
     return {
-      init: function() {
+      init: function () {
         box.setInnerHTML(description(feature.properties));
       },
-      hide: function() {
+      hide: function () {
         box.hide();
       },
-      rerender: function(zoom, mapTypeId, layers) {
+      rerender: function (zoom, mapTypeId, layers) {
         if (layers.distances && zoom >= visibleFrom && zoom <= visibleTo) box.show(); else box.hide();
       }
     };
@@ -529,12 +550,12 @@ export function initObjectRenderer(map, txtol) {
 
   let unsubscribe;
   function onStateChange() {
-    const {data, geojson} = store.getState().data;
+    const { data, geojson } = store.getState().data;
     if (data.mun && geojson.length) {
       if (unsubscribe) unsubscribe();
-      geojson.forEach(function(featureCollection) {
+      geojson.forEach(function (featureCollection) {
         renderFeatureCollection(featureCollection, data, objects);
-      });      
+      });
     } else if (!unsubscribe) {
       unsubscribe = store.subscribe(onStateChange);
     }

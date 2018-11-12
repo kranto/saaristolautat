@@ -61,7 +61,7 @@ export function toggleHeaderbar(callback) {
   }
 }
 
-export function initMapOverlayEvents() {
+export function initInfoEvents() {
   $(".info").on("mouseleave", () => {
     $("#wrapper2").css({ pointerEvents: "none" });
     $(".mapoverlay").css({ pointerEvents: "none" });
@@ -72,7 +72,9 @@ export function initMapOverlayEvents() {
     $(".mapoverlay").css({ pointerEvents: "auto" });
     $("#wrapper2").trigger(e.type, e);
   });
+}
 
+export function initMapOverlayEvents() {
   function getAllEvents(element) {
     var result = [];
     for (var key in element) {

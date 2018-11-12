@@ -3,6 +3,7 @@ import { panTo } from './mapcontrol';
 import { lauttaLegs, lauttaRoutes } from './routes';
 import store from '../store';
 import { getMapStyle } from './styles';
+import { objects, showPierTooltip } from './objects';
 
 let google;
 let map;
@@ -128,7 +129,7 @@ window.onhashchange = () => {
     navigateTo(newState);
   } else if (fdata.piers[hash]) {
     history.go(-1);
-    objects.filter(o => o.id === hash)[0].showTooltip(true);
+    showPierTooltip(hash, true);
   }
 }
 
@@ -200,67 +201,6 @@ function closeTimetables() {
   store.dispatch({ type: "TIMETABLE_CLOSED" });
 }
 
-var pierlinkDown = false;
-
-function initPierLinks() {
-  var isTouch = false;
-
-  $("div.pierlink").mouseover(function (event) {
-    if (!isTouch) {
-      var dataTarget = this.getAttribute("data-target");
-      objects.filter(o => o.id === dataTarget)[0].showTooltip(false);
-    }
-  });
-
-  $("div.pierlink").mouseout(() => {
-    if (!pierlinkDown) tooltip.close();
-  });
-
-  $("div.pierlink").mousedown(() => {
-    if (!isTouch) {
-      $(".info").animate({ opacity: 0 });
-      pierlinkDown = true;
-    }
-  });
-
-  $("div.pierlink").mouseup(() => {
-    if (!isTouch) {
-      $(".info").animate({ opacity: 1 });
-      pierlinkDown = false;
-    }
-  });
-
-  var touchstartTimeout = null;
-  $("div.pierlink").bind("touchstart", function (event) {
-    isTouch = true;
-    var dataTarget = this.getAttribute("data-target");
-    objects.filter(o => o.id === dataTarget)[0].showTooltip(false);
-    touchstartTimeout = setTimeout(() => {
-      $(".info").animate({ opacity: 0 });
-      pierlinkDown = true;
-    }, 200);
-  });
-
-  $("div.pierlink").bind("touchend", () => {
-    if (touchstartTimeout) clearTimeout(touchstartTimeout);
-    touchstartTimeout = null;
-    setTimeout(() => {
-      $(".info").animate({ opacity: 1 });
-      pierlinkDown = false;
-    }, 500);
-  });
-}
-
-$(document).ready(() => {
-  $("body").mouseup(() => {
-    if (pierlinkDown) {
-      $(".info").animate({ opacity: 1 });
-      pierlinkDown = false;
-    }
-  });
-});
-
-
 function setInfoContent(targets, dontPushState) {
   var route;
   if (targets[0].ref) {
@@ -273,21 +213,16 @@ function setInfoContent(targets, dontPushState) {
     if (!dontPushState) history.pushState({ route: targets.map(r => r.id), timetable: null }, null, null);
   }
 
-  if ($(".infocontent.removing").length) $(".infocontent:not(.removing)").hide();
+  $(".infocontent").hide();
 
   if (targets[0].style) {
     var style = targets[0].style;
-    $(".infocontent:not(.removing)").find(".infotitle, .headerbox").css({ borderBottom: style.weight + "px " + style.style + " " + style.color });
+    $(".infocontent").find(".infotitle, .headerbox").css({ borderBottom: style.weight + "px " + style.style + " " + style.color });
   } else {
-    $(".infocontent:not(.removing)").find(".infotitle, .headerbox").css({ borderBottom: "none" });
+    $(".infocontent").find(".infotitle, .headerbox").css({ borderBottom: "none" });
   }
 
-  initPierLinks();
-
-  $(".infocontent.removing").fadeOut('fast', () => {
-    $(".infocontent.removing").remove();
-    $(".infocontent").fadeIn('fast');
-  });
+  $(".infocontent").fadeIn('fast');
 }
 
 var selected = [];
@@ -360,7 +295,6 @@ function updateMapStyles() {
   $("div.gm-style").css({ 'font-size': map.getZoom() + 1 });
 }
 
-export const objects = [];
 var prevRerender = "";
 var hidden = true;
 var prevRenderZoom = 0;
@@ -398,7 +332,6 @@ var mapOptions = {
   styles: [],
 };
 
-export let tooltip;
 export function createMap() {
   google = window.google;
   map = new google.maps.Map(document.getElementById('map'), mapOptions);
@@ -409,11 +342,6 @@ export function createMap() {
   google.maps.event.addListenerOnce(map, 'idle', onMapIdle);
 
   map.addListener('zoom_changed', updateMapStyles);
-
-  tooltip = new google.maps.InfoWindow({
-    content: "",
-    disableAutoPan: true
-  });
 
   map.addListener('zoom_changed', () => {
     hideObjects(map);

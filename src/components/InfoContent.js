@@ -5,6 +5,7 @@ import { connect } from 'react-redux';
 import { routeInfo } from '../lib/datarenderer';
 import { onTimetableButtonClicked } from '../lib/ferries';
 import { toggleScrollIndicator } from '../lib/uicontrol';
+import PierLink from './PierLink';
 
 class InfoContent extends Component {
 
@@ -56,9 +57,8 @@ class InfoContent extends Component {
       </div>
     );
 
-    const pierItems = data.piers.map(pier =>
-      <div key={pier.id} data-target={pier.id} className={"pierlink " + pier.class}><span className="pier">{pier.name}{pier.name_local ? "/" : ""}{pier.name_local}</span><span className="pierspecifier"> {pier.specifier}</span></div>
-    );
+    const pierItems = data.piers.map(pier => <PierLink pier={pier} key={pier.id} 
+      panelIsHidden={this.props.isHidden} setHidden={this.props.setHidden}/> );
 
     const noteItems = data.notes ? data.notes.map(note =>
       <div key={note.content} dangerouslySetInnerHTML={{ __html: note.content }}></div>

@@ -8,20 +8,22 @@ import LiveIndicator from './LiveIndicator';
 import Timetables from './Timetables';
 import MapContainer from './MapContainer';
 import InfoContainer from './InfoContainer';
-import { toggleScrollIndicator, initMapOverlayEvents } from '../lib/uicontrol';
+import { toggleScrollIndicator, initMapOverlayEvents, initInfoEvents } from '../lib/uicontrol';
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 
 class Wrapper extends Component {
 
   componentDidMount() {
     window.addEventListener("resize", toggleScrollIndicator);
+    initMapOverlayEvents();
+
   }
 
   infoOpen = false;
   prevInfoOpen = false;
 
   componentDidUpdate() {
-    if (this.infoOpen && !this.prevInfoOpen) initMapOverlayEvents();
+    if (this.infoOpen && !this.prevInfoOpen) initInfoEvents();
     this.prevInfoOpen = this.infoOpen;
     toggleScrollIndicator();
   }
