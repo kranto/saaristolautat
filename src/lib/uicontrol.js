@@ -75,24 +75,6 @@ export function hideInfoPage() {
   $('#infopage').fadeOut();
 }
 
-export function openInfoPanel() {
-  $(function () {
-    $("#wrapper2").toggleClass("info-open", true);
-  });
-}
-
-export function closeInfoPanel(callback) {
-  $(function () {
-    if ($("body").outerWidth() >= 768) {
-      $("#wrapper2").toggleClass("info-open", false);
-    } else {
-      $("#wrapper2").animate({ scrollTop: 0 }, 'fast', () => {
-        $("#wrapper2").toggleClass("info-open", false);
-      });
-    }
-  });
-}
-
 export function initMapOverlayEvents() {
   $(".info").on("mouseleave", () => {
     $("#wrapper2").css({ pointerEvents: "none" });

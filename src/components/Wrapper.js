@@ -30,7 +30,7 @@ class Wrapper extends Component {
     this.infoOpen = this.props.routeid || this.props.infoContent2;
     return (
       <div id="wrapper">
-        <div id="wrapper2" onScroll={toggleScrollIndicator}>
+        <div id="wrapper2" className={this.infoOpen? "info-open" : ""} onScroll={toggleScrollIndicator}>
           <InfoPage />
           <div className="mapoverlay"></div>
 

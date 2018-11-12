@@ -844,10 +844,6 @@ h4 {
 }
 
 @media screen and (max-width: 767px) {
-  #wrapper2.info-open #mapcontainer {
-    height: 80%;
-  }
-
   #wrapper2.info-open .mapoverlay {
     display: block;
     pointer-events: auto;

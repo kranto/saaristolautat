@@ -1,4 +1,4 @@
-import { toggleScrollIndicator, cancelHeaderBarToggle, toggleHeaderbar, hideMenuAndSettings, hideSettings, hideInfoPage, hideMenu, openInfoPanel, closeInfoPanel } from './uicontrol';
+import { toggleScrollIndicator, cancelHeaderBarToggle, toggleHeaderbar, hideMenuAndSettings, hideSettings, hideInfoPage, hideMenu } from './uicontrol';
 import { panTo, initKeepCenter } from './mapcontrol';
 import { lauttaLegs, lauttaRoutes } from './routes';
 import store from '../store';
@@ -332,7 +332,6 @@ export function select(targets, mouseEvent, dontPushState) {
   $(".info").scrollTop(0);
 
   if (selectedCountWas === 0) {
-    openInfoPanel();
     if ($("body").outerWidth() >= 768) {
       var clientX = mouseEvent ? latLng2Point(mouseEvent.latLng, map).x : 500;
       if (clientX < (400 + 50)) map.panBy(clientX - (($("#map").width() - 400) / 3 + 400), 0);
@@ -356,15 +355,10 @@ function latLng2Point(latLng, map) {
 }
 
 export function unselectAll(pushState) {
-  $("#wrapper2").css({ pointerEvents: "none" });
-  $(".mapverlay").css({ pointerEvents: "none" });
-
   if (selected.length === 0) return;
+
   if (typeof pushState === 'undefined') pushState = true;
-
   if (pushState) history.pushState({ route: null }, null, null);
-
-  closeInfoPanel();
   store.dispatch({ type: "INFOCONTENT_UNSELECTED", payload: null });
 
   selected.forEach(target => { target.highlight(false); if (target.rerender) target.rerender(map.getZoom(), map.getMapTypeId(), layers); });
