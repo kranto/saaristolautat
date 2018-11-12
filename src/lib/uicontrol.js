@@ -8,25 +8,25 @@ export function toggleScrollIndicator() {
   $('#scrollIndicator').toggleClass('can-scroll', !isBottom);
 }
 
-export function showMenu() {
+function showMenu() {
   hideSettings(function () {
     $("#menu").slideDown("fast");
     $("#menu").scrollTop(0);
   });
 }
 
-export function hideMenu(cb) {
+function hideMenu(cb) {
   $("#menu").slideUp("fast", cb);
 }
 
-export function showSettings() {
+function showSettings() {
   hideMenu(function () {
     $("#settings").slideDown("fast");
     $("#settings").scrollTop(0);
   });
 }
 
-export function hideSettings(cb) {
+function hideSettings(cb) {
   $("#settings").slideUp("fast", cb);
 }
 

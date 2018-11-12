@@ -1,4 +1,4 @@
-import { toggleScrollIndicator, toggleHeaderbar, hideMenuAndSettings, hideSettings, hideMenu } from './uicontrol';
+import { toggleScrollIndicator, toggleHeaderbar, hideMenuAndSettings } from './uicontrol';
 import { panTo } from './mapcontrol';
 import { lauttaLegs, lauttaRoutes } from './routes';
 import store from '../store';
@@ -156,7 +156,7 @@ function navigateTo(state) {
     }
   } else if (state && state.infoPage) {
     store.dispatch({type: "INFOPAGE_SELECTED", payload: state.infoPage});
-    hideMenu();
+    hideMenuAndSettings();
   } else {
     unselectAll(false);
   }
@@ -193,8 +193,7 @@ export function onTimetableButtonClicked(href, route, timetable) {
 
 function openTimetable(id) {
   store.dispatch({ type: "TIMETABLE_OPENED", payload: id });
-  hideMenu();
-  hideSettings();
+  hideMenuAndSettings();
 }
 
 function closeTimetables() {
@@ -305,8 +304,7 @@ function selectByIds(ids) {
 export function select(targets, mouseEvent, dontPushState) {
   if (!targets.length) return;
 
-  hideMenu();
-  hideSettings();
+  hideMenuAndSettings();
 
   var selectedCountWas = selected.length;
   selected.forEach(target => { target.highlight(false); if (target.rerender) target.rerender(map.getZoom(), map.getMapTypeId(), layers); });
