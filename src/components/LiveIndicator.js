@@ -2,25 +2,16 @@ import React, { Component } from 'react'
 import { connect } from 'react-redux';
 import { L2 } from '../lib/localizer';
 
-const $ = window.$;
-
 class LiveIndicator extends Component {
 
-  componentDidUpdate() {
-    if (this.props.live.msg) {
-      $("#liveind").show();
-      $("#liveind").animate({left: '0px'});
-    } else {
-      $("#liveind").animate({left: '-100px'}, function() { 
-        $("#liveind").hide();
-      });
-    }    
-  }
+  showMsg = "";
 
   render() {
+    const msg = this.props.live.msg ? L2(this.props.live.msg) : "";
+    this.showMsg = msg || this.showMsg;
     return (
-      <div id="liveind">
-        <span id="liveindtxt">{L2(this.props.live.msg)}</span>
+      <div id="liveind" className={msg ? "visible" : "hidden"}>
+        <span id="liveindtxt">{this.showMsg}</span>
       </div>
     );
   }
