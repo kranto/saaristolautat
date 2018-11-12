@@ -935,12 +935,12 @@ h4 {
   border-radius: 5px;
   padding: 5px;
   color: white;
-  transition: left 1000ms ease-in;
+  transition: left 400ms ease-in;
 }
 
 #liveind.visible {
   left: 0px;
-  transition: left 1000ms ease-out;
+  transition: left 800ms ease-out;
 }
 
 .fmodal-enter {

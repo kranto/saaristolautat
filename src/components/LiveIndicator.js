@@ -4,14 +4,12 @@ import { L2 } from '../lib/localizer';
 
 class LiveIndicator extends Component {
 
-  showMsg = "";
-
   render() {
     const msg = this.props.live.msg ? L2(this.props.live.msg) : "";
-    this.showMsg = msg || this.showMsg;
+    const showMsg = msg || L2("live.closing");
     return (
       <div id="liveind" className={msg ? "visible" : "hidden"}>
-        <span id="liveindtxt">{this.showMsg}</span>
+        <span id="liveindtxt">{showMsg}</span>
       </div>
     );
   }

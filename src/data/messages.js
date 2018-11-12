@@ -61,6 +61,7 @@ const messagesRaw = { // FI SV EN
         zoomin: ['Lähennä nähdäksesi alusten sijainnit', 'Zooma in för att se fartygens lägen', "Zoom in for vessels' positions"],
         delay1: ['Viive ~ {0} min', 'Försening ~ {0} min', "Delay ~ {0} min"],
         delay2: ['Viive {0} - {1} min', 'Försening {0} - {1} min', "Delay {0} - {1} min"],
+        closing: ['Suljetaan live-näkymä', 'Live-vyn stängs', 'Closing live view']
     },
     application: {
         title: ["Saaristolautat.fi (react)", "Saaristolautat.fi (react)", "Saaristolautat.fi (react)"]
