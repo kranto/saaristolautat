@@ -965,8 +965,7 @@ h4 {
   z-index: 110;
   pointer-events: auto;
   opacity: 1;
-  transition: opacity 200ms ease-in;
-  transition-delay: 400ms;
+  transition: opacity 200ms ease-in 400ms, width 700ms ease-in-out, top 700ms ease-in-out, height 700ms ease-in-out;
 }
 
 .info.hidden {
