@@ -18,7 +18,11 @@ export default class MapContainer extends Component {
 
   render() {
     return (
-      <div id="infoholder" className={"info" + (this.state.hidden ? " hidden" : "")}>
+      <div id="infoholder" className={"info" + (this.state.hidden ? " hidden" : "")}
+      onMouseLeave={this.props.onMouseLeave}
+      onMouseEnter={this.props.onMouseEnter}
+      onMouseDown={this.props.onMouseEnter}
+      onTouchStart={this.props.onMouseEnter}>
         <InfoContent isHidden={this.state.hidden} setHidden={this.setHidden.bind(this)} />
         <InfoContent2 />
       </div>

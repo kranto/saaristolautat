@@ -60,35 +60,3 @@ export function toggleHeaderbar(callback) {
     callback();
   }
 }
-
-export function initInfoEvents() {
-  $(".info").on("mouseleave", () => {
-    $("#wrapper2").css({ pointerEvents: "none" });
-    $(".mapoverlay").css({ pointerEvents: "none" });
-  });
-
-  $(".info").on("mouseenter mousedown touchstart", (e) => {
-    $("#wrapper2").css({ pointerEvents: "auto" });
-    $(".mapoverlay").css({ pointerEvents: "auto" });
-    $("#wrapper2").trigger(e.type, e);
-  });
-}
-
-export function initMapOverlayEvents() {
-  function getAllEvents(element) {
-    var result = [];
-    for (var key in element) {
-      if (key.indexOf('on') === 0) {
-        result.push(key.slice(2));
-      }
-    }
-    return result.join(' ');
-  }
-
-  var el = $(".mapoverlay");
-  el.bind(getAllEvents(el[0]), e => {
-    $("#wrapper2").css({ pointerEvents: "none" });
-    $(".mapoverlay").css({ pointerEvents: "none" });
-    $("#mapcontainer").trigger(e.type, e);
-  });
-}

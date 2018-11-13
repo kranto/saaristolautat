@@ -8,38 +8,68 @@ import LiveIndicator from './LiveIndicator';
 import Timetables from './Timetables';
 import MapContainer from './MapContainer';
 import InfoContainer from './InfoContainer';
-import { toggleScrollIndicator, initMapOverlayEvents, initInfoEvents } from '../lib/uicontrol';
+import { toggleScrollIndicator } from '../lib/uicontrol';
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 
+const $ = window.$;
+
+function getAllEvents(element) {
+  const result = [];
+  for (let key in element) {
+    if (key.indexOf('on') === 0) result.push(key.slice(2));
+  }
+  return result.join(' ');
+}
+
+
 class Wrapper extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { pointerOnInfoPanel: false };
+  }
 
   componentDidMount() {
     window.addEventListener("resize", toggleScrollIndicator);
-    initMapOverlayEvents();
-
+    this.initMapOverlayEvents();
   }
 
-  infoOpen = false;
-  prevInfoOpen = false;
+  initMapOverlayEvents() {
+    var el = $(".mapoverlay");
+    el.bind(getAllEvents(el[0]), e => {
+      this.setState({ pointerOnInfoPanel: false });
+      $("#mapcontainer").trigger(e.type, e);
+    });
+  }
 
   componentDidUpdate() {
-    if (this.infoOpen && !this.prevInfoOpen) initInfoEvents();
-    this.prevInfoOpen = this.infoOpen;
     toggleScrollIndicator();
   }
 
+  onMouseEnterInfo(event) {
+    this.setState({ pointerOnInfoPanel: true });
+    $("#wrapper2").trigger(event.type, event);
+  }
+
+  onMouseLeaveInfo(event) {
+    this.setState({ pointerOnInfoPanel: false });
+  }
+
   render() {
-    this.infoOpen = (this.props.routeid || this.props.infoContent2) && !this.props.infoPage;
+    const infoOpen = (this.props.routeid || this.props.infoContent2) && !this.props.infoPage;
+    const pointerEvents = this.state.pointerOnInfoPanel && infoOpen ? "auto" : "none"
     return (
       <div id="wrapper">
-        <div id="wrapper2" className={this.infoOpen? "info-open" : ""} onScroll={toggleScrollIndicator}>
-          <InfoPage />
-          <div className="mapoverlay"></div>
+        <div id="wrapper2" className={infoOpen ? "info-open" : ""} onScroll={toggleScrollIndicator}
+          style={{ pointerEvents }}>
+
+          <div className="mapoverlay" style={{ pointerEvents }}></div>
 
           <ReactCSSTransitionGroup transitionName="info"
             transitionEnterTimeout={200}
             transitionLeaveTimeout={200}>
-            {this.infoOpen ? <InfoContainer key="1" /> : ""}
+            {infoOpen ?
+              <InfoContainer key="1" onMouseEnter={this.onMouseEnterInfo.bind(this)} onMouseLeave={this.onMouseLeaveInfo.bind(this)} />
+              : ""}
           </ReactCSSTransitionGroup>
         </div>
 
@@ -52,6 +82,8 @@ class Wrapper extends Component {
         <Settings />
         <div id="liveindpos"><LiveIndicator /></div>
         <Timetables />
+        <InfoPage />
+
       </div >
     );
   }
