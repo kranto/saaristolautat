@@ -288,9 +288,6 @@ export function unselectAll(pushState) {
 
   selected.forEach(target => { target.highlight(false); if (target.rerender) target.rerender(map.getZoom(), map.getMapTypeId(), layers); });
   selected = [];
-
-  // $("#wrapper2").css({pointerEvents: "none"});
-  // $(".mapoverlay").css({pointerEvents: "none"});
 }
 
 function updateMapStyles() {

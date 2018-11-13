@@ -10,7 +10,7 @@ import PierLink from './PierLink';
 class InfoContent extends Component {
 
   shouldComponentUpdate(props) {
-    return props.routeid;
+    return props.routeid !== this.props.routeid;
   }
 
   componentDidUpdate() {
