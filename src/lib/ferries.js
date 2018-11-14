@@ -1,4 +1,4 @@
-import { toggleScrollIndicator, toggleHeaderbar, hideMenuAndSettings } from './uicontrol';
+import { toggleHeaderbar, hideMenuAndSettings } from './uicontrol';
 import { panTo } from './mapcontrol';
 import { lauttaLegs, lauttaRoutes } from './routes';
 import store from '../store';
@@ -106,9 +106,8 @@ function setInfoContent(targets, dontPushState) {
   var route;
   if (targets[0].ref) {
     route = targets[0].ref;
-    if (!dontPushState) history.pushState({ route: route, timetable: null }, null, null);
-
     store.dispatch({ type: "INFOCONTENT_SELECTED", payload: route });
+    if (!dontPushState) history.pushState({ route: route, timetable: null }, null, null);
   } else {
     store.dispatch({ type: "INFOCONTENT2_SELECTED", payload: targets });
     if (!dontPushState) history.pushState({ route: targets.map(r => r.id), timetable: null }, null, null);
@@ -127,37 +126,31 @@ export function selectById(id) {
 }
 
 export function select(targets, mouseEvent, dontPushState) {
+  targets = (targets.constructor === Array) ? targets : [targets];
   if (!targets.length) return;
 
   hideMenuAndSettings();
 
-  var selectedCountWas = selected.length;
   selected.forEach(target => { target.highlight(false); if (target.rerender) target.rerender(map.getZoom(), map.getMapTypeId(), layers); });
-  selected = [];
+  selected = targets.slice();
 
-  targets = (targets.constructor === Array) ? targets : [targets];
-  targets.forEach(target => {
-    target.highlight(true);
-    selected.push(target);
-  });
+  targets.forEach(target => target.highlight(true));
 
   setInfoContent(targets, dontPushState);
-  toggleScrollIndicator();
-
-  $(".info").scrollTop(0);
-
-  if (selectedCountWas === 0) {
-    if ($("body").outerWidth() >= 768) {
-      var clientX = mouseEvent ? latLng2Point(mouseEvent.latLng, map).x : 500;
-      if (clientX < (400 + 50)) map.panBy(clientX - (($("#map").width() - 400) / 3 + 400), 0);
-    } else {
-      var clientY = mouseEvent ? latLng2Point(mouseEvent.latLng, map).y : 0;
-      if ($("#map").height() * 0.80 < clientY) map.panBy(0, $("#map").height() * 0.2);
-    }
-  }
+  panMapIfClickPointHidden(map, mouseEvent);
 
   if (!mouseEvent && targets[0].bounds) {
     panTo(map, targets[0].bounds, $("#mapcontainer").outerWidth());
+  }
+}
+
+function panMapIfClickPointHidden(map, mouseEvent) {
+  if ($("body").outerWidth() >= 768) {
+    var clientX = mouseEvent ? latLng2Point(mouseEvent.latLng, map).x : 500;
+    if (clientX < (400 + 50)) map.panBy(clientX - (($("#map").width() - 400) / 3 + 400), 0);
+  } else {
+    var clientY = mouseEvent ? latLng2Point(mouseEvent.latLng, map).y : 0;
+    if ($("#map").height() * 0.80 < clientY) map.panBy(0, $("#map").height() * 0.2);
   }
 }
 
