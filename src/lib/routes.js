@@ -3,8 +3,8 @@ import { select } from './ferries';
 import store from '../store';
 import styles from './styles';
 
-export let lauttaLegs;
-export let lauttaRoutes;
+export let lauttaLegs = [];
+export let lauttaRoutes = [];
 
 export function initRoutes(map) {
   const google = window.google;
@@ -70,15 +70,13 @@ export function initRoutes(map) {
 
   const lauttaLegIndex = {};
   function populateRoutes(data) {
-    lauttaLegs = data.lauttaLegs.map(function (leg) {
-      return new Leg(leg);
-    });
+    lauttaLegs = data.lauttaLegs.map(leg => new Leg(leg));
 
     lauttaLegs.forEach(leg => { lauttaLegIndex[leg.id] = leg });
 
-    lauttaRoutes = data.lauttaRoutes.map(function (routeData) {
+    lauttaRoutes = data.lauttaRoutes.map(routeData => {
       let route = new Route(routeData);
-      route.legs.forEach(function (leg) { leg.addRoute(route); });
+      route.legs.forEach(leg => leg.addRoute(route));
       return route;
     });
   }

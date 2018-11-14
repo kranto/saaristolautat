@@ -196,7 +196,7 @@ function rerender(map, force) {
   if (prevRerender === newRerender && !force) return;
   prevRerender = newRerender;
   objects.forEach(object => object.rerender(zoom, mapTypeId, layers));
-  if (lauttaLegs) lauttaLegs.forEach(leg => leg.rerender(zoom, mapTypeId, layers));
+  lauttaLegs.forEach(leg => leg.rerender(zoom, mapTypeId, layers));
   hidden = false;
   prevRenderZoom = zoom;
 }
