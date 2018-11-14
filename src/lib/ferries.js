@@ -3,7 +3,7 @@ import { panTo } from './mapcontrol';
 import { lauttaLegs, lauttaRoutes } from './routes';
 import store from '../store';
 import { getMapStyle } from './styles';
-import { objects } from './objects';
+import { objects, findByIds } from './objects';
 
 let google;
 export let map;
@@ -12,7 +12,6 @@ const { $, history, location } = window;
 
 let layers = store.getState().settings.layers;
 let locale = store.getState().settings.locale;
-let fdata = store.getState().data.data;
 
 function onStateChanged() {
   const newState = store.getState();
@@ -24,7 +23,6 @@ function onStateChanged() {
     locale = newState.settings.locale;
     onLocaleChanged();
   }
-  fdata = newState.data.data;
   if (map && map.getMapTypeId() !== newState.settings.mapTypeId) {
     map.setMapTypeId(newState.settings.mapTypeId);
   }
@@ -115,19 +113,12 @@ function setInfoContent(targets, dontPushState) {
     store.dispatch({ type: "INFOCONTENT2_SELECTED", payload: targets });
     if (!dontPushState) history.pushState({ route: targets.map(r => r.id), timetable: null }, null, null);
   }
-
-  if (targets[0].style) {
-    var style = targets[0].style;
-    $(".infocontent").find(".infotitle, .headerbox").css({ borderBottom: style.weight + "px " + style.style + " " + style.color });
-  } else {
-    $(".infocontent").find(".infotitle, .headerbox").css({ borderBottom: "none" });
-  }
 }
 
 var selected = [];
 
 export function selectByIds(ids) {
-  var matching = objects.filter(o => o.ref && ids.indexOf(o.ref) >= 0);
+  var matching = findByIds(ids);
   if (matching.length) {
     select(matching, null, true);
   } else {

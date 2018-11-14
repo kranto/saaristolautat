@@ -16,6 +16,17 @@ export default class InfoContent2 extends Component {
   render() {
     if (!this.props.targets) return <div />;
     
+    const routeStyle=this.props.targets[0].style;
+    const headerboxStyle = routeStyle ?
+    {
+      borderBottomWidth: routeStyle.weight + "px ",
+      borderBottomStyle: routeStyle.style,
+      borderBottomColor: routeStyle.color
+    } : 
+    { 
+      borderBottom: "none"
+    };
+    
     const targets = this.props.targets;
     const names = targets.map(function (target) { return target.name; }).filter(onlyUnique);
     const nameItems = names.map(name => 
@@ -39,7 +50,7 @@ export default class InfoContent2 extends Component {
 
         <button type="button" className="btn btn-secondary closeInfoButton" onClick={unselectAll}><i className="fa fa-times" aria-hidden="true"></i></button>
 
-        <div className="headerbox">{nameItems}</div>
+        <div className="headerbox" style={headerboxStyle}>{nameItems}</div>
         <div className="contentsbox">{contentItems}</div>
       </div>
     );

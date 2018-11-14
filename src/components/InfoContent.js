@@ -5,6 +5,7 @@ import { routeInfo } from '../lib/datarenderer';
 import { onTimetableButtonClicked } from '../lib/navigation';
 import { toggleScrollIndicator } from '../lib/uicontrol';
 import PierLink from './PierLink';
+import { findByIds } from '../lib/objects';
 
 export default class InfoContent extends Component {
 
@@ -23,11 +24,22 @@ export default class InfoContent extends Component {
       return <div />;
     }
 
+    const routeStyle=findByIds([route])[0].style;
+    const infoTitleStyle = routeStyle ?
+    {
+      borderBottomWidth: routeStyle.weight + "px ",
+      borderBottomStyle: routeStyle.style,
+      borderBottomColor: routeStyle.color
+    } : 
+    { 
+      borderBottom: "none"
+    };
+
     const data = routeInfo(this.props.data.routes[route]);
 
     const titleLine = data.specifier ?
-      (<div className="infotitle">{data.name}: <span className="specifier">{data.specifier}</span></div>) :
-      (<div className="infotitle">{data.name}</div>);
+      (<div className="infotitle" style={infoTitleStyle}>{data.name}: <span className="specifier">{data.specifier}</span></div>) :
+      (<div className="infotitle" style={infoTitleStyle}>{data.name}</div>);
 
     const vesselItems = data.vessels.map(vessel => {
       const features = vessel.features.map(feature =>
