@@ -3,24 +3,12 @@ import { panTo } from './mapcontrol';
 import { lauttaLegs, lauttaRoutes } from './routes';
 import store from '../store';
 import { getMapStyle } from './styles';
-import { objects, showPierTooltip } from './objects';
+import { objects } from './objects';
 
 let google;
-let map;
+export let map;
 
 const { $, history, location } = window;
-
-export function showLivePage() {
-  var liveMapUri = "live.html?lng=" + map.getCenter().lng() + "&lat=" + map.getCenter().lat() + "&zoom=" + map.getZoom();
-  window.open(liveMapUri, "livemap");
-}
-
-export function menuItemClicked(infoPage) {
-  if (history.state && history.state.infoPage === infoPage) return;
-  var newState = { infoPage: infoPage, depth: history.state && history.state.depth ? history.state.depth + 1 : 1 };
-  history.pushState(newState, null, null);
-  navigateTo(newState);
-}
 
 let layers = store.getState().settings.layers;
 let locale = store.getState().settings.locale;
@@ -116,91 +104,6 @@ $(document).ready(() => {
   });
 });
 
-$(document).ready(() => {
-  if (window.location.hash) setTimeout(onhashchange, 2000);
-  else history.replaceState({}, null);
-});
-
-window.onhashchange = () => {
-  var hash = location.hash.substring(1);
-  if (fdata.routes[hash]) {
-    var newState = { route: hash, timetable: null };
-    history.replaceState(newState, null, "/");
-    navigateTo(newState);
-  } else if (fdata.piers[hash]) {
-    history.go(-1);
-    showPierTooltip(hash, true);
-  }
-}
-
-export function closeInfoPage() {
-  history.go(-history.state.depth);
-}
-
-function navigateTo(state) {
-  console.log('navigateTo', state);
-  if (!state || !state.timetable) {
-    closeTimetables();
-  }
-  if (!state || !state.infoPage) {
-    store.dispatch({type: "INFOPAGE_SELECTED", payload: null});    
-  }
-  if (state && state.route) {
-    if (typeof state.route === 'string') {
-      selectByIds([state.route]);
-    } else if (Array.isArray(state.route)) {
-      select(lauttaRoutes.filter(r => state.route.indexOf(r.id) >= 0), null, true);
-    }
-    if (state.timetable) {
-      console.log('openTimetable');
-      openTimetable(state.timetable);
-    }
-  } else if (state && state.infoPage) {
-    store.dispatch({type: "INFOPAGE_SELECTED", payload: state.infoPage});
-    hideMenuAndSettings();
-  } else {
-    unselectAll(false);
-  }
-}
-
-window.onpopstate = (event) => {
-  if (location.hash) return;
-  navigateTo(event.state);
-};
-
-$(document).keyup((e) => {
-  if (e.keyCode === 27) { // escape key maps to keycode `27`
-    if (hideMenuAndSettings()) {
-      // nothing
-    } else if (history.state.infoPage) {
-      closeInfoPage();
-    } else if (history.state.timetable) {
-      history.back();
-    } else if (history.state.route) {
-      unselectAll();
-    }
-  }
-});
-
-export function onTimetableButtonClicked(href, route, timetable) {
-  if (href) {
-    window.open(href, "info");
-  } else {
-    const newState = { route: route, timetable: timetable };
-    history.pushState(newState, null, null);
-    navigateTo(newState);
-  }
-}
-
-function openTimetable(id) {
-  store.dispatch({ type: "TIMETABLE_OPENED", payload: id });
-  hideMenuAndSettings();
-}
-
-function closeTimetables() {
-  store.dispatch({ type: "TIMETABLE_CLOSED" });
-}
-
 function setInfoContent(targets, dontPushState) {
   var route;
   if (targets[0].ref) {
@@ -223,7 +126,7 @@ function setInfoContent(targets, dontPushState) {
 
 var selected = [];
 
-function selectByIds(ids) {
+export function selectByIds(ids) {
   var matching = objects.filter(o => o.ref && ids.indexOf(o.ref) >= 0);
   if (matching.length) {
     select(matching, null, true);

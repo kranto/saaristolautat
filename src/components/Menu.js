@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import MenuItem from './MenuItem';
 import { L2 } from '../lib/localizer';
-import { menuItemClicked } from '../lib/ferries';
+import { menuItemClicked } from '../lib/navigation';
 
 class Menu extends Component {
 

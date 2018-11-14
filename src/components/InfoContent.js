@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { L2 as L } from '../lib/localizer';
 import { unselectAll } from '../lib/ferries';
 import { routeInfo } from '../lib/datarenderer';
-import { onTimetableButtonClicked } from '../lib/ferries';
+import { onTimetableButtonClicked } from '../lib/navigation';
 import { toggleScrollIndicator } from '../lib/uicontrol';
 import PierLink from './PierLink';
 

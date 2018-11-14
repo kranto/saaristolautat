@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { L2 } from '../lib/localizer';
-import { showLivePage, closeInfoPage } from '../lib/ferries';
+import { showLivePage, closeInfoPage } from '../lib/navigation';
 import FModal from './FModal';
 
 const locales = ["fi", "sv", "en"];
