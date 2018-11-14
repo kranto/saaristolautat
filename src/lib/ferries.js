@@ -235,8 +235,9 @@ export function createMap() {
 
   map.addListener('zoom_changed', () => {
     hideObjects(map);
-    setTimeout(() => { rerender(map); }, 50);
   });
+
+  map.addListener('idle', () => rerender(map, false));
 
   map.addListener('maptypeid_changed', () => {
     $(".map").toggleClass("satellite", map.getMapTypeId() === 'satellite' || map.getMapTypeId() === 'hybrid');
