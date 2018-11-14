@@ -213,16 +213,12 @@ function setInfoContent(targets, dontPushState) {
     if (!dontPushState) history.pushState({ route: targets.map(r => r.id), timetable: null }, null, null);
   }
 
-  $(".infocontent").hide();
-
   if (targets[0].style) {
     var style = targets[0].style;
     $(".infocontent").find(".infotitle, .headerbox").css({ borderBottom: style.weight + "px " + style.style + " " + style.color });
   } else {
     $(".infocontent").find(".infotitle, .headerbox").css({ borderBottom: "none" });
   }
-
-  $(".infocontent").fadeIn('fast');
 }
 
 var selected = [];

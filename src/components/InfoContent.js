@@ -1,13 +1,12 @@
 import React, { Component } from 'react';
 import { L2 as L } from '../lib/localizer';
 import { unselectAll } from '../lib/ferries';
-import { connect } from 'react-redux';
 import { routeInfo } from '../lib/datarenderer';
 import { onTimetableButtonClicked } from '../lib/ferries';
 import { toggleScrollIndicator } from '../lib/uicontrol';
 import PierLink from './PierLink';
 
-class InfoContent extends Component {
+export default class InfoContent extends Component {
 
   shouldComponentUpdate(props) {
     return props.routeid !== this.props.routeid;
@@ -57,8 +56,8 @@ class InfoContent extends Component {
       </div>
     );
 
-    const pierItems = data.piers.map(pier => <PierLink pier={pier} key={pier.id} 
-      panelIsHidden={this.props.isHidden} setHidden={this.props.setHidden}/> );
+    const pierItems = data.piers.map(pier => <PierLink pier={pier} key={pier.id}
+      panelIsHidden={this.props.isHidden} setHidden={this.props.setHidden} />);
 
     const noteItems = data.notes ? data.notes.map(note =>
       <div key={note.content} dangerouslySetInnerHTML={{ __html: note.content }}></div>
@@ -79,39 +78,29 @@ class InfoContent extends Component {
     });
 
     return (
-      <div className="infocontent">
+        <div className="infocontent">
 
-        <button type="button" className="btn btn-secondary closeInfoButton" onClick={unselectAll}><i className="fa fa-times" aria-hidden="true"></i></button>
+          <button type="button" className="btn btn-secondary closeInfoButton" onClick={unselectAll}><i className="fa fa-times" aria-hidden="true"></i></button>
 
-        <div className="row"><div className="col-11 col-sm-11">{titleLine}</div></div>
+          <div className="row"><div className="col-11 col-sm-11">{titleLine}</div></div>
 
-        <div className="row vesselrow spaceabove">{vesselItems}</div>
+          <div className="row vesselrow spaceabove">{vesselItems}</div>
 
-        <div className="row spaceabove">{featureItems}</div>
+          <div className="row spaceabove">{featureItems}</div>
 
-        <div className="row spaceabove">{timetableItems}</div>
+          <div className="row spaceabove">{timetableItems}</div>
 
-        <div className="spaceabove pierrow">{pierItems}</div>
+          <div className="spaceabove pierrow">{pierItems}</div>
 
-        <div className="spaceabove">{noteItems}</div>
+          <div className="spaceabove">{noteItems}</div>
 
-        <div className="spaceabove"><h4>{L('infocontent.contactinfo')}</h4></div>
+          <div className="spaceabove"><h4>{L('infocontent.contactinfo')}</h4></div>
 
-        <div id="contactslist" className="">
-          <div className="contactsbox">{contactItems}</div>
+          <div id="contactslist" className="">
+            <div className="contactsbox">{contactItems}</div>
+          </div>
+
         </div>
-
-      </div>
     );
   }
 }
-
-const mapStateToProps = (state) => {
-  return {
-    locale: state.settings.locale,
-    routeid: state.selection.infoContent,
-    data: state.data.data
-  };
-};
-
-export default connect(mapStateToProps)(InfoContent);

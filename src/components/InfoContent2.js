@@ -1,10 +1,9 @@
 import React, { Component } from 'react';
 import {unselectAll} from '../lib/ferries';
 import { onlyUnique } from '../lib/datautils';
-import { connect } from 'react-redux';
 import { toggleScrollIndicator } from '../lib/uicontrol';
 
-class InfoContent2 extends Component {
+export default class InfoContent2 extends Component {
 
   componentDidUpdate() {
     toggleScrollIndicator();
@@ -46,12 +45,3 @@ class InfoContent2 extends Component {
     );
   }
 }
-
-const mapStateToProps = (state) => {
-    return {
-        locale: state.settings.locale,
-        targets: state.selection.infoContent2
-    };
-};
-
-export default connect(mapStateToProps)(InfoContent2);

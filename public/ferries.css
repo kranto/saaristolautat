@@ -572,16 +572,14 @@ div#wrapper2 {
 }
 
 .infocontent {
+  /* position: absolute;
+  top: 0px; */
   max-width: 640px;
   margin: 0 auto;
   background-color: #fcfdfe;
   overflow: hidden;
   padding: 20px;
   padding-bottom: 40px;
-}
-
-.infocontent.removing {
-  z-index: 100;
 }
 
 .infotitle {
@@ -1021,3 +1019,23 @@ h4 {
   }
 }
 
+.infocontent-enter {
+  opacity: 0;
+}
+
+.infocontent-enter.infocontent-enter-active {
+  opacity: 1;
+  transition: opacity 200ms linear;
+}
+
+.infocontent-leave {
+  opacity: 1;
+  pointer-events: none;
+  position: absolute;
+  top: 0px;
+}
+
+.infocontent-leave.infocontent-leave-active {
+  opacity: 0;
+  transition: opacity 200ms linear;
+}
