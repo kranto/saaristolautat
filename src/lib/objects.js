@@ -4,6 +4,7 @@ import styles from './styles';
 import store from '../store';
 
 export const objects = [];
+export const objectIndex = {};
 
 let tooltip;
 let lastTooltipId = null;
@@ -547,7 +548,11 @@ export function initObjectRenderer(map, txtol) {
     features.forEach(feature => {
       var type = feature.properties.stype;
       if (typeof renderers[type] !== 'undefined') {
-        objects.push(renderers[type](feature, map, data));
+        const o = renderers[type](feature, map, data);
+        objects.push(o);
+        if (o.ref) {
+          objectIndex[o.ref] = o;
+        }
       }
     });
   }

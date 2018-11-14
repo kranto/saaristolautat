@@ -3,7 +3,7 @@ import { panTo } from './mapcontrol';
 import { lauttaLegs, lauttaRoutes } from './routes';
 import store from '../store';
 import { getMapStyle } from './styles';
-import { objects, findByIds } from './objects';
+import { objects, objectIndex } from './objects';
 
 let google;
 export let map;
@@ -117,10 +117,10 @@ function setInfoContent(targets, dontPushState) {
 
 var selected = [];
 
-export function selectByIds(ids) {
-  var matching = findByIds(ids);
-  if (matching.length) {
-    select(matching, null, true);
+export function selectById(id) {
+  if (id) {
+    var matching = objectIndex[id];
+    select([matching], null, true);
   } else {
     unselectAll();
   }

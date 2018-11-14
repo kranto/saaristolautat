@@ -1,5 +1,5 @@
 import store from '../store';
-import { map, selectByIds, select, unselectAll } from './ferries';
+import { map, selectById, select, unselectAll } from './ferries';
 import { showPierTooltip } from './objects';
 import { hideMenuAndSettings } from './uicontrol';
 import {lauttaRoutes } from './routes';
@@ -72,7 +72,7 @@ export function closeInfoPage() {
 }
 
 function navigateTo(state) {
-  console.log('navigateTo', state, history);
+  // console.log('navigateTo', state, history);
   if (!state || !state.timetable) {
     closeTimetables();
   }
@@ -81,7 +81,7 @@ function navigateTo(state) {
   }
   if (state && state.route) {
     if (typeof state.route === 'string') {
-      selectByIds([state.route]);
+      selectById(state.route);
     } else if (Array.isArray(state.route)) {
       select(lauttaRoutes.filter(r => state.route.indexOf(r.id) >= 0), null, true);
     }
