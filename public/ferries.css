@@ -1031,7 +1031,7 @@ h4 {
 .infocontent-leave {
   opacity: 1;
   pointer-events: none;
-  position: absolute;
+  position: relative;
   top: 0px;
 }
 
