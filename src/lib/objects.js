@@ -21,10 +21,6 @@ export function closePierTooltip(id) {
   }
 }
 
-export function findByIds(ids) {
-  return objects.filter(o => o.ref && ids.indexOf(o.ref) >= 0);
-}
-
 export function initObjectRenderer(map, txtol) {
 
   const google = window.google;
