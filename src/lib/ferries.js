@@ -12,6 +12,9 @@ const { $, history, location } = window;
 
 let layers = store.getState().settings.layers;
 let locale = store.getState().settings.locale;
+let selected = [];
+let selectedRoute = null;
+let selectedLauttaLegs = "";
 
 function onStateChanged() {
   const newState = store.getState();
@@ -25,6 +28,18 @@ function onStateChanged() {
   }
   if (map && map.getMapTypeId() !== newState.settings.mapTypeId) {
     map.setMapTypeId(newState.settings.mapTypeId);
+  }
+  if (newState.selection.infoContent !== selectedRoute) {
+    selectedRoute = newState.selection.infoContent;
+    if (selectedRoute) {
+      const object = objectIndex[selectedRoute];
+      showSelected([object]);  
+    };
+  }
+  const tmp = newState.selection.infoContent2? newState.selection.infoContent2.map(l => l.id).join("-") : null;
+  if (tmp !== selectedLauttaLegs) {
+    selectedLauttaLegs = tmp;
+    if (selectedLauttaLegs) showSelected(newState.selection.infoContent2);
   }
 }
 setTimeout(() => store.subscribe(onStateChanged), 100);
@@ -114,8 +129,6 @@ function setInfoContent(targets, dontPushState) {
   }
 }
 
-var selected = [];
-
 export function selectById(id) {
   if (id) {
     var matching = objectIndex[id];
@@ -126,22 +139,21 @@ export function selectById(id) {
 }
 
 export function select(targets, mouseEvent, dontPushState) {
-  targets = (targets.constructor === Array) ? targets : [targets];
   if (!targets.length) return;
-
-  hideMenuAndSettings();
-
-  selected.forEach(target => { target.highlight(false); if (target.rerender) target.rerender(map.getZoom(), map.getMapTypeId(), layers); });
-  selected = targets.slice();
-
-  targets.forEach(target => target.highlight(true));
-
   setInfoContent(targets, dontPushState);
   panMapIfClickPointHidden(map, mouseEvent);
+  hideMenuAndSettings();
 
   if (!mouseEvent && targets[0].bounds) {
     panTo(map, targets[0].bounds, $("#mapcontainer").outerWidth());
   }
+}
+
+function showSelected(targets) {
+  if (!targets.length) return;
+  selected.forEach(target => { target.highlight(false); if (target.rerender) target.rerender(map.getZoom(), map.getMapTypeId(), layers); });
+  selected = targets.slice();
+  targets.forEach(target => target.highlight(true));
 }
 
 function panMapIfClickPointHidden(map, mouseEvent) {
