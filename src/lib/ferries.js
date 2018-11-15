@@ -4,6 +4,7 @@ import { lauttaLegs, lauttaRoutes } from './routes';
 import store from '../store';
 import { getMapStyle } from './styles';
 import { objects, objectIndex } from './objects';
+import { selectRoute } from './navigation';
 
 let google;
 export let map;
@@ -33,10 +34,10 @@ function onStateChanged() {
     selectedRoute = newState.selection.infoContent;
     if (selectedRoute) {
       const object = objectIndex[selectedRoute];
-      showSelected([object]);  
+      showSelected([object]);
     };
   }
-  const tmp = newState.selection.infoContent2? newState.selection.infoContent2.map(l => l.id).join("-") : null;
+  const tmp = newState.selection.infoContent2 ? newState.selection.infoContent2.map(l => l.id).join("-") : null;
   if (tmp !== selectedLauttaLegs) {
     selectedLauttaLegs = tmp;
     if (selectedLauttaLegs) showSelected(newState.selection.infoContent2);
@@ -102,35 +103,21 @@ $(document).ready(() => {
   });
 });
 
-function setInfoContent(targets, dontPushState) {
-  var route;
-  if (targets[0].ref) {
-    route = targets[0].ref;
-    store.dispatch({ type: "INFOCONTENT_SELECTED", payload: route });
-    if (!dontPushState) history.pushState({ route: route, timetable: null }, null, null);
-  } else {
-    store.dispatch({ type: "INFOCONTENT2_SELECTED", payload: targets });
-    if (!dontPushState) history.pushState({ route: targets.map(r => r.id), timetable: null }, null, null);
-  }
+export function panToObject(id) {
+  panTo(map, objectIndex[id].bounds, $("#mapcontainer").outerWidth());
 }
 
-export function selectById(id) {
-  if (id) {
-    var matching = objectIndex[id];
-    select([matching], null, true);
-  } else {
-    unselectAll();
-  }
-}
-
-export function select(targets, mouseEvent, dontPushState) {
-  if (!targets.length) return;
-  setInfoContent(targets, dontPushState);
+export function select(targets, mouseEvent) {
+  navigateTo(targets);
   panMapIfClickPointHidden(map, mouseEvent);
   hideMenuAndSettings();
+}
 
-  if (!mouseEvent && targets[0].bounds) {
-    panTo(map, targets[0].bounds, $("#mapcontainer").outerWidth());
+function navigateTo(targets) {
+  if (targets[0].ref) {
+    selectRoute(targets[0].ref);
+  } else {
+    selectRoute(targets.map(r => r.id));
   }
 }
 
