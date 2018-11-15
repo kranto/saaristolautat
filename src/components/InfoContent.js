@@ -3,7 +3,6 @@ import { L2 as L } from '../lib/localizer';
 import { unselectAll } from '../lib/ferries';
 import { routeInfo } from '../lib/datarenderer';
 import { onTimetableButtonClicked } from '../lib/navigation';
-import { toggleScrollIndicator } from '../lib/uicontrol';
 import PierLink from './PierLink';
 import { objectIndex } from '../lib/objects';
 
@@ -11,10 +10,6 @@ export default class InfoContent extends Component {
 
   shouldComponentUpdate(props) {
     return props.routeid !== this.props.routeid;
-  }
-
-  componentDidUpdate() {
-    toggleScrollIndicator();
   }
 
   render() {

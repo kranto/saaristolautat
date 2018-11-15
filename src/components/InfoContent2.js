@@ -1,13 +1,8 @@
 import React, { Component } from 'react';
 import {unselectAll} from '../lib/ferries';
 import { onlyUnique } from '../lib/datautils';
-import { toggleScrollIndicator } from '../lib/uicontrol';
 
 export default class InfoContent2 extends Component {
-
-  componentDidUpdate() {
-    toggleScrollIndicator();
-  }
   
   shouldComponentUpdate(props) {
     return props.targets;
