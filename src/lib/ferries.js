@@ -59,21 +59,6 @@ function onLocaleChanged() {
   }
 }
 
-function addMapListeners(map) {
-  google.maps.event.addListener(map, 'maptypeid_changed', () => {
-    var isSatellite = map.getMapTypeId() === 'satellite' || map.getMapTypeId() === 'hybrid';
-    if (isSatellite) {
-      $('#setMapTypeMap').removeClass('active');
-      $('#setMapTypeSatellite').addClass('active');
-    } else {
-      $('#setMapTypeMap').addClass('active');
-      $('#setMapTypeSatellite').removeClass('active');
-    }
-  });
-
-  map.addListener('click', () => toggleHeaderbar(unselectAll));
-}
-
 var loaderTimeout = false;
 var mapInitialized = false;
 
@@ -185,7 +170,7 @@ export function unselectAll(pushState) {
   selected = [];
 }
 
-function updateMapStyles() {
+function updateMapStyles(map) {
   map.setOptions({ styles: getMapStyle(map.getMapTypeId(), map.getZoom(), {}) });
   $("div.gm-style").css({ 'font-size': map.getZoom() + 1 });
 }
@@ -232,25 +217,20 @@ export function createMap() {
   map = new google.maps.Map(document.getElementById('map'), mapOptions);
   map.setMapTypeId(store.getState().settings.mapTypeId);
   map.fitBounds({ south: 60, north: 60.5, west: 20, east: 22.3 });
-  updateMapStyles();
+  updateMapStyles(map);
 
   google.maps.event.addListenerOnce(map, 'idle', onMapIdle);
 
-  map.addListener('zoom_changed', updateMapStyles);
-
-  map.addListener('zoom_changed', () => {
-    hideObjects(map);
-  });
-
+  map.addListener('zoom_changed', () => updateMapStyles(map));
+  map.addListener('zoom_changed', () => hideObjects(map));
   map.addListener('idle', () => rerender(map, false));
+  map.addListener('click', () => toggleHeaderbar(unselectAll));
 
   map.addListener('maptypeid_changed', () => {
     $(".map").toggleClass("satellite", map.getMapTypeId() === 'satellite' || map.getMapTypeId() === 'hybrid');
-    updateMapStyles();
+    updateMapStyles(map);
     rerender(map, true);
   });
-
-  addMapListeners(map);
 
   // initKeepCenter(map, () => selected.length);
   return map;
