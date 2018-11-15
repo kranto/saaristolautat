@@ -151,7 +151,7 @@ div#infopagecontent {
   color: #000;
 }
 
-#scrollIndicator {
+.scrollIndicator {
   height: 25px;
   width: 100%;
   display: none;
@@ -163,11 +163,11 @@ div#infopagecontent {
   pointer-events: none;
 }
 
-#scrollIndicator.can-scroll {
+.scrollIndicator.can-scroll {
   display: block;
 }
 
-#scrollIndicator i {
+.scrollIndicator i {
   position: relative;
   font-size: 40px;
   left: -20px;

@@ -8,7 +8,7 @@ import LiveIndicator from './LiveIndicator';
 import Timetables from './Timetables';
 import MapContainer from './MapContainer';
 import InfoContainer from './InfoContainer';
-import { toggleScrollIndicator } from '../lib/uicontrol';
+import ScrollIndicator from './ScrollIndicator';
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 
 const $ = window.$;
@@ -21,6 +21,7 @@ function getAllEvents(element) {
   return result.join(' ');
 }
 
+const scrollLimit = 22;
 
 class Wrapper extends Component {
   constructor(props) {
@@ -29,7 +30,7 @@ class Wrapper extends Component {
   }
 
   componentDidMount() {
-    window.addEventListener("resize", toggleScrollIndicator);
+    window.addEventListener("resize", this.onScroll.bind(this));
     this.initMapOverlayEvents();
   }
 
@@ -41,10 +42,6 @@ class Wrapper extends Component {
     });
   }
 
-  componentDidUpdate() {
-    toggleScrollIndicator();
-  }
-
   onMouseEnterInfo(event) {
     this.setState({ pointerOnInfoPanel: true });
     $("#wrapper2").trigger(event.type, event);
@@ -54,12 +51,23 @@ class Wrapper extends Component {
     this.setState({ pointerOnInfoPanel: false });
   }
 
+  componentDidUpdate() {
+    setTimeout(this.onScroll.bind(this), 500);
+  }
+
+  onScroll() {
+    var elem = $("#wrapper2");
+    if (!elem || !elem[0]) return false;
+    var isBottom = (elem[0].scrollHeight - elem.scrollTop() - scrollLimit <= elem.outerHeight());
+    $('.scrollIndicator').toggleClass('can-scroll', !isBottom);
+  }
+
   render() {
     const infoOpen = (this.props.routeid || this.props.infoContent2) && !this.props.infoPage;
     const pointerEvents = this.state.pointerOnInfoPanel && infoOpen ? "auto" : "none"
     return (
       <div id="wrapper">
-        <div id="wrapper2" className={infoOpen ? "info-open" : ""} onScroll={toggleScrollIndicator}
+        <div id="wrapper2" className={infoOpen ? "info-open" : ""} onScroll={this.onScroll.bind(this)}
           style={{ pointerEvents }}>
 
           <div className="mapoverlay" style={{ pointerEvents }}></div>
@@ -68,14 +76,14 @@ class Wrapper extends Component {
             transitionEnterTimeout={200}
             transitionLeaveTimeout={200}>
             {infoOpen ?
-              <InfoContainer key="1" onMouseEnter={this.onMouseEnterInfo.bind(this)} onMouseLeave={this.onMouseLeaveInfo.bind(this)} />
+              <InfoContainer key="1" 
+              onMouseEnter={this.onMouseEnterInfo.bind(this)}
+              onMouseLeave={this.onMouseLeaveInfo.bind(this)} />
               : ""}
           </ReactCSSTransitionGroup>
         </div>
 
         <MapContainer />
-
-        <div id="scrollIndicator"><i className="fa fa-ellipsis-h" aria-hidden="true"></i></div>
 
         <TopBar id="topbar" />
         <Menu />
@@ -84,6 +92,7 @@ class Wrapper extends Component {
         <Timetables />
         <InfoPage />
 
+        <ScrollIndicator />
       </div >
     );
   }

@@ -13,7 +13,6 @@ export default class App extends Component {
           <Loader />
           <Banner />
           <Wrapper />
-          <canvas id="canvas" style={{ display: "none" }}></canvas>
         </div>
       </Provider>
     );

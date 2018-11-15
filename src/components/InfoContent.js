@@ -19,16 +19,16 @@ export default class InfoContent extends Component {
       return <div />;
     }
 
-    const routeStyle=objectIndex[route].style;
+    const routeStyle = objectIndex[route].style;
     const infoTitleStyle = routeStyle ?
-    {
-      borderBottomWidth: routeStyle.weight + "px ",
-      borderBottomStyle: routeStyle.style,
-      borderBottomColor: routeStyle.color
-    } : 
-    { 
-      borderBottom: "none"
-    };
+      {
+        borderBottomWidth: routeStyle.weight + "px ",
+        borderBottomStyle: routeStyle.style,
+        borderBottomColor: routeStyle.color
+      } :
+      {
+        borderBottom: "none"
+      };
 
     const data = routeInfo(this.props.data.routes[route]);
 
@@ -85,29 +85,29 @@ export default class InfoContent extends Component {
     });
 
     return (
-        <div className="infocontent">
+      <div className="infocontent">
 
-          <button type="button" className="btn btn-secondary closeInfoButton" onClick={unselectAll}><i className="fa fa-times" aria-hidden="true"></i></button>
+        <button type="button" className="btn btn-secondary closeInfoButton" onClick={unselectAll}><i className="fa fa-times" aria-hidden="true"></i></button>
 
-          <div className="row"><div className="col-11 col-sm-11">{titleLine}</div></div>
+        <div className="row"><div className="col-11 col-sm-11">{titleLine}</div></div>
 
-          <div className="row vesselrow spaceabove">{vesselItems}</div>
+        <div className="row vesselrow spaceabove">{vesselItems}</div>
 
-          <div className="row spaceabove">{featureItems}</div>
+        <div className="row spaceabove">{featureItems}</div>
 
-          <div className="row spaceabove">{timetableItems}</div>
+        <div className="row spaceabove">{timetableItems}</div>
 
-          <div className="spaceabove pierrow">{pierItems}</div>
+        <div className="spaceabove pierrow">{pierItems}</div>
 
-          <div className="spaceabove">{noteItems}</div>
+        <div className="spaceabove">{noteItems}</div>
 
-          <div className="spaceabove"><h4>{L('infocontent.contactinfo')}</h4></div>
+        <div className="spaceabove"><h4>{L('infocontent.contactinfo')}</h4></div>
 
-          <div id="contactslist" className="">
-            <div className="contactsbox">{contactItems}</div>
-          </div>
-
+        <div id="contactslist" className="">
+          <div className="contactsbox">{contactItems}</div>
         </div>
+
+      </div>
     );
   }
 }

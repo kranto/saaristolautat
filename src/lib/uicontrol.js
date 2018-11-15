@@ -2,12 +2,6 @@ const $ = window.$;
 
 var scrollLimit = 22;
 
-export function toggleScrollIndicator() {
-  var elem = $("#wrapper2");
-  var isBottom = (elem[0].scrollHeight - elem.scrollTop() - scrollLimit <= elem.outerHeight());
-  $('#scrollIndicator').toggleClass('can-scroll', !isBottom);
-}
-
 function showMenu() {
   hideSettings(function () {
     $("#menu").slideDown("fast");

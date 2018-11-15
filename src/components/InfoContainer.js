@@ -3,7 +3,6 @@ import { connect } from 'react-redux';
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 import InfoContent from './InfoContent';
 import InfoContent2 from './InfoContent2';
-import { toggleScrollIndicator } from '../lib/uicontrol';
 
 class InfoContainer extends Component {
   constructor(props) {
@@ -13,10 +12,6 @@ class InfoContainer extends Component {
     window.$("body").mouseup(() => {
       this.setState({ hidden: false });
     });
-  }
-
-  componentDidUpdate() {
-    toggleScrollIndicator();
   }
 
   setHidden(hidden) {
