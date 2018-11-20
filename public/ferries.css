@@ -435,13 +435,21 @@ div#info {
   float: right;
 }
 
+.slidedownmenu {
+  max-height: 0%;
+  transition: max-height 100ms linear;
+}
+
+.slidedownmenu.open {
+  max-height: 90%;
+  transition: max-height 200ms linear;
+}
+
 #menu {
-  display: none;
   position: fixed;
   left: 0px;
   top: 50px;
   width: 200px;
-  max-height: 90%;
   overflow-y: scroll;
   overflow-x: hidden;
   box-shadow: 2px 2px #ddd;
@@ -461,12 +469,10 @@ div#info {
 }
 
 #settings {
-  display: none;
   position: fixed;
   right: 0px;
   top: 50px;
   width: 200px;
-  max-height: 90%;
   overflow-y: scroll;
   overflow-x: hidden;
   box-shadow: -2px 2px #ddd;

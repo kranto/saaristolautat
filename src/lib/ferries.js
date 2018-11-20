@@ -1,4 +1,4 @@
-import { toggleHeaderbar, hideMenuAndSettings } from './uicontrol';
+import { hideMenuAndSettings } from './uicontrol';
 import { panTo } from './mapcontrol';
 import { lauttaLegs, lauttaRoutes } from './routes';
 import store from '../store';
@@ -211,7 +211,7 @@ export function createMap() {
   map.addListener('zoom_changed', () => updateMapStyles(map));
   map.addListener('zoom_changed', () => hideObjects(map));
   map.addListener('idle', () => rerender(map, false));
-  map.addListener('click', () => toggleHeaderbar(unselectAll));
+  map.addListener('click', () => { if (!hideMenuAndSettings()) unselectAll(); });
 
   map.addListener('maptypeid_changed', () => {
     $(".map").toggleClass("satellite", map.getMapTypeId() === 'satellite' || map.getMapTypeId() === 'hybrid');
