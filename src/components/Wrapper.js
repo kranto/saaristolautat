@@ -10,6 +10,7 @@ import MapContainer from './MapContainer';
 import InfoContainer from './InfoContainer';
 import ScrollIndicator from './ScrollIndicator';
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
+import {toggleMenu, toggleSettings} from '../lib/uicontrol';
 
 const $ = window.$;
 
@@ -85,9 +86,9 @@ class Wrapper extends Component {
 
         <MapContainer />
 
-        <TopBar id="topbar" />
-        <Menu />
-        <Settings />
+        <TopBar id="topbar" onMenuButtonClicked={toggleMenu} onSettingsButtonClicked={toggleSettings}/>
+        <Menu open={this.props.uiState.menuOpen}/>
+        <Settings open={this.props.uiState.settingsOpen}/>
         <div id="liveindpos"><LiveIndicator /></div>
         <Timetables />
         <InfoPage />
@@ -105,7 +106,8 @@ const mapStateToProps = (state) => {
     routeid: state.selection.infoContent,
     infoContent2: state.selection.infoContent2,
     infoPage: state.selection.infoPage,
-    data: state.data.data
+    data: state.data.data,
+    uiState: state.uiState
   };
 };
 

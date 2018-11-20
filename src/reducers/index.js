@@ -3,10 +3,12 @@ import settings from "./settingsReducer";
 import live from "./liveReducer";
 import selection from "./selectionReducer";
 import data from "./dataReducer";
+import uiState from "./uiStateReducer";
 
 export default combineReducers({
 	settings,
 	live,
 	selection,
-	data
+	data,
+	uiState
 })

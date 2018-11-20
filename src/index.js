@@ -5,7 +5,6 @@ import txtol from './lib/txtol';
 import { initMapTypes } from './lib/maptypes';
 import LiveLayer from './lib/live';
 import { initObjectRenderer } from './lib/objects';
-import './lib/uicontrol';
 import './lib/mapcontrol';
 import  {initFullscreen} from './lib/fullscreen';
 import { createMap } from './lib/ferries';

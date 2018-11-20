@@ -13,7 +13,7 @@ class Menu extends Component {
       return (<MenuItem key={item} name={L2("menu." + item)} onClick={() => menuItemClicked(item)} />);
     })
     return (
-      <div id="menu" className="slidedownmenu">
+      <div id="menu" className={"slidedownmenu" + (this.props.open ? " open" : "")}>
         <div className="menucontainer" id="menucontent">
           {items}
         </div>

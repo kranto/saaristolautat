@@ -1,19 +1,15 @@
-
-const $ = window.$;
+import store from '../store';
 
 export function toggleMenu() {
-  $("#menu").toggleClass("open");
-  $("#settings").toggleClass("open", false);
+  store.dispatch({type: "MENU_TOGGLED"});
 }
 
 export function toggleSettings() {
-  $("#settings").toggleClass("open");
-  $("#menu").toggleClass("open", false);
+  store.dispatch({type: "SETTINGS_TOGGLED"});
 }
 
 export function hideMenuAndSettings() {
-  const wasOpen = $("#menu").hasClass("open") || $("#settings").hasClass("open");
-  $("#menu").toggleClass("open", false);
-  $("#settings").toggleClass("open", false);
+  const wasOpen = store.getState().uiState.menuOpen || store.getState().uiState.settingsOpen;
+  if (wasOpen) store.dispatch({type: "MENU_AND_SETTINGS_HIDDEN"});
   return wasOpen;
 }

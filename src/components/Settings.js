@@ -12,7 +12,7 @@ export default class Settings extends Component {
 
   render() {
     return (
-      <div id="settings" className="slidedownmenu">
+      <div id="settings" className={"slidedownmenu" + (this.props.open ? " open" : "")}>
         <div className="menucontainer" id="settingscontent">
 
           <div className="boxs"><MapTypeSelector /></div>
