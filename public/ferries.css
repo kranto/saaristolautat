@@ -68,6 +68,10 @@ div#loadercontent {
   padding: 15px;
 }
 
+#timetables .fmodalcontent {
+  max-width: 730px;
+}
+
 .fmodalheader {
   margin-bottom: 20px;
 }

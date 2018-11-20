@@ -99,7 +99,7 @@ class Timetables extends Component {
   render() {
     const show = (this.props.timetableid && this.props.routeid);
     return (
-      <FModal
+      <FModal id="timetables"
         show={show}
         onClose={window.history.back.bind(window.history)}
         header={show ? this.getHeader() : ""}
