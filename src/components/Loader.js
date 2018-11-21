@@ -22,6 +22,9 @@ export default class Loader extends Component {
             {L2("loader.loading")}
           </div>
         </div>
+        <div style={{position: "absolute", bottom: "2px", textAlign: "right", width: "100%", color: "#bbb", fontSize: "10px"}}>
+          {process.env.REACT_APP_VERSION}
+        </div>
       </div>
     );
   }
