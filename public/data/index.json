@@ -1,4 +1,0 @@
-{
-    "data": "data.json?v=1",
-    "geojson": ["roads.json?v=1", "routes.json?v=1", "saaristo.json?v=1"]
-}
