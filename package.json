@@ -18,6 +18,7 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "mv public/data .data.save; react-scripts build; mv .data.save public/data",
+    "copy": "scp -r build/* dh:test/react2/",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
