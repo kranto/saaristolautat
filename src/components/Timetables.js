@@ -61,9 +61,9 @@ class Timetables extends Component {
     const tableItems = tables.map(table => {
       const images = table.images.map(image =>
         <div className="timetablelink" key={image}>
-          <a href={"timetables_jpg/" + image} target="timetable">
+          <a href={"data/timetables_jpg/" + image} target="timetable">
             <div>
-              <img alt="timetable" className="timetable" src={"timetables_jpg/" + image} />
+              <img alt="timetable" className="timetable" src={"data/timetables_jpg/" + image} />
             </div>
           </a>
         </div>

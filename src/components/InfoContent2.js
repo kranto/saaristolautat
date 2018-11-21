@@ -34,7 +34,7 @@ export default class InfoContent2 extends Component {
           <div className="routename">{content.name}</div>
           <div className="routedetails">{content.details}</div>
           <div className="routeoperatorlogo">
-            <img src={content.operator.logo} height={content.operator.height} alt={content.operator.name}/>
+            <img src={"data/" + content.operator.logo} height={content.operator.height} alt={content.operator.name}/>
           </div>
         </div>
       </a>
