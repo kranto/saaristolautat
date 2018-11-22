@@ -14,9 +14,7 @@ class Menu extends Component {
     })
     return (
       <div id="menu" className={"slidedownmenu" + (this.props.open ? " open" : "")}>
-        <div className="menucontainer" id="menucontent">
-          {items}
-        </div>
+        {items}
       </div>
     );
   }

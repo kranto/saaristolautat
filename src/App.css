@@ -1,3 +1,30 @@
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: 'Roboto', sans-serif;
+  font-size: 14px;
+}
+
+div#wrapper {
+  position: fixed; 
+  top: 0px; 
+  height: 100%; 
+  width: 100%; 
+  overflow-y: hidden;
+}
+
+div#wrapper2 {
+  position: fixed;
+  top: 0px; 
+  height: 100%; 
+  width: 100%; 
+  overflow-y: scroll;
+  z-index: 110;
+  pointer-events: none;
+}
+
+
 h3 {
   font-size: 20px;
 }
@@ -103,7 +130,12 @@ div#infopagecontent {
   padding: 15px;
 }
 
+#infopage table {
+  width: 100%;
+}
+
 #infopage td, #infopage th {
+  min-width: 50px;
   padding: 5px;
 }
 
@@ -425,14 +457,19 @@ div#info {
 
 .topbarbutton {
   float: left;
-  margin: 3px;
-  margin-left: 5px;
-  margin-right: 5px;
+  width: 196px;
+  max-height: 46px; 
   border: none;
+  border-radius: 5%;
+  text-align: left;
+  margin-left: 4px;
+  margin-top: 2px;
+  padding-left: 15px;
   outline: 0;
   font-size: 30px;
   color: #444;
   background: transparent;
+  transition: background-color 100ms linear;
 }
 
 .topbarbutton .description {
@@ -442,9 +479,20 @@ div#info {
 
 .topbarbutton.right {
   float: right;
+  text-align: right;
+  margin-right: 4px;
+  padding-right: 15px;
+}
+
+.topbarbutton.active {
+  background-color: #f2f2f2;
+  transition: background-color 100ms linear;
 }
 
 @media screen and (max-width: 512px) {
+  .topbarbutton {
+    max-width: 100px;
+  }
   .topbarbutton .description {
     display: none;
     font-size: 12px;
@@ -453,6 +501,14 @@ div#info {
 }
 
 .slidedownmenu {
+  position: fixed;
+  top: 50px;
+  width: 200px;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  z-index: 120;
+  border-radius: 0% 0% 3% 3%;
+  background-color: white;
   max-height: 0%;
   transition: max-height 100ms linear;
 }
@@ -463,58 +519,32 @@ div#info {
 }
 
 #menu {
-  position: fixed;
   left: 0px;
-  top: 50px;
-  width: 200px;
-  overflow-y: scroll;
-  overflow-x: hidden;
   box-shadow: 2px 2px #ddd;
-  z-index: 120;
-}
-
-.menucontainer {
-  width: 100%;
-  background-color: white;
-  opacity: 1;
-  border: solid #aaa 1px;
-  padding: 10px;
-  padding-left: 20px;
-  padding-top: 5px;
-  margin-top: 0px;
-  background-color: white;
 }
 
 #settings {
-  position: fixed;
   right: 0px;
-  top: 50px;
-  width: 200px;
-  overflow-y: scroll;
-  overflow-x: hidden;
   box-shadow: -2px 2px #ddd;
-  box-shadow: 2px 2px #ddd;
-  z-index: 120;
-}
-
-#menu .col-sm-3 {
-  padding-left: 10px;
-  padding-right: 10px;
 }
 
 .box {
-  margin: 5px;
-  height: 40px;
-  padding: 5px;
+  height: 50px;
+  padding-top: 15px;
+  padding-bottom: 15px;
   border-bottom: solid #ddd 1px;
   overflow: hidden;
   text-align: center;
   cursor: pointer;
 }
 
+.box:hover {
+  background-color: #eee;
+}
+
 .boxs {
   user-select: none;
-  margin: 5px;
+  padding: 10px;
   min-height: 40px;
   border-bottom: solid #ddd 1px;
   overflow: hidden;
@@ -536,8 +566,14 @@ div#info {
 }
 
 .layerselector {
-  font-weight: normal;
-  cursor: pointer; 
+  cursor: pointer;
+  width: 100%;
+  margin: 0px;
+  padding: 5px;
+}
+
+.layerselector:hover {
+  background-color: #eee;
 }
 
 .layer input[type=checkbox] { display:none; }
@@ -566,32 +602,6 @@ div#info {
 }
 .layer input[type=checkbox][disabled] + label {
   color: #ddd; 
-}
-
-html, body {
-  height: 100%;
-  margin: 0;
-  padding: 0;
-  font-family: 'Roboto', sans-serif;
-  font-size: 14px;
-}
-
-div#wrapper {
-  position: fixed; 
-  top: 0px; 
-  height: 100%; 
-  width: 100%; 
-  overflow-y: hidden;
-}
-
-div#wrapper2 {
-  position: fixed;
-  top: 0px; 
-  height: 100%; 
-  width: 100%; 
-  overflow-y: scroll;
-  z-index: 110;
-  pointer-events: none;
 }
 
 .infocontent {

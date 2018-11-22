@@ -13,8 +13,6 @@ export default class Settings extends Component {
   render() {
     return (
       <div id="settings" className={"slidedownmenu" + (this.props.open ? " open" : "")}>
-        <div className="menucontainer" id="settingscontent">
-
           <div className="boxs"><MapTypeSelector /></div>
 
           <div className="boxs"><FullScreenButton /></div>
@@ -22,8 +20,6 @@ export default class Settings extends Component {
           <div className="boxs"><SettingsLayers /></div>
 
           <div className="boxs"><LocaleSelector /></div>
-
-        </div>
       </div>
     );
   }
