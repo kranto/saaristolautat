@@ -2,7 +2,7 @@ html, body {
   height: 100%;
   margin: 0;
   padding: 0;
-  font-family: 'Roboto', sans-serif;
+  font-family: 'Lato', sans-serif;
   font-size: 14px;
 }
 
@@ -116,6 +116,7 @@ div#loadercontent {
 }
 
 #infopage {
+  font-family: 'Roboto', sans-serif;
   top: 50px;
   pointer-events: auto;
 }
@@ -446,7 +447,9 @@ div#info {
 }
 
 #topbartitle {
-  font-size: 20px;
+  font-size: 22px;
+  font-weight: 600;
+  color: #444;
   width: 100%;
   text-align: center;
   padding: 10px;
@@ -473,20 +476,34 @@ div#info {
 }
 
 .topbarbutton .description {
-  font-size: 16px;
-  margin: 10px;
+  font-size: 12px;
+  padding-left: 10px;
+  text-transform: uppercase;
+  transition: font-size 100ms ease-out;
 }
 
 .topbarbutton.right {
   float: right;
   text-align: right;
+  margin-left: 0px;
   margin-right: 4px;
+  padding-left: 0px;
   padding-right: 15px;
+}
+
+.topbarbutton.right .description {
+  padding-left: 0px;
+  padding-right: 10px;
 }
 
 .topbarbutton.active {
   background-color: #f2f2f2;
   transition: background-color 100ms linear;
+}
+
+.topbarbutton.active .description {
+  font-size: 17px;
+  transition: font-size 200ms ease-out;
 }
 
 @media screen and (max-width: 512px) {

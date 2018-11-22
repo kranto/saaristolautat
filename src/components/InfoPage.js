@@ -56,7 +56,7 @@ class InfoPage extends Component {
 
         {page === "alandferriesinfo" ?
           <div className="infosection">
-            <h2>{L2("menu.alandferriesinfo")} <img src="img/alandstrafiken.png" width="120px" alt="Ålandstrafiken" /></h2>
+            <h2>{L2("menu.alandferriesinfo")} <img src="data/img/alandstrafiken.png" width="120px" alt="Ålandstrafiken" /></h2>
             {onlyInFinnish}
             <h3>Lauttareitit</h3>
             <ul className="ferrieslist">
