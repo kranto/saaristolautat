@@ -4,6 +4,7 @@ import Banner from './components/Banner';
 import Wrapper from './components/Wrapper';
 import { Provider } from "react-redux";
 import store from "./store";
+import './App.css';
 
 export default class App extends Component {
   render() {

@@ -79,6 +79,10 @@ const messagesRaw = { // FI SV EN
         dontshowagain: ["Älä näytä uudestaan", "Visa inte mer", "Don't show again"],
         close: ["Sulje", "Stäng", "Close"]
     },
+    topbar: {
+        info: ["Info", "Info", "Info"],
+        settings: ["Asetukset", "Inställningar", "Settings"],
+    },
     settings: {
         fullscreen: ["Koko ruutu", "Full screen", "Full screen"]
     },
