@@ -179,7 +179,8 @@ div#infopagecontent {
   margin-bottom: 30px;
 }
 .closeInfoButton {
-  float: right;
+  position: absolute;
+  right: 20px;
   background-color: #eeeeee;
   font-size: 20px;
   width: 40px;
@@ -508,7 +509,7 @@ div#info {
 
 @media screen and (max-width: 512px) {
   .topbarbutton {
-    max-width: 100px;
+    width: 55px;
   }
   .topbarbutton .description {
     display: none;
@@ -556,7 +557,10 @@ div#info {
 }
 
 .box:hover {
+  position: relative;
   background-color: #eee;
+  font-size: 1.2em;
+  transition: font-size 100ms linear, background-color 100ms linear;
 }
 
 .boxs {
@@ -634,11 +638,13 @@ div#info {
 
 .infotitle {
   font-size: 20px;
-  font-weight: 500;
+  font-weight: 600;
+  min-height: 50px;
 }
 
 .infotitle .specifier {
   font-size: 16px;
+  font-weight: 400;
 }
 
 .spaceabove {
@@ -749,7 +755,11 @@ div#info {
 .pierrow:before {
   font-family: FontAwesome;
   content: "\f13d";
+  font-size: 30px;
   -moz-osx-font-smoothing: grayscale;
+  margin-right: 10px;
+  margin-bottom: 5px;
+  float: left;
 }
 
 .pierlink {

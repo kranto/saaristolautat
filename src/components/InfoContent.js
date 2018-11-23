@@ -9,7 +9,7 @@ import { objectIndex } from '../lib/objects';
 export default class InfoContent extends Component {
 
   shouldComponentUpdate(props) {
-    return props.routeid !== this.props.routeid;
+    return props.routeid !== this.props.routeid || props.locale !== this.props.locale;
   }
 
   render() {
@@ -32,9 +32,8 @@ export default class InfoContent extends Component {
 
     const data = routeInfo(this.props.data.routes[route]);
 
-    const titleLine = data.specifier ?
-      (<div className="infotitle" style={infoTitleStyle}>{data.name}: <span className="specifier">{data.specifier}</span></div>) :
-      (<div className="infotitle" style={infoTitleStyle}>{data.name}</div>);
+    const specifier = data.specifier ? <div><span className="specifier">{data.specifier}</span></div> : "";
+    const titleLine = (<div className="infotitle" style={infoTitleStyle}>{data.name}{specifier}</div>);
 
     const vesselItems = data.vessels.map(vessel => {
       const features = vessel.features.map(feature =>
@@ -89,7 +88,7 @@ export default class InfoContent extends Component {
 
         <button type="button" className="btn btn-secondary closeInfoButton" onClick={unselectAll}><i className="fa fa-times" aria-hidden="true"></i></button>
 
-        <div className="row"><div className="col-11 col-sm-11">{titleLine}</div></div>
+        <div className="row"><div className="col-12">{titleLine}</div></div>
 
         <div className="row vesselrow spaceabove">{vesselItems}</div>
 
