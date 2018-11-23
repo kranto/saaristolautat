@@ -187,6 +187,7 @@ div#infopagecontent {
   height: 40px;
   padding: 0;
   color: #000;
+  z-index: 10;
 }
 
 .scrollIndicator {
@@ -685,6 +686,10 @@ div#info {
   position: absolute;
   bottom: 6px;
   right: 15px;
+}
+
+.vesselfeatures span {
+  margin-left: 7px;
 }
 
 .routefeature {
