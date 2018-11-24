@@ -32,8 +32,8 @@ export default class InfoContent extends Component {
 
     const data = routeInfo(this.props.data.routes[route]);
 
-    const specifier = data.specifier ? <div><span className="specifier">{data.specifier}</span></div> : "";
-    const titleLine = (<div className="infotitle" style={infoTitleStyle}>{data.name}{specifier}</div>);
+    const specifier = <div className="specifier">{data.specifier}</div>;
+    const titleLine = <span>{data.name}{specifier}</span>;
 
     const vesselItems = data.vessels.map(vessel => {
       const features = vessel.features.map(feature =>
@@ -86,11 +86,12 @@ export default class InfoContent extends Component {
     return (
       <div className="infocontent">
 
-        <button type="button" className="btn btn-secondary closeInfoButton" onClick={unselectAll}><i className="fa fa-times" aria-hidden="true"></i></button>
+    <div className="infotitle" style={infoTitleStyle}>
+      <button type="button" className="btn btn-secondary closeInfoButton" onClick={unselectAll}><i className="fa fa-times" aria-hidden="true"></i></button>
+      {titleLine}
+    </div>
 
-        <div className="row"><div className="col-12">{titleLine}</div></div>
-
-        <div className="row vesselrow spaceabove">{vesselItems}</div>
+      <div className="row vesselrow spaceabove">{vesselItems}</div>
 
         <div className="row spaceabove">{featureItems}</div>
 
@@ -100,7 +101,7 @@ export default class InfoContent extends Component {
 
         <div className="spaceabove">{noteItems}</div>
 
-        <div className="spaceabove"><h4>{L('infocontent.contactinfo')}</h4></div>
+        <div className="contactsheader">{L('infocontent.contactinfo')}</div>
 
         <div id="contactslist" className="">
           <div className="contactsbox">{contactItems}</div>
