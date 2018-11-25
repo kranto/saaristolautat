@@ -581,10 +581,56 @@ div#info {
   font-size: 18px; 
 }
 
-.mapTypeSelect {
+.MapTypeSelector {
   height: 30px;
   width: 100%;
   background-color: white;
+  overflow: hidden;
+}
+
+.MapTypeSelector.open {
+  height: initial;
+}
+
+.mapSelectOption {
+  height: 0px;
+  cursor: pointer;
+  margin-bottom: 0px;
+  overflow: hidden;
+}
+
+.mapSelectOption.selected {
+  height: 30px;
+  border: 1px solid darkgrey;
+}
+
+.mapSelectOption:hover {
+  border: 3px solid darkgrey;
+}
+
+.MapTypeSelector.open .mapSelectOption {
+  height: 87px;
+  margin-bottom: 3px;
+  transition: height 300ms ease-in-out;
+}
+
+.MapTypeSelector.open .mapSelectOption.selected {
+  border: 3px solid blue;
+}
+
+.mapSelectOption .text {
+  position: absolute;
+  top: 2px;
+  left: 5px;
+  text-shadow:
+  -2px -2px 0px rgba(255, 255, 255, 1),
+  2px -2px 0px rgba(255, 255, 255, 1),
+  -2px 2px 0px rgba(255, 255, 255, 1),
+  2px 2px 0px rgba(255, 255, 255, 1),
+  -2px 0px 0px rgba(255, 255, 255, 1),
+  2px 0px 0px rgba(255, 255, 255, 1),
+  0px -2px 0px rgba(255, 255, 255, 1),
+  0px 2px 0px rgba(255, 255, 255, 1);
 }
 
 .layerselector {

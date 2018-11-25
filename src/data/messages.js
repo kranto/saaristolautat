@@ -84,6 +84,7 @@ const messagesRaw = { // FI SV EN
         settings: ["Asetukset", "Inställningar", "Settings"],
     },
     settings: {
+        backgroundmap: ["Taustakartta", "Bakgrundskarta", "Background Map"],
         fullscreen: ["Koko ruutu", "Full screen", "Full screen"]
     },
     menu: {
