@@ -8,10 +8,10 @@ export default class Loader extends Component {
       <div id="loader">
         <div id="loaderbox">
           <div id="loaderheader">
-            <img src="/mstile-70x70.png" alt="Saaristolautat.fi"/>
+            <img src="/mstile-70x70.png" alt="Logo"/>
           </div>
           <div id="loadercontent">
-            <h1>Saaristolautat.fi (react)</h1>
+            <h1>{L2("application.title")}</h1>
             <p>{L2("loader.main")}</p>
             <p dangerouslySetInnerHTML={{__html: L2("loader.islands")}}></p>
           </div>

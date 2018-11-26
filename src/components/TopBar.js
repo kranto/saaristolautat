@@ -11,7 +11,7 @@ export default class TopBar extends Component {
           <span className="description">{L2("topbar.info")}</span>
         </button>
         <div id="topbartitle">
-          Saaristolautat.fi
+          {L2("application.title")}
         </div>
         <button id="settingsbutton" type="button" className={"topbarbutton right" + (this.props.settingsOpen ? " active" : "")} 
           onClick={this.props.onSettingsButtonClicked}>

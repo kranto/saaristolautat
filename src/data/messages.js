@@ -64,7 +64,7 @@ const messagesRaw = { // FI SV EN
         closing: ['Suljetaan live-näkymä', 'Live-vyn stängs', 'Closing live view']
     },
     application: {
-        title: ["Saaristolautat.fi (react)", "Saaristolautat.fi (react)", "Saaristolautat.fi (react)"]
+        title: ["Saaristolautat.fi", "Saaristolautat.fi", "Saaristolautat.fi"]
     },
     loader: {
         main: ["Turun saariston ja Ahvenanmaan lauttareitit", "Skärgårdsfärjorna i Skärgårdshavet", "Ferry routes in the Finnish archipelago"],
