@@ -9,11 +9,10 @@ export default class TopBar extends Component {
     }
   }
 
-  componentDidMount() {
-    setTimeout(() => this.setState({hideBubbles: true}), 15000);
-  }
-
   render() {
+    if (!this.state.hideBubbles && this.props.bannerClosed && !this.hideTimeout) {
+      this.hideTimeout = setTimeout(() => this.setState({hideBubbles: true}), 15000);
+    }
     const descriptionClasses = "description" + (this.state.hideBubbles ? " hide" : "");
     return (
       <div id="topbar">

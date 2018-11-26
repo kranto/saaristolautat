@@ -91,12 +91,16 @@ function hideLoader() {
     if (dontShowAgainVersion < currentBannerVersion && !location.hash && !selected.length) {
       $('#bannerModal').modal({});
       setTimeout(() => $('#bannerModal').modal({}), 500);
+      store.dispatch({type: "BANNER_OPENED"});
+    } else {
+      store.dispatch({type: "BANNER_CLOSED"});
     }
   }
 }
 
 $(document).ready(() => {
   $("#bannerModal").on('hidden.bs.modal', () => {
+    store.dispatch({type: "BANNER_CLOSED"});
     if ($("#dont-show-again-cb").is(":checked")) {
       localStorage.setItem("dontShowAgainVersion", currentBannerVersion);
     }

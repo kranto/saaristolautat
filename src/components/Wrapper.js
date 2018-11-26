@@ -87,7 +87,8 @@ class Wrapper extends Component {
         <MapContainer />
 
         <TopBar id="topbar" onMenuButtonClicked={toggleMenu} onSettingsButtonClicked={toggleSettings} 
-          menuOpen={this.props.uiState.menuOpen} settingsOpen={this.props.uiState.settingsOpen}/>
+          menuOpen={this.props.uiState.menuOpen} settingsOpen={this.props.uiState.settingsOpen}
+          bannerClosed={this.props.uiState.bannerClosed}/>
         <Menu open={this.props.uiState.menuOpen}/>
         <Settings open={this.props.uiState.settingsOpen}/>
         <div id="liveindpos"><LiveIndicator /></div>
