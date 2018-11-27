@@ -1,10 +1,15 @@
 import React, { Component } from 'react';
+import ReactDOM from 'react-dom';
 import FullScreenButton from './FullScreenButton';
 import SettingsLayers from './SettingsLayers';
 import MapTypeSelector from './MapTypeSelector2';
 import LocaleSelector from './LocaleSelector';
 
 export default class Settings extends Component {
+
+  componentDidUpdate() {
+    if (!this.props.open) ReactDOM.findDOMNode(this).scrollTop = 0;
+  }
 
   render() {
     return (

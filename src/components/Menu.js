@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import ReactDOM from 'react-dom';
 import { connect } from 'react-redux';
 import MenuItem from './MenuItem';
 import { L2 } from '../lib/localizer';
@@ -7,6 +8,10 @@ import { menuItemClicked } from '../lib/navigation';
 class Menu extends Component {
 
   menuItems = ["gettingthere", "alandferriesinfo", "finlandferriesinfo", "live", "linksinfo", "appinfo"];
+
+  componentDidUpdate() {
+    if (!this.props.open) ReactDOM.findDOMNode(this).scrollTop = 0;
+  }
 
   render() {
     const items = this.menuItems.map(item => {
