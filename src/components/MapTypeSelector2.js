@@ -11,10 +11,14 @@ class MapTypeSelector extends Component {
 
     mapTypes = ["roadmap", "satellite", "hybrid", "terrain", "OSM", "MMLTAUSTA", "MMLMAASTO"];
 
-    onClickk(event) {
-        console.log(event);
+    onClick(event) {
         if (this.state.open) {
-            this.props.dispatch(selectMapType(event.target.getAttribute("data-target")));
+            const clicked = event.target.getAttribute("data-target");
+            if (this.props.mapTypeId === clicked) {
+                this.setState({ open: false });
+            } else {
+                this.props.dispatch(selectMapType(clicked));
+            }
         } else {
             this.setState({ open: true });
         }
@@ -29,7 +33,7 @@ class MapTypeSelector extends Component {
         const options = this.mapTypes.map(mapType => {
             const classes = "mapSelectOption" + (this.props.mapTypeId === mapType ? " selected" : "");
             return (
-                <div key={mapType} data-target={mapType} onClick={this.onClickk.bind(this)} className={classes}>
+                <div key={mapType} data-target={mapType} onClick={this.onClick.bind(this)} className={classes}>
                     <div style={{ position: "relative", pointerEvents: "none" }}>
                         <img src={"img/" + mapType + ".png"} alt={mapType} style={{ maxWidth: "100%", maxHeight: "100%" }}></img>
                         <div className="text">{L2("mapTypes." + mapType)}</div>

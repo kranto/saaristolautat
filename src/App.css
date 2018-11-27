@@ -618,14 +618,9 @@ div#info {
 }
 
 .MapTypeSelector {
-  height: 30px;
   width: 100%;
   background-color: white;
   overflow: hidden;
-}
-
-.MapTypeSelector.open {
-  height: initial;
 }
 
 .mapSelectOption {
@@ -633,6 +628,7 @@ div#info {
   cursor: pointer;
   margin-bottom: 0px;
   overflow: hidden;
+  transition: height 300ms ease-in-out;
 }
 
 .mapSelectOption.selected {
