@@ -216,14 +216,14 @@ div#infopagecontent {
 
 .map div {
   text-shadow:
-  -1px -1px 0px rgba(255, 255, 255, 0.3),
-  1px -1px 0px rgba(255, 255, 255, 0.3),
-  -1px 1px 0px rgba(255, 255, 255, 0.3),
-  1px 1px 0px rgba(255, 255, 255, 0.3),
-  -1px 0px 0px rgba(255, 255, 255, 0.3),
-  1px 0px 0px rgba(255, 255, 255, 0.3),
-  0px -1px 0px rgba(255, 255, 255, 0.3),
-  0px 1px 0px rgba(255, 255, 255, 0.3);
+  -2px -2px 1px rgba(255, 255, 255, 0.7),
+  2px -2px 1px rgba(255, 255, 255, 0.7),
+  -2px 2px 1px rgba(255, 255, 255, 0.7),
+  2px 2px 1px rgba(255, 255, 255, 0.7),
+  -2px 0px 1px rgba(255, 255, 255, 0.7),
+  2px 0px 1px rgba(255, 255, 255, 0.7),
+  0px -2px 1px rgba(255, 255, 255, 0.7),
+  0px 2px 1px rgba(255, 255, 255, 0.7);
 }
 
 .map.satellite div {
