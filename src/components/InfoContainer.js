@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import ReactDOM from 'react-dom';
 import { connect } from 'react-redux';
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 import InfoContent from './InfoContent';
@@ -18,9 +19,14 @@ class InfoContainer extends Component {
     this.setState({ hidden: hidden });
   }
 
+  componentDidUpdate(prevProps) {
+    if (this.props.routeid !== prevProps.routeid ||
+      this.props.infoContent2key !== prevProps.infoContent2key) {
+        ReactDOM.findDOMNode(this).scrollTop = 0;
+      }
+  }
+
   render() {
-    const infoContent2key = this.props.targets === null ? null : 
-    this.props.targets.map(r=>r.id).join("-");
     return (
       <div id="infoholder" className={"info" + (this.state.hidden ? " hidden" : "")}
         onMouseLeave={this.props.onMouseLeave}
@@ -33,7 +39,7 @@ class InfoContainer extends Component {
 
           <InfoContent isHidden={this.state.hidden} setHidden={this.setHidden.bind(this)}
             locale={this.props.locale} routeid={this.props.routeid} data={this.props.data} key={this.props.routeid} />
-          <InfoContent2 locale={this.props.locale} targets={this.props.targets} key={infoContent2key}/>
+          <InfoContent2 locale={this.props.locale} targets={this.props.targets} key={this.props.infoContent2key}/>
         </ReactCSSTransitionGroup>
       </div>
     );
@@ -46,6 +52,7 @@ const mapStateToProps = (state) => {
     locale: state.settings.locale,
     routeid: state.selection.infoContent,
     targets: state.selection.infoContent2,
+    infoContent2key: state.selection.infoContent2 === null ? null : state.selection.infoContent2.map(r=>r.id).join("-"),
     data: state.data.data
   };
 };
