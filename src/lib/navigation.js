@@ -15,7 +15,7 @@ window.onhashchange = () => {
   var hash = location.hash.substring(1);
   if (store.getState().data.data.routes[hash]) {
     var newState = { route: hash, timetable: null };
-    history.replaceState(newState, null, "/");
+    history.replaceState(newState, null, window.location.pathname);
     navigateTo(newState);
   } else if (store.getState().data.data.piers[hash]) {
     //history.go(-1);
@@ -24,6 +24,7 @@ window.onhashchange = () => {
 }
 
 window.onpopstate = (event) => {
+  if (!event.state) return;
   navigateTo(event.state);
 };
 
@@ -77,7 +78,7 @@ export function selectRoute(route) {
 }
 
 function navigateTo(state, isNewState) {
-  // console.log('navigateTo', state, history);
+  // console.log('navigateTo', state, history, new Error().stack);
   if (!state || !state.timetable) {
     closeTimetables();
   }
