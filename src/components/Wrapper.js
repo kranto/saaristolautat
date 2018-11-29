@@ -11,6 +11,7 @@ import InfoContainer from './InfoContainer';
 import ScrollIndicator from './ScrollIndicator';
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 import {toggleMenu, toggleSettings} from '../lib/uicontrol';
+import { phases } from '../lib/constants';
 
 const $ = window.$;
 
@@ -88,7 +89,7 @@ class Wrapper extends Component {
 
         <TopBar id="topbar" onMenuButtonClicked={toggleMenu} onSettingsButtonClicked={toggleSettings} 
           menuOpen={this.props.uiState.menuOpen} settingsOpen={this.props.uiState.settingsOpen}
-          bannerClosed={this.props.uiState.bannerClosed}/>
+          introduction={this.props.uiState.phase === phases.INTRODUCTION}/>
         <Menu open={this.props.uiState.menuOpen}/>
         <Settings open={this.props.uiState.settingsOpen}/>
         <div id="liveindpos"><LiveIndicator /></div>

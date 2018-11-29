@@ -512,15 +512,18 @@ div#info {
     position: fixed;
     top: 60px;
     left: 30px;
+    padding: 5px;
     background-color: rgba(0,0,0,.7);
     color: white;
-    border-radius: 0px 10px 10px 10px;
+    border-radius: 0px 7px 7px 7px;
+    transition: opacity 500ms linear;
+    transition-delay: 1000ms;
   }
   .topbarbutton.right .description {
     top: 60px;
     left: initial;
     right: 30px;
-    border-radius: 10px 0px 10px 10px;
+    border-radius: 7px 0px 7px 7px;
   }
   .topbarbutton .description:after {
     content: '';

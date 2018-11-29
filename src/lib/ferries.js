@@ -2,6 +2,7 @@ import { hideMenuAndSettings } from './uicontrol';
 import { panTo } from './mapcontrol';
 import { lauttaLegs, lauttaRoutes } from './routes';
 import store from '../store';
+import { phases } from '../lib/constants';
 import { getMapStyle } from './styles';
 import { objects, objectIndex } from './objects';
 import { selectRoute } from './navigation';
@@ -88,19 +89,29 @@ function hideLoader() {
   if (loaderTimeout && mapInitialized) {
     rerender(map, true);
     $("#loader").fadeOut(1000);
+    changePhase(phases.LOADER_CLOSED);
     if (dontShowAgainVersion < currentBannerVersion && !location.hash && !selected.length) {
       $('#bannerModal').modal({});
-      setTimeout(() => $('#bannerModal').modal({}), 500);
-      store.dispatch({type: "BANNER_OPENED"});
+      setTimeout(() => {
+        $('#bannerModal').modal({});
+        changePhase(phases.BANNER_OPEN);
+      }, 500);
     } else {
-      store.dispatch({type: "BANNER_CLOSED"});
+      setTimeout(() => changePhase(phases.INTRODUCTION), 500);
     }
+  }
+}
+
+function changePhase(phase) {
+  store.dispatch({ type: "PHASE_CHANGED", payload: phase});
+  if (phase === phases.INTRODUCTION) {
+    setTimeout(() => changePhase(phases.NORMAL_USE), 12000);
   }
 }
 
 $(document).ready(() => {
   $("#bannerModal").on('hidden.bs.modal', () => {
-    store.dispatch({type: "BANNER_CLOSED"});
+    changePhase(phases.INTRODUCTION);
     if ($("#dont-show-again-cb").is(":checked")) {
       localStorage.setItem("dontShowAgainVersion", currentBannerVersion);
     }
@@ -226,3 +237,5 @@ export function createMap() {
   // initKeepCenter(map, () => selected.length);
   return map;
 }
+
+changePhase(phases.LOADER_OPEN);

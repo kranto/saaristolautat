@@ -2,18 +2,9 @@ import React, { Component } from 'react';
 import {L2} from '../lib/localizer';
 
 export default class TopBar extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      hideBubbles: false
-    }
-  }
 
   render() {
-    if (!this.state.hideBubbles && this.props.bannerClosed && !this.hideTimeout) {
-      this.hideTimeout = setTimeout(() => this.setState({hideBubbles: true}), 15000);
-    }
-    const descriptionClasses = "description" + (this.state.hideBubbles ? " hide" : "");
+    const descriptionClasses = "description" + (!this.props.introduction ? " hide" : "");
     return (
       <div id="topbar">
         <button type="button" className={"topbarbutton" + (this.props.menuOpen ? " active" : "")} onClick={this.props.onMenuButtonClicked}>

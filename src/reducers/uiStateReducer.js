@@ -1,8 +1,9 @@
+import { phases } from '../lib/constants';
+
 export default function reducer(state = {
   menuOpen: false,
   settingsOpen: false,
-  bannerOpen: false,
-  bannerClosed: false
+  phase: phases.INIT
 }, action) {
   switch (action.type) {
     case "MENU_TOGGLED":
@@ -11,10 +12,8 @@ export default function reducer(state = {
       return { ...state, settingsOpen: !state.settingsOpen, menuOpen: false };
     case "MENU_AND_SETTINGS_HIDDEN":
       return { ...state, menuOpen: false, settingsOpen: false };
-    case "BANNER_OPENED":
-      return { ...state, bannerOpen: true };
-      case "BANNER_CLOSED":
-      return { ...state, bannerOpen: false, bannerClosed: true };
+    case "PHASE_CHANGED":
+      return { ...state, phase: Math.max(state.phase, action.payload)}; 
     default:
       return state;
   }
