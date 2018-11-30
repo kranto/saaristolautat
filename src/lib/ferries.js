@@ -189,8 +189,27 @@ function rerender(map, force) {
   prevRerender = newRerender;
   objects.forEach(object => object.rerender(zoom, mapTypeId, layers));
   lauttaLegs.forEach(leg => leg.rerender(zoom, mapTypeId, layers));
+  rerenderCircle(map, zoom, mapTypeId, layers);
   hidden = false;
   prevRenderZoom = zoom;
+}
+
+let circle;
+function rerenderCircle(map, zoom) {
+  if (!circle) {
+    circle = new google.maps.Circle({
+      strokeColor: '#FFFF00',
+      fillColor: '#ffd000',
+      map: map,
+      center: {lat: 60.2, lng: 21.25},
+      radius: 110000
+    });
+  }
+  circle.setOptions({
+    strokeOpacity: zoom >= 8 ? 0 : 0.7,
+    strokeWeight: 1 + (zoom - 5)/3 ,
+    fillOpacity: zoom >= 8 ? 0 : 0.4 - (zoom - 5)*0.15
+  });
 }
 
 function hideObjects(map) {
