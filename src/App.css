@@ -783,15 +783,14 @@ div#info {
 }
 
 .routefeature {
-  position: relative;
-  left: 30px;
+  padding-left: 45px;
 }
 
 .routefeature:before {
   font-family: FontAwesome;
   -moz-osx-font-smoothing: grayscale;
   position: absolute;
-  left: -15px;
+  left: 15px;
 }
 
 .routefeature.negative:before {
