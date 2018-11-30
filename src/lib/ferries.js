@@ -206,10 +206,11 @@ function rerenderCircle(map, zoom) {
     });
   }
   circle.setOptions({
-    strokeOpacity: zoom >= 8 ? 0 : 0.7,
+    strokeOpacity: 0.7,
     strokeWeight: 1 + (zoom - 5)/3 ,
-    fillOpacity: zoom >= 8 ? 0 : 0.4 - (zoom - 5)*0.15
+    fillOpacity: 0.4 - (zoom - 5)*0.15
   });
+  circle.setVisible(zoom < 8);
 }
 
 function hideObjects(map) {
