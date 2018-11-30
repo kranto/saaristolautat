@@ -207,9 +207,9 @@ function rerenderCircle(map, zoom) {
     });
   }
   circle.setOptions({
-    strokeOpacity: 0.7,
+    strokeOpacity: 0.7 - (zoom -5)*0.1,
     strokeWeight: 1 + (zoom - 5)/3 ,
-    fillOpacity: 0.4 - (zoom - 5)*0.15
+    fillOpacity: 0.4 - (zoom - 5)*0.18
   });
   circle.setVisible(zoom < 8);
 }
