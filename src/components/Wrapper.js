@@ -62,6 +62,9 @@ class Wrapper extends Component {
     if (!elem || !elem[0]) return false;
     var isBottom = (elem[0].scrollHeight - elem.scrollTop() - scrollLimit <= elem.outerHeight());
     $('.scrollIndicator').toggleClass('can-scroll', !isBottom);
+
+    var height = $(".mapoverlay").outerHeight();
+    $(".closeInfoButton").toggleClass('fix', elem.scrollTop() > height);
   }
 
   render() {

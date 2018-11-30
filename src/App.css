@@ -190,6 +190,13 @@ div#infopagecontent {
   z-index: 10;
 }
 
+.closeInfoButton.fix {
+  position: fixed;
+  top: 70px;
+  right: 21px;
+  box-shadow: 0 2px 2px 0 rgba(220, 220, 220, 0.5);
+}
+
 .scrollIndicator {
   height: 25px;
   width: 100%;
