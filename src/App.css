@@ -100,7 +100,12 @@ div#loadercontent {
 }
 
 .fmodalheader {
+  position: relative;
   margin-bottom: 20px;
+}
+
+.fmodalheader .closeInfoButton {
+  top: 0px;
 }
 
 .timetablescontent {
@@ -178,9 +183,11 @@ div#infopagecontent {
 .infosection h1, .infosection h2 {
   margin-bottom: 30px;
 }
+
 .closeInfoButton {
-  float: right;
-  margin-left: 5px;
+  position: absolute;
+  top: 20px;
+  right: 20px;
   background-color: #eeeeee;
   font-size: 20px;
   width: 40px;
@@ -188,6 +195,13 @@ div#infopagecontent {
   padding: 0;
   color: #000;
   z-index: 10;
+}
+
+.closeInfoButtonPlaceHolder {
+  float: right;
+  margin-left: 5px;
+  width: 40px;
+  height: 40px;
 }
 
 .closeInfoButton.fix {

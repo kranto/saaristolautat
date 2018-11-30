@@ -88,6 +88,7 @@ export default class InfoContent extends Component {
 
     <div className="infotitle" style={infoTitleStyle}>
       <button type="button" className="btn btn-secondary closeInfoButton" onClick={unselectAll}><i className="fa fa-times" aria-hidden="true"></i></button>
+      <div className="closeInfoButtonPlaceHolder"></div>
       {titleLine}
     </div>
 

@@ -20,10 +20,10 @@ export default class FModal extends Component {
     return (
       <div id={this.props.id} className="fmodal" onClick={this.onCloseClicked.bind(this)} key="1" ref={this.fmodalRef}>
         <div className="fmodalcontent" onClick={this.stopPropagation}>
+          <div className="fmodalheader" style={{position: "relative"}}>
           <button type="button" className="btn btn-secondary closeInfoButton" onClick={this.onCloseClicked.bind(this)}>
             <i className="fa fa-times" aria-hidden="true"></i>
           </button>
-          <div className="fmodalheader">
             {this.props.header}
           </div>
           <div className="fmodalbody">
