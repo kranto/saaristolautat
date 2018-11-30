@@ -202,7 +202,8 @@ function rerenderCircle(map, zoom) {
       fillColor: '#ffd000',
       map: map,
       center: {lat: 60.2, lng: 21.25},
-      radius: 110000
+      radius: 110000,
+      clickable: false
     });
   }
   circle.setOptions({
