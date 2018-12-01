@@ -380,7 +380,6 @@ export function initObjectRenderer(map, txtol) {
       var highlight = function (doHighlight) {
         isSelected = doHighlight;
         lineb.setOptions({ strokeOpacity: doHighlight ? properties.highlightOpacity : 0 });
-        // rerender(map.getZoom(), map.getMapTypeId());
       };
       lineb.addListener('click', function (event) {
         select([connectionObject], event);

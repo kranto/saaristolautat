@@ -29,7 +29,7 @@ h3 {
   font-size: 20px;
 }
 
-div#loader {
+#loader {
   background-image: url("asterholma1.jpg");
   background-size: auto 100%;
   background-repeat: repeat;
@@ -43,25 +43,25 @@ div#loader {
   font-family: sans-serif;
 }
 
-div#loaderbox {
+#loaderbox {
   display: block;
   width: 100%;
   position: absolute;
   top: 50px;
 }
 
-div#loaderheader {
+#loaderheader {
   top: 50px;
   width: 100%;
   display: block;
 }
 
-div#loaderheader img {
+#loaderheader img {
   display: block;
   margin: auto;
 }
 
-div#loadercontent {
+#loadercontent {
   text-align: center;
   margin-left: auto;
   margin-right: auto; 
@@ -1234,4 +1234,22 @@ h4 {
 .infocontent-leave.infocontent-leave-active {
   opacity: 0;
   transition: opacity 200ms linear;
+}
+
+#loader.loader-enter {
+  opacity: 0;
+}
+
+#loader.loader-enter.loader-enter-active {
+  opacity: 1;
+  transition: opacity 200ms linear; 
+}
+
+#loader.loader-leave {
+  opacity: 1;
+}
+
+#loader.loader-leave.loader-leave-active {
+  opacity: 0;
+  transition: opacity 700ms linear;
 }

@@ -64,9 +64,9 @@ function onLocaleChanged() {
 var loaderTimeout = false;
 var mapInitialized = false;
 
-// if (window.location.hostname === "localhost") $("#loader").fadeOut(500);
+if (window.location.hostname === "localhost") changePhase(phases.LOADER_CLOSED);
 
-setTimeout(() => { loaderTimeout = true; hideLoader(); }, 3000);
+setTimeout(() => { loaderTimeout = true; hideLoader(); }, 2500);
 
 function onMapIdle() {
   if (map.getZoom() < 8) {
@@ -75,7 +75,7 @@ function onMapIdle() {
   } else {
     var z = map.getZoom();
     map.setZoom(z - 1);
-    setTimeout(() => map.setZoom(z), 100);
+    setTimeout(() => map.setZoom(z), 500);
   }
   mapInitialized = true;
   hideLoader();
@@ -88,7 +88,6 @@ function hideLoader() {
   currentBannerVersion = $("#dont-show-again-cb").attr("version") || 0;
   if (loaderTimeout && mapInitialized) {
     rerender(map, true);
-    $("#loader").fadeOut(1000);
     changePhase(phases.LOADER_CLOSED);
     if (dontShowAgainVersion < currentBannerVersion && !location.hash && !selected.length) {
       $('#bannerModal').modal({});
@@ -224,7 +223,7 @@ function hideObjects(map) {
 
 var mapOptions = {
   center: { lat: 60.25, lng: 21.25 },
-  zoom: 9,
+  zoom: 11,
   minZoom: 4,
   maxZoom: 15,
   mapTypeControl: false,
