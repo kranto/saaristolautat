@@ -191,6 +191,7 @@ div#infopagecontent {
   max-width: 630px;
   margin: 0 auto 0 auto;
   height: 0;
+  z-index: 1;
 }
 
 #timetables .closeInfoButtonHolder {
@@ -198,9 +199,6 @@ div#infopagecontent {
 }
 
 .closeInfoButton {
-  position: absolute;
-  top: 20px;
-  right: 20px;
   background-color: #eeeeee;
   font-size: 20px;
   width: 40px;
@@ -208,6 +206,12 @@ div#infopagecontent {
   padding: 0;
   color: #000;
   z-index: 10;
+}
+
+.closeInfoButton {
+  position: absolute;
+  top: 20px;
+  right: 20px;
 }
 
 .closeInfoButtonPlaceHolder {
