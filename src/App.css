@@ -185,6 +185,14 @@ div#infopagecontent {
   margin-bottom: 30px;
 }
 
+.closeInfoButtonHolder {
+  position: sticky;
+  top: 0;
+  max-width: 630px;
+  margin: 0 auto 0 auto;
+  height: 0;
+}
+
 .closeInfoButton {
   position: absolute;
   top: 20px;
@@ -210,6 +218,12 @@ div#infopagecontent {
   top: 70px;
   right: 21px;
   box-shadow: 0 2px 2px 0 rgba(220, 220, 220, 0.5);
+}
+
+.closeInfoButtonHolder .closeInfoButton {
+  margin-top: 0px;
+  top: 15px;
+  right: 15px;
 }
 
 .scrollIndicator {
