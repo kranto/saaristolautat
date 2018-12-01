@@ -193,6 +193,10 @@ div#infopagecontent {
   height: 0;
 }
 
+#timetables .closeInfoButtonHolder {
+  max-width: 730px;
+}
+
 .closeInfoButton {
   position: absolute;
   top: 20px;
