@@ -401,20 +401,6 @@ div#infopagecontent {
   -moz-user-select: none; 
 }
 
-div#info {
-  overflow-y: hidden; 
-  width: 100%; 
-  min-height: 10%;
-  position: absolute;
-  top: 100%;
-  display: none;
-  padding-top: 20px;
-  padding-left: 10px;
-  padding-right: 10px;
-  padding-bottom: 30px;
-  background-color: #fbfcfd;
-}
-
 .map {
   height: 100%;
   width: 100%; 
@@ -1060,28 +1046,6 @@ h4 {
   font-weight: bold;
 }
 
-@media screen and (max-height: 500px) {
-  #topbar {
-    height: 40px;
-  }
-  .topbarbutton {
-    font-size: 25px;
-    margin: 2px;
-  }
-  #topbartitle {
-    padding: 5px;
-  }
-  #menu, #settings, #infopage {
-    top: 40px;
-  }
-  #wrapper2 {
-    top: 40px;
-  }
-  #mapoverlay {
-    top: 40px;
-  }
-}
-
 .infopageroute {
   display: inline-block;
   width: 30px;
@@ -1173,6 +1137,12 @@ h4 {
     left: -400px;
     transition: left 200ms ease-in;
   }
+  .closeInfoButton.fix1 {
+    position: fixed;
+    top: 70px;
+    left: 340px;
+    box-shadow: 0 2px 2px 0 rgba(220, 220, 220, 0.5);
+  }
 }
 
 @media screen and (max-width: 767px) {
@@ -1192,6 +1162,31 @@ h4 {
   .info-leave.info-leave-active {
     top: 100%;
     transition: top 200ms ease-in;
+  }
+}
+
+@media screen and (max-height: 500px) {
+  #topbar {
+    height: 40px;
+  }
+  .topbarbutton {
+    font-size: 25px;
+    margin: 2px;
+  }
+  #topbartitle {
+    padding: 5px;
+  }
+  #menu, #settings, #infopage {
+    top: 40px;
+  }
+  #wrapper2 {
+    top: 40px;
+  }
+  #mapoverlay {
+    top: 40px;
+  }
+  .closeInfoButton.fix1 {
+    top: 60px;
   }
 }
 

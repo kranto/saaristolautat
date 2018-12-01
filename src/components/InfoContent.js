@@ -86,13 +86,13 @@ export default class InfoContent extends Component {
     return (
       <div className="infocontent">
 
-    <div className="infotitle" style={infoTitleStyle}>
-      <button type="button" className="btn btn-secondary closeInfoButton" onClick={unselectAll}><i className="fa fa-times" aria-hidden="true"></i></button>
-      <div className="closeInfoButtonPlaceHolder"></div>
-      {titleLine}
-    </div>
+        <div className="infotitle" style={infoTitleStyle}>
+          <button type="button" className="btn btn-secondary closeInfoButton fix1" onClick={unselectAll}><i className="fa fa-times" aria-hidden="true"></i></button>
+          <div className="closeInfoButtonPlaceHolder"></div>
+          {titleLine}
+        </div>
 
-      <div className="row vesselrow spaceabove">{vesselItems}</div>
+        <div className="row vesselrow spaceabove">{vesselItems}</div>
 
         <div className="row spaceabove">{featureItems}</div>
 
