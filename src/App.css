@@ -1207,6 +1207,9 @@ h4 {
   #mapoverlay {
     top: 40px;
   }
+}
+
+@media screen and (max-height: 500px) and (min-width: 768px) {
   .closeInfoButton.fix1 {
     top: 60px;
   }
