@@ -38,7 +38,7 @@ class Timetables extends Component {
   getBody() {
     if (!this.props.timetableid) return "";
     const timetable = { ...this.props.data.timetables[this.props.timetableid] };
-    const tables = filterTimetables(timetable.tables).map((table, index) => {
+    const tables = filterTimetables(LP(timetable, "tables")).map((table, index) => {
       return {
         ...table,
         active: "",
@@ -59,7 +59,7 @@ class Timetables extends Component {
     );
 
     const tableItems = tables.map(table => {
-      const images = table.images.map(image =>
+      const images = LP(table, "images").map(image =>
         <div className="timetablelink" key={image}>
           <a href={"data/timetables_jpg/" + image} target="timetable">
             <div>
