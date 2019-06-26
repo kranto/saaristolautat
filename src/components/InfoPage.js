@@ -229,7 +229,7 @@ class InfoPage extends Component {
             </div>
             <div id="licensebox">
               <p>
-                Saaristolautat.fi © Kyösti Ranto 2018
+                Saaristolautat.fi © Kyösti Ranto 2018&mdash;2019
               </p>
 
               <div style={{ marginTop: "10px" }}></div>
