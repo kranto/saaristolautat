@@ -2,7 +2,7 @@
   "name": "saaristolautat",
   "version": "0.1.0",
   "private": true,
-  "homepage": "/react2",
+  "homepage": "/",
   "dependencies": {
     "axios": "^0.18.0",
     "react": "^16.5.2",
@@ -18,7 +18,7 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "mv public/data .data.save; REACT_APP_VERSION=$(date) react-scripts build; mv .data.save public/data",
-    "copy": "scp -r build/* dh:test/react2/",
+    "copy": "scp -r build/* dh:test/",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
