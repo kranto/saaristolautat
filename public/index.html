@@ -3,6 +3,8 @@
   <head>
     <title>Saaristolautat.fi</title>
 
+    <meta name="keywords" content="saaristolautat, saaristo, autolautat, aikataulut, turun saaristo, ahvenanmaa, saariston rengastie, rengastie"/>
+    <meta name="description" content="Turun saariston ja Ahvenanmaan lauttojen reitit ja aikataulut"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <meta name="HandheldFriendly" content="true" />
     <meta charset="utf-8"/>
@@ -24,5 +26,845 @@
   </head>
   <body>
     <div id="app"></div>
+
+    <div id="keywords" style="z-index: 0; font-size: 1px; color: #fff;">
+      lautta lautat lossi lossit laiva laivat aikataulu aikataulut lautta-aikataulut saaristo reitti reitit risteily 
+      färja färjor tidtabell tidtabeller skärgård rutt kryssning
+      ferry schedule timetable finland finnish archipelago route cruise
+      ahvenanmaa åland islands nagu nauvo pargas parainen korpo korppoo gustavs kustavi velkua iniö rymättylä rimito houtskari houtskär utö jurmo hangö hanko kimitoön kemiönsaari kemiö kimito kasnäs högsåra pensar kumlinge föglö brändö kökar sottunga vårdö örö bengtskär turku åbo helsinki maarianhamina mariehamn eckerö naantali nådendal
+      gudingen skiftet ejdern knipan alfågeln skarven viggen doppingen frida satava aura aurora stella mergus elektra viken alva nordep isla kivimo fiskö falkö fanny norrskär aavatar eivor karolina odin summersea sissel
+    </div>
+
+    <div id="routelist" style="position: relative; top: 100%; z-index: 0; font-size: 1px; color: #fff;">
+      <div>
+        <div>
+          Föglön linja:  Svinö - Degerby
+        </div>
+        <div>
+            M/S Skarven
+        </div>
+        <div>
+            Svinö (Lumparland)
+            Degerby (Föglö)
+        </div>
+      </div>
+      <div>
+        <div>
+          Pohjoinen linja:  Hummelvik - Enklinge - Kumlinge - Lappo - Torsholma
+        </div>
+        <div>
+            M/S Alfågeln
+            M/S Ejdern
+            M/S Rosala II
+        </div>
+        <div>
+            Hummelvik (Vårdö)
+            Enklinge 
+            Kumlinge 
+            Lappo 
+            Torsholma (Brändö)
+        </div>
+      </div>
+      <div>
+        <div>
+          Pohjoinen linja:  Enklinge - Kumlinge
+        </div>
+        <div>
+            M/S Rosala II
+        </div>
+        <div>
+            Enklinge 
+            Kumlinge 
+        </div>
+      </div>
+      <div>
+        <div>
+          Pohjoinen linja:  Asterholma - Lappo - Torsholma
+        </div>
+        <div>
+            M/S Frida II
+        </div>
+        <div>
+            Asterholma 
+            Lappo 
+            Torsholma (Brändö)
+        </div>
+      </div>
+      <div>
+        <div>
+          Pohjoinen linja:  Åva - Jurmo
+        </div>
+        <div>
+            M/S Doppingen
+        </div>
+        <div>
+            Åva (Brändö)
+            Jurmo 
+        </div>
+      </div>
+      <div>
+        <div>
+          Pohjoinen linja:  Vuosnainen - Åva
+        </div>
+        <div>
+            M/S Viggen
+        </div>
+        <div>
+            Vuosnainen (Kustavi)
+            Åva (Brändö)
+        </div>
+      </div>
+      <div>
+        <div>
+          Eteläinen linja:  Långnäs - Överö - Sottunga - Kökar - Galtby
+        </div>
+        <div>
+            M/S Gudingen
+            M/S Skiftet
+            M/S Knipan
+        </div>
+        <div>
+            Långnäs (Lumparland)
+            Överö (Föglö)
+            Sottunga 
+            Husö 
+            Kyrkogårdsö 
+            Kökar 
+            Galtby (Korppoo)
+        </div>
+      </div>
+      <div>
+        <div>
+          Poikittainen linja:  Långnäs - Överö - Sottunga - Snäckö
+        </div>
+        <div>
+            M/S Odin
+        </div>
+        <div>
+            Långnäs (Lumparland)
+            Bergö 
+            Överö (Föglö)
+            Sottunga 
+            Snäckö (Kumlinge)
+        </div>
+      </div>
+      <div>
+        <div>
+          Iniö - Kustavi 
+        </div>
+        <div>
+            M/S Aura
+        </div>
+        <div>
+            Kannvik (Iniö)
+            Heponiemi (Kustavi)
+        </div>
+      </div>
+      <div>
+        <div>
+          Houtskari - Iniö 
+        </div>
+        <div>
+            M/S Antonia
+        </div>
+        <div>
+            Mossala (Houtskari)
+            Dalen (Iniö)
+        </div>
+      </div>
+      <div>
+        <div>
+          Korppoo - Houtskari 
+        </div>
+        <div>
+            M/S Stella
+            M/S Mergus
+        </div>
+        <div>
+            Galtby (Korppoo)
+            Kittuis (Houtskari)
+        </div>
+      </div>
+      <div>
+        <div>
+          Korppoo - Norrskata 
+        </div>
+        <div>
+            M/S Stella
+            M/S Mergus
+        </div>
+        <div>
+            Galtby (Korppoo)
+            Olofsnäs (Norrskata)
+        </div>
+      </div>
+      <div>
+        <div>
+          Nauvo - Korppoo 
+        </div>
+        <div>
+            M/S Prostvik 1
+            M/S Nagu 2
+        </div>
+        <div>
+            Pärnäinen/Pärnäs (Nauvo)
+            Retais (Korppoo)
+        </div>
+      </div>
+      <div>
+        <div>
+          Parainen - Nauvo 
+        </div>
+        <div>
+            M/S Elektra
+            M/S Sterna
+            M/S Falco
+        </div>
+        <div>
+            Lillmälö (Parainen)
+            Prostvik (Nauvo)
+        </div>
+      </div>
+      <div>
+        <div>
+          Pieni rengastie:  Nauvo - Seili - Hanka
+        </div>
+        <div>
+            M/S Östern
+        </div>
+        <div>
+            Nauvo/Nagu 
+            Seili/Själö 
+            Hanka (Rymättylä)
+        </div>
+      </div>
+      <div>
+        <div>
+          Velkuan reitti:  Teersalo - Hakkenpää
+        </div>
+        <div>
+            M/S Kivimo
+        </div>
+        <div>
+            Teersalo (Velkua)
+            Hakkenpää (Taivassalo)
+        </div>
+      </div>
+      <div>
+        <div>
+          Kasnäs - Hiittinen 
+        </div>
+        <div>
+            M/S Aurora
+        </div>
+        <div>
+            Kasnäs (Kemiönsaari)
+            Långnäs (Hiittinen)
+        </div>
+      </div>
+      <div>
+        <div>
+          Velkuan reitti 
+        </div>
+        <div>
+            M/S Kivimo
+        </div>
+        <div>
+            Teersalo (Velkua)
+            Rauhala 
+            Lailuoto 
+            Talosmeri 
+            Munninmaa 
+            Tammisluoto 
+            Liettinen 
+            Kettumaa 
+            Hakkenpää (Taivassalo)
+        </div>
+      </div>
+      <div>
+        <div>
+          Rymättylän reitti 
+        </div>
+        <div>
+            M/S Isla
+        </div>
+        <div>
+            Haapala (Rymättylä)
+            Ruotsalainen 
+            Korvenmaa 
+            Pakinainen 
+            Pähkinäinen 
+            Samsaari 
+            Maisaari 
+        </div>
+      </div>
+      <div>
+        <div>
+          Korppoon reitti 
+        </div>
+        <div>
+            Y/A Fiskö
+        </div>
+        <div>
+            Verkan (Korppoo)
+            Finnö 
+            Käldersö 
+            Elvsö 
+            Berghamn 
+            Luk 
+            Kittuis (Houtskari)
+            Lillpensor 
+            Storpensor 
+            Havträsk (Norrskata)
+            Brunskär 
+            Österskär 
+            Kälö 
+        </div>
+      </div>
+      <div>
+        <div>
+          Houtskarin reitti ja Iniön lisäreitti 
+        </div>
+        <div>
+            M/S Karolina
+            M/S Satava
+        </div>
+        <div>
+            Näsby (Houtskari)
+            Roslax (Houtskari)
+            Ytterstö 
+            Lempmo 
+            Salmis 
+            Lammholm 
+            Norrby (Iniö)
+            Sördö 
+            Lempnäs 
+            Äpplö 
+            Bockholm 
+            Södö 
+            Nåtö 
+            Torsholma (Brändö)
+            Själö 
+            Härklot 
+            Kvarnholm 
+            Åselholm 
+            Perkala 
+            Perkala P 
+            Kolko 
+            Kannvik (Iniö)
+        </div>
+      </div>
+      <div>
+        <div>
+          Utön reitti 
+        </div>
+        <div>
+            M/S Eivor
+        </div>
+        <div>
+            Pärnäinen/Pärnäs (Nauvo)
+            Berghamn 
+            Nötö 
+            Aspö 
+            Jurmo 
+            Utö 
+        </div>
+      </div>
+      <div>
+        <div>
+          Nauvon pohjoinen reitti 
+        </div>
+        <div>
+            M/S Falkö
+        </div>
+        <div>
+            Nauvo/Nagu 
+            Seili/Själö 
+            Innamo 
+            Järvsor 
+            Maskinnamo 
+            Ahvensaari/Åvensor 
+            Lavarn (Houtsala)
+        </div>
+      </div>
+      <div>
+        <div>
+          Nauvon poikittainen reitti 
+        </div>
+        <div>
+            M/S Myrskylintu
+            M/S Cheri
+        </div>
+        <div>
+            Pärnäinen/Pärnäs (Nauvo)
+            Krok 
+            Mattnäs 
+            Lånholm 
+            Fagerholm 
+            Killingholm 
+            Ängsö 
+            Tveskiftsholm 
+            Berghamn 
+            Hummelholm 
+            Rockelholm 
+            Ytterstholm 
+            Byskär 
+            Brännskär 
+            Grötö 
+            Stenskär 
+            Gullkrona 
+            Kirjainen/Kirjais (Nauvo)
+        </div>
+      </div>
+      <div>
+        <div>
+          Nauvon eteläinen reitti 
+        </div>
+        <div>
+            M/S Nordep
+        </div>
+        <div>
+            Kirjainen/Kirjais (Nauvo)
+            Pensar L 
+            Peno 
+            Brännskär 
+            Stenskär 
+            Gullkrona 
+            Grötö 
+            Knivskär 
+            Kopparholm 
+            Träskholm 
+            Bodö 
+            Björkö 
+            Gloskär 
+            Trunsö 
+            Sandholm 
+            Lökholm 
+            Borstö 
+        </div>
+      </div>
+      <div>
+        <div>
+          Paraisten reitti 
+        </div>
+        <div>
+            M/S Viken
+        </div>
+        <div>
+            Granvik (Parainen)
+            Granholmen 
+            Heisala 
+            Björkholm 
+            Ramsholm 
+            Aspholm 
+            Stenholm 
+            Östra Tallholm 
+            Kuggö 
+            Pensar I 
+        </div>
+      </div>
+      <div>
+        <div>
+          Hiittisten reitti 
+        </div>
+        <div>
+            M/S Stella
+            M/S Alva
+        </div>
+        <div>
+            Kasnäs (Kemiönsaari)
+            Tunnhamn 
+            Vänö 
+            Holma 
+            Helsingholm 
+            Stora Ängesö 
+            Bolax 
+            Botesö 
+            Grönvik 
+            Djupö 
+            Vänoxa by 
+            Vänoxa släten (Bergö) 
+            Biskopsö 
+            Taalintehdas/Dalsbruk (Kemiönsaari)
+        </div>
+      </div>
+      <div>
+        <div>
+          Högsåra 
+        </div>
+        <div>
+            Lautta #151
+        </div>
+        <div>
+            Svartnäs 
+            Högsåra 
+        </div>
+      </div>
+      <div>
+        <div>
+          Vartsala 
+        </div>
+        <div>
+            Lautta #198
+        </div>
+        <div>
+            Kivimaa 
+            Vartsala 
+        </div>
+      </div>
+      <div>
+        <div>
+          Våno 
+        </div>
+        <div>
+            Lautta #201
+        </div>
+        <div>
+            Våno 
+            Mielisholm 
+        </div>
+      </div>
+      <div>
+        <div>
+          Högsar 
+        </div>
+        <div>
+            Lautta #182
+        </div>
+        <div>
+            Grännäs 
+            Ängholm 
+        </div>
+      </div>
+      <div>
+        <div>
+          Kokkila 
+        </div>
+        <div>
+            Lautta #199
+        </div>
+        <div>
+            Kokkila 
+            Angelniemi 
+        </div>
+      </div>
+      <div>
+        <div>
+          Hämmärönsalmi 
+        </div>
+        <div>
+            Lautta #185
+        </div>
+        <div>
+            Airismaa 
+            Aasla 
+        </div>
+      </div>
+      <div>
+        <div>
+          Palva 
+        </div>
+        <div>
+            Lautta #179
+        </div>
+        <div>
+            Teersalo (Velkua)
+            Palva 
+        </div>
+      </div>
+      <div>
+        <div>
+          Velkuanmaa 
+        </div>
+        <div>
+            Lautta #171
+        </div>
+        <div>
+            Palva 
+            Velkuanmaa 
+        </div>
+      </div>
+      <div>
+        <div>
+          Kivimo 
+        </div>
+        <div>
+            Lautta #167
+        </div>
+        <div>
+            Roslax (Houtskari)
+            Kivimo 
+        </div>
+      </div>
+      <div>
+        <div>
+          Saverkeit 
+        </div>
+        <div>
+            Lautta #181
+        </div>
+        <div>
+            Näsby 
+            Saverkeit 
+        </div>
+      </div>
+      <div>
+        <div>
+          Mossala 
+        </div>
+        <div>
+            Lautta #176
+        </div>
+        <div>
+            Björkö 
+            Mossala 
+        </div>
+      </div>
+      <div>
+        <div>
+          Keistiö 
+        </div>
+        <div>
+            Lautta #177
+        </div>
+        <div>
+            Dalen (Iniö)
+            Keistiö 
+        </div>
+      </div>
+      <div>
+        <div>
+          Ängösundslinjen 
+        </div>
+        <div>
+            Ängösundslinjes färja
+        </div>
+        <div>
+            Norrboda (Lumparland)
+            Ängö 
+        </div>
+      </div>
+      <div>
+        <div>
+          Björkölinjen 
+        </div>
+        <div>
+            Björkölinjes färja
+        </div>
+        <div>
+            Lappo (Brändö)
+            Björkö (Kumlinge)
+        </div>
+      </div>
+      <div>
+        <div>
+          Simskälalinjen 
+        </div>
+        <div>
+            Simskälälinjes färja
+        </div>
+        <div>
+            Sandö (Vårdö)
+            Simskäla 
+        </div>
+      </div>
+      <div>
+        <div>
+          Seglingelinjen 
+        </div>
+        <div>
+            Seglingelinjes färja
+        </div>
+        <div>
+            Snäckö (Kumlinge)
+            Seglinge 
+        </div>
+      </div>
+      <div>
+        <div>
+          Töftölinjen 
+        </div>
+        <div>
+            Töftölinjes färja
+        </div>
+        <div>
+            Prästö (Sund)
+            Töftö (Vårdö)
+        </div>
+      </div>
+      <div>
+        <div>
+          Embarsundslinjen 
+        </div>
+        <div>
+            Embarsundslinjes färja
+        </div>
+        <div>
+            Finholma 
+            Jyddö 
+        </div>
+      </div>
+      <div>
+        <div>
+          Polkupyörälautta Skarpnåtö - Hällö 
+        </div>
+        <div>
+            M/S Silvana
+        </div>
+        <div>
+            Skarpnåtö (Hammarland)
+            Hällö (Geta)
+        </div>
+      </div>
+      <div>
+        <div>
+          Skagen 
+        </div>
+        <div>
+            Vikare
+        </div>
+        <div>
+            Skagen 
+            Jumo 
+        </div>
+      </div>
+      <div>
+        <div>
+          Sorpo 
+        </div>
+        <div>
+            Sorpo
+        </div>
+        <div>
+            Jermo 
+            Sorpo 
+        </div>
+      </div>
+      <div>
+        <div>
+          Pettu 
+        </div>
+        <div>
+            Pettu
+        </div>
+        <div>
+            Ulkoluoto 
+            Pettu 
+        </div>
+      </div>
+      <div>
+        <div>
+          Hanko - Kasnäs - Örö 
+        </div>
+        <div>
+            M/S Norrskär
+        </div>
+        <div>
+            Hanko 
+            Kasnäs (Kemiönsaari)
+            Örö 
+        </div>
+      </div>
+      <div>
+        <div>
+          Kasnäs - Örö 
+        </div>
+        <div>
+            M/S Norrskär
+            M/S Sissel
+            M/S Minandra
+        </div>
+        <div>
+            Kasnäs (Kemiönsaari)
+            Örö 
+        </div>
+      </div>
+      <div>
+        <div>
+          Kasnäs - Bengtskär 
+        </div>
+        <div>
+            M/S Sissel
+            M/S Minandra
+        </div>
+        <div>
+            Kasnäs (Kemiönsaari)
+            Rosala 
+            Bengtskär 
+        </div>
+      </div>
+      <div>
+        <div>
+          Hanko - Bengtskär 
+        </div>
+        <div>
+            M/S Summersea
+        </div>
+        <div>
+            Hanko 
+            Bengtskär 
+        </div>
+      </div>
+      <div>
+        <div>
+          Turku - Seili - Nauvo 
+        </div>
+        <div>
+            M/S Fanny
+        </div>
+        <div>
+            Aurajoki (Turku)
+            Seili/Själö 
+            Nauvo/Nagu 
+        </div>
+      </div>
+      <div>
+        <div>
+          Turku - Nauvo - Pärnäinen - Utö 
+        </div>
+        <div>
+            M/S Kökar
+        </div>
+        <div>
+            Aurajoki (Turku)
+            Nauvo/Nagu 
+            Pärnäinen/Pärnäs (Nauvo)
+            Utö 
+        </div>
+      </div>
+      <div>
+        <div>
+          Naantali - Velkua - Taivassalo - Kustavi 
+        </div>
+        <div>
+            M/S Aavatar
+        </div>
+        <div>
+            Naantali 
+            Merimasku 
+            Teersalo (Velkua)
+            Hakkenpää (Taivassalo)
+            Parattula (Kustavi)
+            Kivimaa (Kustavi)
+        </div>
+      </div>
+      <div>
+        <div>
+          Korpoström - Aspö - Vänö - Örö 
+        </div>
+        <div>
+            M/S Amanda
+        </div>
+        <div>
+            Korpoström (Korppoo)
+            Aspö 
+            Nötö 
+            Bodö 
+            Vänö 
+            Örö 
+        </div>
+      </div>
+    </div>
+    
   </body>
 </html>
