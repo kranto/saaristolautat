@@ -40,7 +40,7 @@ const getMapKey = () => {
 const loadGoogleMaps = () => {
 	const googleMapScript = document.createElement('script');
 	const key = getMapKey();
-	googleMapScript.setAttribute('src','https://maps.googleapis.com/maps/api/js?key=' + key + '&v=3.33&callback=initApplication');
+	googleMapScript.setAttribute('src','https://maps.googleapis.com/maps/api/js?key=' + key + '&v=quarterly&callback=initApplication');
 	document.body.appendChild(googleMapScript);	
 }
 
