@@ -5,7 +5,7 @@ let initialSettings = getFromLocalStorage("settings") ||
     distances: true,
     roadferries: true,
     conn4: true,
-    conn5: false,
+    conn5: true,
     longdistanceferries: false,
     live: false,
   },
