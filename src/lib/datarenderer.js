@@ -1,5 +1,7 @@
 import { L, currentLang } from './localizer';
 
+const locales = ["fi", "sv", "en"];
+
 function sanitizePhone(num) {
     return num.replace(/\(.*\)/g, "").replace(/[-]/g, " ");
 }
@@ -20,28 +22,92 @@ function getPhones(item) {
     });
 }
 
-function getLocalizedItem(item, lang) {
+function endsWithAnyLocale(key) {
+    for (let locale of locales.concat("L")) {
+        if (ew(key, "_" + locale)) return true;
+    }
+    return false;
+}
 
+function getI18dItem(item) {
+    if (!(item instanceof Object)) return item;
+
+    if (item instanceof Array) return item.map(getI18dItem);
+
+    var result = {};
+    var keys = Object.keys(item).filter(key => !endsWithAnyLocale(key));
+
+    for (let key of keys) {
+        if (item[key + "_L"]) {
+            result[key + "_I"] = locales.reduce((acc, cur) => { return {
+                ...acc,
+                [cur]: L(cur, item[key + "_L"])};}, {});
+        } else if (item[key] instanceof Object) {
+            result[key] = getI18dItem(item[key]);
+        } else {
+            result[key + "_I"] = locales.reduce((acc, cur) => { return {
+                ...acc,
+                [cur]: item[key + "_" + cur] || item[key]
+            }; }, {local: item[key]});
+        }
+    }
+    return result;
+}
+
+function getLocalizedItem2(item, lang) {
+    if (!(item instanceof Object)) return item;
+
+    if (item instanceof Array) return item.map(i => getLocalizedItem2(i, lang));
+
+    const result = {};
+    const keys = Object.keys(item);
+    for (let key of keys) {
+        if (ew(key, "_I")) {
+            const key1 = key.substring(0, key.length - 2);
+            result[key1] = item[key][lang];
+            result[key1 + "_local"] = item[key].local;
+            result[key] = item[key];
+        } else {
+            result[key] = getLocalizedItem2(item[key], lang);
+        }
+    }
+    return result;
+}
+
+function getLocalizedItem(item, lang) {
     if (!(item instanceof Object)) return item;
 
     if (item instanceof Array) return item.map(i => getLocalizedItem(i, lang));
 
     var result = {};
     var keys = Object.keys(item);
+    var localizeToLang = (acc, lang1) => { return {...acc, [lang1]: L(lang1, item[key])};}
+    var hasNoImplicitLocalization = l => !result[key + "_I"][l];
+    var addDefaultLocalization = (l) => result[key + "_I"][l] = item[key];
     for (let index in keys) {
         var key = keys[index];
         if (ew(key, "_L")) {
             let key1 = key.substring(0, key.length - 2);
-            result[key1] = L(lang, item[key]);
-        } else if (ew(key, "_" + lang)) {
+            result[key1 + "_I"] = locales.reduce(localizeToLang, {});
+            result[key1] = result[key1 + "_I"][lang];
+        } else if (RegExp('_..$').test(key)) {
             let key1 = key.substring(0, key.length - 3);
-            if (result[key1]) result[key1 + "_local"] = result[key1];
-            result[key1] = item[key];
-        } else if (!RegExp('_..$').test(key)) {
+            const locale = key.substring(key.length - 2, key.length);
+            result[key1 + "_I"] = result[key1 + "_I"] || {};
+            result[key1 + "_I"][locale] = item[key];
+            if (locale === lang) {
+                if (result[key1]) result[key1 + "_local"] = result[key1];
+                result[key1] = item[key];
+            }
+        } else if (item[key] instanceof Object) {
+            result[key] = getLocalizedItem(item[key], lang);
+        } else {
+            result[key + "_I"] = result[key + "_I"] || {};
+            locales.filter(hasNoImplicitLocalization).forEach(addDefaultLocalization);
             if (result[key]) {
                 result[key + "_local"] = item[key];
             } else {
-                result[key] = getLocalizedItem(item[key], lang);
+                result[key] = item[key];
             }
         }
     }
@@ -84,6 +150,10 @@ export function filterTimetables(tables) {
     return tables.length ? tables : null;
 }
 
+export function routeData(route, lang=currentLang) {
+    return getLocalizedItem2(getI18dItem(deepCopy(route)), lang);
+}
+
 export function routeInfo(route, lang = currentLang) {
     route = getLocalizedItem(deepCopy(route), lang);
     var info = {};
@@ -116,6 +186,7 @@ export function routeInfo(route, lang = currentLang) {
     piers.forEach(pier => {
         pier.class = pier.type === "1" ? "mainpier" : "";
         pier.specifier = pier.type === "1" && pier.mun.name !== pier.name ? "(" + pier.mun.name + ")" : "";
+        pier.nname = pier.name.normalize('NFD').replace(/[\u0300-\u036f]/g, "");
     });
     piers[piers.length - 1].last = true;
     info.piers = piers;

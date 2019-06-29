@@ -9,10 +9,14 @@ class InfoContainer extends Component {
   constructor(props) {
     super(props);
     this.state = { hidden: false }
+  }
 
-    window.$("body").mouseup(() => {
-      this.setState({ hidden: false });
-    });
+  componentDidMount() {
+    window.$("body").mouseup(() => this.setHidden(false));
+  }
+
+  componentWillUnmount() {
+    window.$("body").off("mouseup");
   }
 
   setHidden(hidden) {

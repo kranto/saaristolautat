@@ -129,9 +129,9 @@ export function select(targets, mouseEvent) {
 
 function navigateTo(targets) {
   if (targets[0].ref) {
-    selectRoute(targets[0].ref);
+    selectRoute(targets[0].ref, false);
   } else {
-    selectRoute(targets.map(r => r.id));
+    selectRoute(targets.map(r => r.id), false);
   }
 }
 
@@ -139,7 +139,7 @@ function showSelected(targets) {
   if (!targets.length) return;
   selected.forEach(target => { target.highlight(false); if (target.rerender) target.rerender(map.getZoom(), map.getMapTypeId(), layers); });
   selected = targets.slice();
-  targets.forEach(target => target.highlight(true));
+  targets.forEach(target => { target.highlight(true); if (target.rerender) target.rerender(map.getZoom(),  map.getMapTypeId(), layers); });
 }
 
 function panMapIfClickPointHidden(map, mouseEvent) {

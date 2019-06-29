@@ -16,7 +16,7 @@ window.onhashchange = () => {
   if (store.getState().data.data.routes[hash]) {
     var newState = { route: hash, timetable: null };
     history.replaceState(newState, null, window.location.pathname);
-    navigateTo(newState);
+    navigateTo(newState, true);
   } else if (store.getState().data.data.piers[hash]) {
     //history.go(-1);
     showPierTooltip(hash, true);
@@ -25,7 +25,7 @@ window.onhashchange = () => {
 
 window.onpopstate = (event) => {
   if (!event.state) return;
-  navigateTo(event.state);
+  navigateTo(event.state, true);
 };
 
 $(document).keyup((e) => {
@@ -72,12 +72,12 @@ export function closeInfoPage() {
   history.go(-history.state.depth);
 }
 
-export function selectRoute(route) {
+export function selectRoute(route, panTo=true) {
   history.pushState({ route: route, timetable: null }, null, null);
-  navigateTo(history.state, true);
+  navigateTo(history.state, panTo);
 }
 
-function navigateTo(state, isNewState) {
+function navigateTo(state, panTo) {
   // console.log('navigateTo', state, history, new Error().stack);
   if (!state || !state.timetable) {
     closeTimetables();
@@ -88,7 +88,7 @@ function navigateTo(state, isNewState) {
   if (state && state.route) {
     if (typeof state.route === 'string') {
       store.dispatch({ type: "INFOCONTENT_SELECTED", payload: state.route });
-      if (!isNewState) panToObject(state.route);
+      if (panTo) panToObject(state.route);
     } else if (Array.isArray(state.route)) {
       const routes = lauttaRoutes.filter(r => state.route.indexOf(r.id) >= 0);
       store.dispatch({ type: "INFOCONTENT2_SELECTED", payload: routes });
