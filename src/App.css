@@ -150,23 +150,33 @@ div#infopagecontent {
   margin-top: 30px;
 }
 
-#appinfo #followbox {
+#followbox {
   margin-top: 30px;
 }
 
-#appinfo ul {
+#followbox ul {
   list-style-type: none;
   margin-top: 25px;
   margin-bottom: 30px;
 }
 
-#appinfo ul li i {
+#followbox li {
+  margin-bottom: 5px;
+  vertical-align: middle;
+}
+
+#followbox li i {
   font-size: 1.5em;
   margin-right: 20px;
   margin-top: 5px;
+  vertical-align: middle;
 }
 
-#appinfo #licensebox {
+#followbox li span {
+  vertical-align: middle;
+}
+
+#licensebox {
   border-top: solid 1px;
   border-color: #bbb;
   margin-top: 40px;
@@ -181,6 +191,9 @@ div#infopagecontent {
   color: #00aced;
 }
 
+.instagramcolor {
+  color: #e4405f;
+}
 .infosection h1, .infosection h2 {
   margin-bottom: 30px;
 }

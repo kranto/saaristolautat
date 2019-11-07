@@ -222,9 +222,10 @@ class InfoPage extends Component {
             <div id="followbox">
               <h5>Seuraa Saaristolauttoja ja anna palautetta</h5>
               <ul>
-                <li><a href="https://www.facebook.com/saaristolautat/" rel="noopener noreferrer" target="facebook"><i className="fa fa-facebook-official fbcolor" aria-hidden="true"></i> @saaristolautat</a></li>
-                <li><a href="https://twitter.com/saaristolautat/" rel="noopener noreferrer" target="twitter"><i className="fa fa-twitter twittercolor" aria-hidden="true"></i> @saaristolautat</a></li>
-                <li><a href="mailto:feedback@saaristolautat.fi?subject=Palautetta Saaristolautat-sovelluksesta"><i className="fa fa-envelope-o" aria-hidden="true" style={{ color: "#000" }}></i> feedback@saaristolautat.fi</a></li>
+                <li><a href="https://www.facebook.com/saaristolautat/" rel="noopener noreferrer" target="facebook"><i className="fa fa-facebook-official fbcolor" aria-hidden="true"></i><span>@saaristolautat</span></a></li>
+                <li><a href="https://twitter.com/saaristolautat/" rel="noopener noreferrer" target="twitter"><i className="fa fa-twitter twittercolor" aria-hidden="true"></i><span>@saaristolautat</span></a></li>
+                <li><a href="https://www.instagram.com/saaristolautat.fi/" rel="noopener noreferrer" target="instagram"><i className="fa fa-instagram instagramcolor" aria-hidden="true"></i><span>@saaristolautat.fi</span></a></li>
+                <li><a href="mailto:feedback@saaristolautat.fi?subject=Palautetta Saaristolautat-sovelluksesta"><i className="fa fa-envelope-o" aria-hidden="true" style={{ color: "#000" }}></i><span>feedback@saaristolautat.fi</span></a></li>
               </ul>
             </div>
             <div id="licensebox">
