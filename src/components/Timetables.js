@@ -28,8 +28,8 @@ class Timetables extends Component {
     if (!this.props.timetableid || !this.props.routeid) return "";
     const route = this.props.data.routes[this.props.routeid];
     const timetable = this.props.data.timetables[this.props.timetableid];
-    const name = timetable.name || route.name;
-    const specifier = timetable.specifier || route.specifier;
+    const name = LP(timetable, "name") || LP(route, "name");
+    const specifier = LP(timetable, "specifier") || LP(route, "specifier");
     return specifier ?
       (<div className="infotitle">{name}: <span className="specifier">{specifier}</span></div>) :
       (<div className="infotitle">{name}</div>);
