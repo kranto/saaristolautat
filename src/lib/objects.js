@@ -2,6 +2,7 @@ import { shortName, longName, description } from './datautils';
 import { select } from './ferries';
 import styles from './styles';
 import store from '../store';
+import { LP } from './localizer';
 
 export const objects = [];
 export const objectIndex = {};
@@ -338,13 +339,34 @@ export function initObjectRenderer(map, txtol) {
     });
   }
 
-  function connection(connection, map) {
+  var connectionTooltip = new txtol.TxtOverlay({lat: 0, lng: 0}, "", "connectionlabelbox", map, { dir: 'N', x: -30, y: -30 });
+
+  function showConnectionTooltip(connectionData, position) {
+    connectionTooltip.setPosition(position);
+    const name = LP(connectionData, "name");
+    const specifier = LP(connectionData, "specifier");
+    connectionTooltip.setText(
+      '<div class="connectionname">' + name + '</div>' +
+      (specifier ? '<div class="connectionspecifier">' + specifier + '</div>' : '') + 
+      '<div>');
+    connectionTooltip.show();
+    connectionTooltip.draw();
+  }
+
+  function hideConnectionTooltip() {
+    connectionTooltip.hide();
+  }
+
+  function connection(connection, map, data) {
     var baseStyler = connectionStylers["base"];
     var subtype = connection.properties.ssubtype;
     var connectionStyler = subtype ? connectionStylers[subtype] : baseStyler;
     var layer = connectionStyler.layer || baseStyler.layer;
     var legFeatures = connection.type === 'FeatureCollection' ? connection.features : [connection];
     var connectionObject = { ref: connection.properties.ref, bounds: {} };
+    var dataObject = data.routes[connection.properties.ref];
+    var isSelected = false;
+    var isHighlight = false;
     var legObjects = legFeatures.map(function (leg) {
 
       var coords = leg.geometry.coordinates.map(function (coord) { return new google.maps.LatLng(coord[1], coord[0]); });
@@ -353,7 +375,6 @@ export function initObjectRenderer(map, txtol) {
       var propertyNames = ["weight", "opacity", "color", "zIndex", "visibleFrom", "visibleTo", "highlightColor", "highlightWeight", "highlightOpacity", "icons"];
       var propertySources = [leg.properties, legStyler, connection.properties, connectionStyler, baseStyler]
       var properties = pickProperties(propertyNames, propertySources);
-      var isSelected = false;
       connectionObject.style = connectionStyler.style || { color: properties.color, weight: properties.weight, style: "solid", opacity: properties.opacity };
 
       var line = new google.maps.Polyline({
@@ -377,12 +398,19 @@ export function initObjectRenderer(map, txtol) {
         cursor: 'context-menu',
         map: map
       });
-      var highlight = function (doHighlight) {
-        isSelected = doHighlight;
-        lineb.setOptions({ strokeOpacity: doHighlight ? properties.highlightOpacity : 0 });
-      };
       lineb.addListener('click', function (event) {
-        select([connectionObject], event);
+        hideConnectionTooltip();
+        select([connectionObject], event);        
+      });
+      lineb.addListener('mouseover', function(event) {
+        showConnectionTooltip(dataObject, event.latLng);
+        connectionObject.setHighlight(true);
+        connectionObject.rerender(map.getZoom(), map.getMapTypeId(), store.getState().settings.layers);
+      });
+      lineb.addListener('mouseout', function(event) {
+        hideConnectionTooltip();
+        connectionObject.setHighlight(false);
+        connectionObject.rerender(map.getZoom(), map.getMapTypeId(), store.getState().settings.layers);
       });
       var rerender = function (zoom, mapTypeId, layers) {
         if (properties.icons) {
@@ -394,19 +422,20 @@ export function initObjectRenderer(map, txtol) {
         var lineIsVisible = isSelected || (layers[layer] && zoom >= properties.visibleFrom && zoom <= properties.visibleTo);
         line.setVisible(lineIsVisible);
         lineb.setVisible(lineIsVisible);
+        lineb.setOptions({ strokeOpacity: isSelected || isHighlight ? properties.highlightOpacity : 0 });
       }
-      return { highlight: highlight, rerender: rerender };
+      return { rerender: rerender };
     });
-    connectionObject.highlight = function (doHighlight) {
-      legObjects.forEach(function (leg) { leg.highlight(doHighlight); });
+
+    connectionObject.setHighlight = function (isHighlight_) {
+      isHighlight = isHighlight_;
+    }
+    connectionObject.setSelected = function (isSelected_) {
+      isSelected = isSelected_;
     }
 
     connectionObject.rerender = function (zoom, mapTypeId, layers) {
-      legObjects.forEach(function (leg) { leg.rerender(zoom, mapTypeId, layers); });
-    }
-
-    connectionObject.init = function () {
-      connectionObject.name = shortName(connection.properties, store.getState);
+      legObjects.forEach(leg => leg.rerender(zoom, mapTypeId, layers));
     }
 
     return connectionObject;

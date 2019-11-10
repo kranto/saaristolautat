@@ -37,9 +37,9 @@ export function initRoutes(map) {
     }
   }
 
-  Leg.prototype.highlight = function (doHighlight) {
-    this.isSelected = doHighlight;
-    this.highlightLine.setVisible(doHighlight);
+  Leg.prototype.setSelected = function (isSelected) {
+    this.isSelected = isSelected;
+    this.highlightLine.setVisible(isSelected);
   }
 
   Leg.prototype.addRoute = function (route) {
@@ -60,8 +60,8 @@ export function initRoutes(map) {
     this.init();
   }
 
-  Route.prototype.highlight = function (doHighlight) {
-    this.legs.forEach(function (leg) { leg.highlight(doHighlight); });
+  Route.prototype.setSelected = function (isSelected) {
+    this.legs.forEach(function (leg) { leg.setSelected(isSelected); });
   }
 
   Route.prototype.rerender = function (zoom, mapTypeId, layers) {

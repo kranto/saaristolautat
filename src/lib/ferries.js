@@ -137,9 +137,9 @@ function navigateTo(targets) {
 
 function showSelected(targets) {
   if (!targets.length) return;
-  selected.forEach(target => { target.highlight(false); if (target.rerender) target.rerender(map.getZoom(), map.getMapTypeId(), layers); });
+  selected.forEach(target => { target.setSelected(false); if (target.rerender) target.rerender(map.getZoom(), map.getMapTypeId(), layers); });
   selected = targets.slice();
-  targets.forEach(target => { target.highlight(true); if (target.rerender) target.rerender(map.getZoom(),  map.getMapTypeId(), layers); });
+  targets.forEach(target => { target.setSelected(true); if (target.rerender) target.rerender(map.getZoom(),  map.getMapTypeId(), layers); });
 }
 
 function panMapIfClickPointHidden(map, mouseEvent) {
@@ -167,7 +167,7 @@ export function unselectAll(pushState) {
   if (pushState) history.pushState({ route: null }, null, null);
   store.dispatch({ type: "INFOCONTENT_UNSELECTED", payload: null });
 
-  selected.forEach(target => { target.highlight(false); if (target.rerender) target.rerender(map.getZoom(), map.getMapTypeId(), layers); });
+  selected.forEach(target => { target.setSelected(false); if (target.rerender) target.rerender(map.getZoom(), map.getMapTypeId(), layers); });
   selected = [];
 }
 

@@ -79,6 +79,11 @@ txtol.init = function(OverlayView) { // window.google.maps.OverlayView
     this.draw();
   }
 
+  TxtOverlay.prototype.setText = function(txt) {
+    this.txt_ = txt;
+    this.div_.innerHTML = this.txt_;
+  }
+
   TxtOverlay.prototype.setPosition = function(pos) {
     this.pos = pos;
   }

@@ -436,6 +436,26 @@ div#infopagecontent {
   -moz-user-select: none; 
 }
 
+.map .connectionlabelbox {
+  border: 2px solid rgba(0, 139, 139, 0.8);
+  border-radius: 4px;
+  padding: 3px;
+  background: rgba(255, 255, 255, 0.6);
+  z-index: 2;
+  max-width: 250px;
+  white-space: normal;
+}
+
+.map .connectionlabelbox .connectionname {
+  font-size: 1.4em;
+  padding: 3px;
+}
+
+.map .connectionlabelbox .connectionspecifier {
+  font-size: 1.1em;
+  padding: 0px 3px;
+}
+
 .map {
   height: 100%;
   width: 100%; 
