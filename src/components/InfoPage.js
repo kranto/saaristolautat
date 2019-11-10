@@ -209,17 +209,17 @@ class InfoPage extends Component {
               ], lang)}
               <h3>{L2("infopage.localinfo")}</h3>
               <ul>
-              <li>{linkSpan(["https://visitparainen.fi/fi/", "https://visitparainen.fi/sv/", "https://visitparainen.fi/en/"], "pargas", ["Parainen - Nauvo - Korppoo - Houtskari - Iniö", "Pargas - Nagu - Korpo - Houtskär - Iniö", "Pargas - Nagu - Korpo - Houtskär - Iniö"], lang) }</li>
-              <li>{linkSpan(["https://www.visitkimitoon.fi/fi/", "https://www.visitkimitoon.fi/", "https://www.visitkimitoon.fi/en/"], "kemiö", ["Kemiönsaari", "Kimitoön", "Kimitoön"], lang) }</li>
-              <li>{linkSpan(["https://www.kustavi.fi/", "https://www.kustavi.fi/?language=sv", "https://www.kustavi.fi/?language=en"], "kustavi", ["Kustavi", "Gustavs", "Kustavi"], lang) }</li>
-              <li>{linkSpan(["https://www.visitnaantali.com/", "https://www.visitnaantali.com/sv", "https://www.visitnaantali.com/en"], "naantali", ["Naantali - Rymättylä - Velkua", "Nådendal - Rimito - Velkua", "Naantali - Rymättylä - Velkua"], lang) }</li>
-              <li>{linkSpan(["http://www.visitturku.fi/", "http://www.visitturku.fi/sv", "http://www.visitturku.fi/en"], "turku", ["Turku", "Åbo", "Turku"], lang) }</li>
+              <li>{linkSpan(["https://visitparainen.fi/fi/", "https://visitparainen.fi/sv/", "https://visitparainen.fi/en/"], "pargas", ["Visit Pargas: Parainen - Nauvo - Korppoo - Houtskari - Iniö", "Visit Pargas: Pargas - Nagu - Korpo - Houtskär - Iniö", "Visit Pargas: Pargas - Nagu - Korpo - Houtskär - Iniö"], lang) }</li>
+              <li>{linkSpan(["https://www.visitnaantali.com/", "https://www.visitnaantali.com/sv", "https://www.visitnaantali.com/en"], "naantali", ["Visit Naantali: Naantali - Rymättylä - Velkua", "Visit Naantali: Nådendal - Rimito - Velkua", "Visit Naantali: Naantali - Rymättylä - Velkua"], lang) }</li>
+              <li>{linkSpan(["http://www.visitturku.fi/", "http://www.visitturku.fi/sv", "http://www.visitturku.fi/en"], "turku", ["Visit Turku", "Visit Turku / Åbo", "Visit Turku"], lang) }</li>
+              <li>{linkSpan(["https://www.visitkimitoon.fi/fi/", "https://www.visitkimitoon.fi/", "https://www.visitkimitoon.fi/en/"], "kemiö", ["Visit Kemiönsaari", "Visit Kimitoön", "Visit Kimitoön"], lang) }</li>
               <li>{linkSpan(["https://tourism.hanko.fi/", "https://tourism.hanko.fi/sv/", "https://tourism.hanko.fi/en/"], "hanko", ["Hanko", "Hangö", "Hanko"], lang) }</li>
-              <li>{linkSpan(["http://www.foglo.ax/sv/for_turister/suomeksi", "http://www.foglo.ax/sv/for_turister", "http://www.foglo.ax/sv/for_turister/in_english"], "föglö", "Föglö", lang) }</li>
+              <li>{linkSpan(["https://www.kustavi.fi/", "https://www.kustavi.fi/?language=sv", "https://www.kustavi.fi/?language=en"], "kustavi", ["Kustavi", "Gustavs", "Kustavi"], lang) }</li>
               <li>{linkSpan(["http://brando.ax/fi/", "http://brando.ax/sv/", "http://brando.ax/en/"], "brändö", "Brändö", lang) }</li>
               <li>{linkSpan(["https://www.kumlinge.ax/fi/tule-ja-tutustu", "https://www.kumlinge.ax/bo-besoka", "https://www.kumlinge.ax/en/stay-visit"], "kumlinge", "Kumlinge", lang) }</li>
               <li>{linkSpan(["http://www2.kokar.ax/fi-fi/kokarin/matkailu", "https://www.kokar.ax/", "http://www2.kokar.ax/en-en/kokar/tourism"], "kökar", "Kökar", lang) }</li>
               <li>{linkSpan("http://www.sottunga.ax/turism", "sottunga", "Sottunga", lang) }</li>
+              <li>{linkSpan(["http://www.foglo.ax/sv/for_turister/suomeksi", "http://www.foglo.ax/sv/for_turister", "http://www.foglo.ax/sv/for_turister/in_english"], "föglö", "Föglö", lang) }</li>
             </ul>
 
           </div>
