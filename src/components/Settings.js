@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import FullScreenButton from './FullScreenButton';
 import SettingsLayers from './SettingsLayers';
-import MapTypeSelector from './MapTypeSelector2';
+import MapTypeSelector from './MapTypeSelector';
 import LocaleSelector from './LocaleSelector';
 
 export default class Settings extends Component {
