@@ -98,6 +98,7 @@ const messagesRaw = { // FI SV EN
     infopage: {
         ferries: ["Lautat", "Färjorna", "Ferries"],
         touristinfo: ["Matkailutietoa", "Turistinformation", "Tourist Information"],
+        localinfo: ["Paikallista tietoa", "Lokal information", "Local information"],
         mapdata: ["Karttatiedot", "Karta data", "Map data"],
         icons: ["Ikonit", "Ikoner", "Icons by"],
         appicon: ["Sovellusikoni", "App ikon", "Application icon"],

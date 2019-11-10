@@ -12,8 +12,12 @@ const getItem = (arrayOrString, locale) => {
   return arrayOrString[index];
 }
 
+const linkSpan = (urls, target, linkTexts, locale) => (
+  <a href={getItem(urls, locale)} rel="noopener noreferrer" target={target}>{getItem(linkTexts, locale)}</a>
+);
+
 const link = (urls, target, linkTexts, descriptions, locale) => (
-  <div><a href={getItem(urls, locale)} rel="noopener noreferrer" target={target}>{getItem(linkTexts, locale)}</a>
+  <div>{linkSpan(urls, target, linkTexts, locale)}
     <p>{getItem(descriptions, locale)}</p>
   </div>
 );
@@ -183,13 +187,12 @@ class InfoPage extends Component {
 
             <h3>{L2("infopage.touristinfo")}</h3>
 
-            {link(["http://saaristo.org/index.php?page=101&lang=1", "http://saaristo.org/index.php?page=101&lang=3", "http://saaristo.org/index.php?page=101&lang=2"],
-              "saaristoorg",
-              "Saaristo.org",
-              ["Turun saariston matkailuneuvonta<",
-                "Åbo skärgårdens turistinformation",
-                "Turku Archipelago Tourist Information Center"
-              ], lang)}
+            {link(["http://saaristonrengastie.fi/", "http://saaristonrengastie.fi/sv", "http://saaristonrengastie.fi/en"],
+              "rengastie",
+              ["Saarison rengastie", "Skärgårdens ringväg", "Saariston rengastie - The Archipelago Trail"],
+              ["Turun saariston matkailuneuvonta",
+              "Åbo skärgårdens turistinformation",
+              "Turku Archipelago Tourist Information Center"], lang)}
             {link(["http://www.visitaland.com/fi/", "http://www.visitaland.com/", "http://www.visitaland.com/en/"],
               "visitaland",
               "Visit Åland",
@@ -204,6 +207,20 @@ class InfoPage extends Component {
                 "Ålands skärgårdkommunernas turistinformation. Föglö, Sottunga, Kumlinge, Vårdö, Brändö, Kökar.",
                 "Tourist information of the archipelago municipalities in Åland. Föglö, Sottunga, Kumlinge, Vårdö, Brändö, Kökar."
               ], lang)}
+              <h3>{L2("infopage.localinfo")}</h3>
+              <ul>
+              <li>{linkSpan(["https://visitparainen.fi/fi/", "https://visitparainen.fi/sv/", "https://visitparainen.fi/en/"], "pargas", ["Parainen - Nauvo - Korppoo - Houtskari - Iniö", "Pargas - Nagu - Korpo - Houtskär - Iniö", "Pargas - Nagu - Korpo - Houtskär - Iniö"], lang) }</li>
+              <li>{linkSpan(["https://www.visitkimitoon.fi/fi/", "https://www.visitkimitoon.fi/", "https://www.visitkimitoon.fi/en/"], "kemiö", ["Kemiönsaari", "Kimitoön", "Kimitoön"], lang) }</li>
+              <li>{linkSpan(["https://www.kustavi.fi/", "https://www.kustavi.fi/?language=sv", "https://www.kustavi.fi/?language=en"], "kustavi", ["Kustavi", "Gustavs", "Kustavi"], lang) }</li>
+              <li>{linkSpan(["https://www.visitnaantali.com/", "https://www.visitnaantali.com/sv", "https://www.visitnaantali.com/en"], "naantali", ["Naantali - Rymättylä - Velkua", "Nådendal - Rimito - Velkua", "Naantali - Rymättylä - Velkua"], lang) }</li>
+              <li>{linkSpan(["http://www.visitturku.fi/", "http://www.visitturku.fi/sv", "http://www.visitturku.fi/en"], "turku", ["Turku", "Åbo", "Turku"], lang) }</li>
+              <li>{linkSpan(["https://tourism.hanko.fi/", "https://tourism.hanko.fi/sv/", "https://tourism.hanko.fi/en/"], "hanko", ["Hanko", "Hangö", "Hanko"], lang) }</li>
+              <li>{linkSpan(["http://www.foglo.ax/sv/for_turister/suomeksi", "http://www.foglo.ax/sv/for_turister", "http://www.foglo.ax/sv/for_turister/in_english"], "föglö", "Föglö", lang) }</li>
+              <li>{linkSpan(["http://brando.ax/fi/", "http://brando.ax/sv/", "http://brando.ax/en/"], "brändö", "Brändö", lang) }</li>
+              <li>{linkSpan(["https://www.kumlinge.ax/fi/tule-ja-tutustu", "https://www.kumlinge.ax/bo-besoka", "https://www.kumlinge.ax/en/stay-visit"], "kumlinge", "Kumlinge", lang) }</li>
+              <li>{linkSpan(["http://www2.kokar.ax/fi-fi/kokarin/matkailu", "https://www.kokar.ax/", "http://www2.kokar.ax/en-en/kokar/tourism"], "kökar", "Kökar", lang) }</li>
+              <li>{linkSpan("http://www.sottunga.ax/turism", "sottunga", "Sottunga", lang) }</li>
+            </ul>
 
           </div>
           : ""}
