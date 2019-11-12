@@ -198,6 +198,9 @@ div#infopagecontent {
   margin-bottom: 30px;
 }
 
+#marinetrafficbutton {
+  width: 100%;
+}
 .closeInfoButtonHolder {
   position: sticky;
   top: 0;
@@ -741,6 +744,12 @@ div#infopagecontent {
 .layerselector:hover {
   background-color: #eee;
 }
+
+.infosection .layerselector {
+  text-align: center;
+  margin-top: 30px;
+  margin-bottom: 30px;
+} 
 
 .layer input[type=checkbox] { display:none; }
 .layer input[type=checkbox] + label:before {

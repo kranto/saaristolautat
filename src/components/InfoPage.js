@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import { L2 } from '../lib/localizer';
 import { showLivePage, closeInfoPage } from '../lib/navigation';
 import FModal from './FModal';
+import { setLayer } from '../actions/settingsActions';
 
 const locales = ["fi", "sv", "en"];
 
@@ -32,6 +33,11 @@ class InfoPage extends Component {
     return {page: nextProps.page, scrollTop: prevState && nextProps.page !== prevState.page};
   }
 
+  onChange(event) {
+    this.props.dispatch(setLayer('live', event.target.checked));
+    closeInfoPage();
+  }
+  
   renderContents(page) {
     const { locale: lang } = this.props;
     const onlyInFinnish = lang === "fi" ? "" : lang === "sv" ? (<span>Bara på finska...</span>) : (<span>Only in Finnish...</span>);
@@ -124,7 +130,13 @@ class InfoPage extends Component {
             {lang === "fi" && (
               <div>
                 <p>Live-karttatasolla esitetään Saaristomeren alueella sijaintinsa ilmoittavat matkustaja-alukset. Sijaintitiedot esitetään lähes reaaliajassa, mutta ajoittain viivettä voi kuitenkin esiintyä muutamia minuutteja. Aluksen sijainnin ja suunnan lisäksi näytetään aluksen reitti viimeisen kolmen tunnin ajalta </p>
+                <p>Live-karttatason saat käyttöön tästä tai asetusvalikosta.</p>
+                <div className="layer">
+                  <input type="checkbox" id="infolivelayercb" checked={this.props.layers.live} onChange={this.onChange.bind(this)}/>
+                  <label className="layerselector" htmlFor="infolivelayercb">Live-karttataso</label>
+                </div>
                 <p>Liikennetietojen lähde <a href="http://www.liikennevirasto.fi">Liikennevirasto</a> / <a href="http://digitraffic.liikennevirasto.fi/meriliikenne/">meri.digitraffic.fi</a>, lisenssi <a href="http://creativecommons.org/licenses/by/4.0/">CC 4.0 BY</a></p>
+                <hr/>
                 <h3>Marinetraffic</h3>
                 <p>Kattavamman näkymän Saaristomeren ja koko maailman meriliikenteeseen saa mm. Marinetraffic.com-palvelusta</p>
               </div>
@@ -132,22 +144,24 @@ class InfoPage extends Component {
             {lang === "sv" && (
               <div>
                 <span>Bara på engelska...</span>
-                <p>Live layer shows passanger vessels in the Finnish Archipelago. Location is shown almost in real time. However, from time to time there is a delay of up to a few minutes. In addition to location and direction, also the route from the last three hours is shown.</p>
-                <p>Source of live data <a href="http://www.liikennevirasto.fi">Liikennevirasto</a> / <a href="http://digitraffic.liikennevirasto.fi/meriliikenne/">meri.digitraffic.fi</a>, license <a href="http://creativecommons.org/licenses/by/4.0/">CC 4.0 BY</a></p>
-                <h3>Marinetraffic</h3>
-                <p>A more comprehensive view to marine traffic is available e.g. in  Marinetraffic.com service.</p>
               </div>
             )}
-            {lang !== "fi" && lang !== "sv" && (
+            {lang !== "fi" && (
               <div>
                 <p>Live layer shows passanger vessels in the Finnish Archipelago. Location is shown almost in real time. However, from time to time there is a delay of up to a few minutes. In addition to location and direction, also the route from the last three hours is shown.</p>
+                <p>You can switch Live layer on here or in the Settings menu.</p>
+                <div className="layer">
+                  <input type="checkbox" id="infolivelayercb" checked={this.props.layers.live} onChange={this.onChange.bind(this)}/>
+                  <label className="layerselector" htmlFor="infolivelayercb">Live layer</label>
+                </div>
                 <p>Source of live data <a href="http://www.liikennevirasto.fi">Liikennevirasto</a> / <a href="http://digitraffic.liikennevirasto.fi/meriliikenne/">meri.digitraffic.fi</a>, license <a href="http://creativecommons.org/licenses/by/4.0/">CC 4.0 BY</a></p>
+                <hr/>
                 <h3>Marinetraffic</h3>
                 <p>A more comprehensive view to marine traffic is available e.g. in  Marinetraffic.com service.</p>
               </div>
             )}
 
-            <button type="button" className="btn btn-secondary linkbutton external showLive" style={{ width: "100%" }} onClick={showLivePage}>Live by Marinetraffic.com!!!</button>
+            <button type="button" className="btn btn-secondary linkbutton external showLive" id="marinetrafficbutton" onClick={showLivePage}>Live by Marinetraffic.com</button>
           </div >
           : ""}
 
@@ -277,6 +291,7 @@ class InfoPage extends Component {
 const mapStateToProps = (state) => {
   return {
     locale: state.settings.locale,
+    layers: state.settings.layers,
     page: state.selection.infoPage
   };
 };
