@@ -1,6 +1,6 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "Saaristolautat.fi",
+  "name": "Ferry routes in the Finnish Archipelago",
   "icons": [
     {
       "src": "favicon.ico",
