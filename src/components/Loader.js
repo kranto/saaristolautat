@@ -29,6 +29,8 @@ class Loader extends Component {
               </div>
             </div>
             <div style={{ position: "absolute", bottom: "2px", textAlign: "right", width: "100%", color: "#bbb", fontSize: "10px" }}>
+              {this.props.dataVersion}
+              <br/>
               {process.env.REACT_APP_VERSION}
             </div>
           </div>) : ""}
@@ -40,7 +42,8 @@ class Loader extends Component {
 const mapStateToProps = (state) => {
   return {
     locale: state.settings.locale,
-    phase: state.uiState.phase
+    phase: state.uiState.phase,
+    dataVersion: state.data.dataVersion
   };
 };
 
