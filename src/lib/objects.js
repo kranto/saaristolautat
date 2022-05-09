@@ -201,8 +201,8 @@ export function initObjectRenderer(map, txtol) {
       }
     }
 
-    marker.addListener('click', showTooltip);
-    label.addEventListener('click', function (event) { event.stopPropagation(); event.preventDefault(); showTooltip(); });
+    // marker.addListener('click', showTooltip);
+    // label.addEventListener('click', function (event) { event.stopPropagation(); event.preventDefault(); showTooltip(); });
     return {
       ref: ref,
       init: function () {
