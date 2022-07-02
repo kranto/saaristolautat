@@ -3,7 +3,7 @@ import { showPierTooltip, closePierTooltip } from '../lib/objects';
 
 let isTouch = false;
 
-export default class InfoContent extends Component {
+export default class PierLink extends Component {
 
   onMouseEnter() {
     if (!isTouch && !this.props.panelIsHidden) {
@@ -31,6 +31,10 @@ export default class InfoContent extends Component {
 
   onTouchEnd() {
     this.props.setHidden(false);
+  }
+
+  componentWillUnmount() {
+    closePierTooltip(this.props.pier.id);
   }
 
   render() {
