@@ -5,6 +5,8 @@ import SettingsLayers from './SettingsLayers';
 import MapTypeSelector from './MapTypeSelector';
 import LocaleSelector from './LocaleSelector';
 
+const isIOS = /(iPhone|iPad|iPod)/.test(window.navigator.userAgent);
+
 export default class Settings extends Component {
 
   componentDidUpdate() {
@@ -16,7 +18,7 @@ export default class Settings extends Component {
       <div id="settings" className={"slidedownmenu" + (this.props.open ? " open" : "")}>
           <div className="boxs"><MapTypeSelector settingsOpen={this.props.open}/></div>
 
-          <div className="boxs"><FullScreenButton /></div>
+          { isIOS ? '' : (<div className="boxs"><FullScreenButton /></div>)}
 
           <div className="boxs"><SettingsLayers /></div>
 
