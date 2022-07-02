@@ -25,6 +25,9 @@ function getAllEvents(element) {
 
 const scrollLimit = 22;
 
+const isIOS = /(iPhone|iPad|iPod)/.test(window.navigator.userAgent);
+let previous = undefined
+
 class Wrapper extends Component {
   constructor(props) {
     super(props);
@@ -54,7 +57,7 @@ class Wrapper extends Component {
   }
 
   componentDidUpdate() {
-    setTimeout(this.onScroll.bind(this), 500);
+    previous = this.props.routeid;
   }
 
   onScroll() {
@@ -69,7 +72,8 @@ class Wrapper extends Component {
 
   render() {
     const infoOpen = (this.props.routeid || this.props.infoContent2) && !this.props.infoPage;
-    const pointerEvents = this.state.pointerOnInfoPanel && infoOpen ? "auto" : "none"
+    const touchFocusInInfo = infoOpen && (this.state.pointerOnInfoPanel || (isIOS && this.props.routeid !== previous))
+    const pointerEvents = touchFocusInInfo ? "auto" : "none"
     return (
       <div id="wrapper">
         <div id="wrapper2" className={infoOpen ? "info-open" : ""} onScroll={this.onScroll.bind(this)}
