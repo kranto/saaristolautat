@@ -10,7 +10,7 @@ import  {initFullscreen} from './lib/fullscreen';
 import { createMap } from './lib/ferries';
 import './lib/dataloader';
 import { initRoutes } from './lib/routes';
-
+import LocationLayer from './lib/location';
 
 window.initApplication = () => {
 	txtol.init(window.google.maps.OverlayView);
@@ -19,6 +19,7 @@ window.initApplication = () => {
 	initObjectRenderer(map, txtol);
 	initRoutes(map);
 	new LiveLayer().init(map, txtol);
+	new LocationLayer().init(map);
 }
 
 const getMapKey = () => {

@@ -1156,6 +1156,34 @@ h4 {
   transition: left 800ms ease-out;
 }
 
+.location-button {
+  margin-bottom: 15px;
+  margin-right: 10px;
+  color: #808080;
+  border: none;
+  user-select: none;
+  box-shadow: rgb(0 0 0 / 30%) 0px 1px 4px -1px;
+  border-radius: 2px;
+  cursor: pointer;
+  background-color: rgb(255, 255, 255);
+  width: 40px;
+  height: 40px;
+}
+
+.location-button:before {
+  content: "\f05b";
+  font-family: FontAwesome;
+  -moz-osx-font-smoothing: grayscale;
+  font-size: 30px;
+  position:absolute;
+  top: 5px;
+  right: 7px;
+}
+
+.location-button.active {
+  color: #3B84DF;
+}
+
 .fmodal-enter {
   opacity: 0.01;
 }

@@ -45,7 +45,7 @@ txtol.init = function(OverlayView) { // window.google.maps.OverlayView
   }
 
   TxtOverlay.prototype.onAdd = function() {
-    this.getPanes().overlayMouseTarget.appendChild(this.div_);
+    this.getPanes().markerLayer.appendChild(this.div_);
     this.draw();
   }
 
