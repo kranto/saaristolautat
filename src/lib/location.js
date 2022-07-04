@@ -44,18 +44,19 @@ function createVesselIcon(map, feature) {
   };
 }
 
-function createLocationSymbol(color, opacity) {
+function createLocationSymbol(scale, color, opacity) {
   return {
     path: window.google.maps.SymbolPath.CIRCLE,
     strokeWeight: 0,
     fillColor: color,
     fillOpacity: opacity,
     size: 100,
-    scale: 6
+    scale: scale
   };
 }
 
 let locationSymbol = null;
+let locationSymbolOuter = null;
 let positionReceived = false;
 
 function showPosition(map) {
@@ -71,16 +72,25 @@ function showPosition(map) {
     positionReceived = true;
     if (!locationSymbol) {
       locationSymbol = new window.google.maps.Marker({
-      clickable: false,
-      icon: createLocationSymbol('#3B84DF', 0.9),
-      zIndex: 1000,
-      map: map,
-      visible: false,
+        clickable: false,
+        icon: createLocationSymbol(6, '#3B84DF', 0.9),
+        zIndex: 1000,
+        map: map,
+        visible: false,
       });
+      locationSymbolOuter = new window.google.maps.Marker({
+        clickable: false,
+        icon: createLocationSymbol(10, '#ffffff', 0.7),
+        zIndex: 999,
+        map: map,
+        visible: false,
+        });
     }
     if (!document[hidden] && positionWatcher && locationSymbol) {
       locationSymbol.setPosition(pos);
-      locationSymbol.setVisible(true);  
+      locationSymbol.setVisible(true);
+      locationSymbolOuter.setPosition(pos);
+      locationSymbolOuter.setVisible(true);
     }
   };
 }
@@ -135,7 +145,10 @@ function refreshPositionWatcher() {
     console.log('do not watchPosition');
     positionWatcher = null;
     positionReceived = false;
-    if (locationSymbol) locationSymbol.setVisible(false);
+    if (locationSymbol) {
+      locationSymbol.setVisible(false);
+      locationSymbolOuter.setVisible(false);
+    }
   }
 }
 
