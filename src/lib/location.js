@@ -78,8 +78,10 @@ function showPosition(map) {
       visible: false,
       });
     }
-    locationSymbol.setPosition(pos);
-    locationSymbol.setVisible(true);
+    if (!document[hidden] && positionWatcher && locationSymbol) {
+      locationSymbol.setPosition(pos);
+      locationSymbol.setVisible(true);  
+    }
   };
 }
 
@@ -88,28 +90,70 @@ function positioningError(error) {
   console.log(error);
 }
 
+// Set the name of the hidden property and the change event for visibility
+let hidden;
+let visibilityChange;
+if (typeof document.hidden !== "undefined") { // Opera 12.10 and Firefox 18 and later support
+  hidden = "hidden";
+  visibilityChange = "visibilitychange";
+} else if (typeof document.msHidden !== "undefined") {
+  hidden = "msHidden";
+  visibilityChange = "msvisibilitychange";
+} else if (typeof document.webkitHidden !== "undefined") {
+  hidden = "webkitHidden";
+  visibilityChange = "webkitvisibilitychange";
+}
+
+// If the page is hidden, pause the video;
+// if the page is shown, play the video
+function handleVisibilityChange() {
+  refreshPositionWatcher()  
+}
+
+// Warn if the browser doesn't support addEventListener or the Page Visibility API
+if (typeof document.addEventListener === "undefined" || hidden === undefined) {
+  // console.log("This demo requires a browser, such as Google Chrome or Firefox, that supports the Page Visibility API.");
+} else {
+  // Handle page visibility change
+  document.addEventListener(visibilityChange, handleVisibilityChange, false);
+}
+
+let locationButtonStateActive = false;
+let positionWatcher = null;
+let showPositionOnMap = null;
+
+function refreshPositionWatcher() {
+  console.log('clearWatch');
+  if (positionWatcher) navigator.geolocation.clearWatch(positionWatcher)
+  if (locationButtonStateActive && !document[hidden]) {
+    console.log('watchPosition');
+    positionWatcher = navigator.geolocation.watchPosition(
+      showPositionOnMap,
+      positioningError,
+      {timeout: 10000, enableHighAccuracy: true})
+  } else {
+    console.log('do not watchPosition');
+    positionWatcher = null;
+    positionReceived = false;
+    if (locationSymbol) locationSymbol.setVisible(false);
+  }
+}
 
 export default class LocationLayer {
 
-  positionWatcher = null;
+  // positionWatcher = null;
 
   togglePosition() {
-    if (!this.positionWatcher) {
-      this.positionWatcher = navigator.geolocation.watchPosition(
-        showPosition(this.map),
-        positioningError,
-        {timeout: 10000, enableHighAccuracy: true})
+    locationButtonStateActive = !locationButtonStateActive;
+    if (locationButtonStateActive) {
       document.getElementById("location-button").classList.add("active");
     } else {
-      navigator.geolocation.clearWatch(this.positionWatcher)
-      this.positionWatcher = null;
       document.getElementById("location-button").classList.remove("active");
-      locationSymbol.setVisible(false);
-      positionReceived = false;
     }
+    refreshPositionWatcher();
   }
 
-    init(map) {
+  init(map) {
     this.map = map;
     // this.initStyle();
     // this.refreshLiveLayer();
@@ -119,6 +163,7 @@ export default class LocationLayer {
   }
 
   init2(map) {
+    showPositionOnMap = showPosition(map);
     if (navigator.geolocation) {
       this.positionButton = document.createElement("button");
       this.positionButton.id = "location-button"
