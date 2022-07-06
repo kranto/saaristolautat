@@ -50,9 +50,9 @@ function showPosition(map) {
 }
 
 function positioningError(error) {
-  togglePosition(false);
-  alert(error.message);
+  switchPosition(false);
   console.log(error);
+  alert(error.message);
 }
 
 // Set the name of the hidden property and the change event for visibility
