@@ -11,9 +11,37 @@ function createLocationSymbol(scale, color, opacity) {
 
 let locationSymbol = null;
 let locationSymbolOuter = null;
+let accuracyCircle = null;
 let positionReceived = false;
 
 function showPosition(map) {
+
+  locationSymbol = new window.google.maps.Marker({
+    clickable: false,
+    icon: createLocationSymbol(6, '#3B84DF', 0.9),
+    zIndex: 1000,
+    map: map,
+    visible: false,
+  });
+  locationSymbolOuter = new window.google.maps.Marker({
+    clickable: false,
+    icon: createLocationSymbol(10, '#ffffff', 0.7),
+    zIndex: 999,
+    map: map,
+    visible: false,
+  });
+  accuracyCircle = new window.google.maps.Circle({
+    strokeColor: '#3B84DF',
+    fillColor: '3B84DF',
+    strokeOpacity: 0.8,
+    fillOpacity: 0.3,
+    map: map,
+    center: {lat: 0, lng: 0},
+    radius: 0,
+    clickable: false,
+    visible: false
+  });
+  
   return (position) => {
     // console.log(position);
     const pos = {
@@ -24,27 +52,20 @@ function showPosition(map) {
       map.panTo(pos);
     }
     positionReceived = true;
-    if (!locationSymbol) {
-      locationSymbol = new window.google.maps.Marker({
-        clickable: false,
-        icon: createLocationSymbol(6, '#3B84DF', 0.9),
-        zIndex: 1000,
-        map: map,
-        visible: false,
-      });
-      locationSymbolOuter = new window.google.maps.Marker({
-        clickable: false,
-        icon: createLocationSymbol(10, '#ffffff', 0.7),
-        zIndex: 999,
-        map: map,
-        visible: false,
-        });
-    }
-    if (!document[hidden] && positionWatcher && locationSymbol) {
+    if (!document[hidden] && positionWatcher) {
       locationSymbol.setPosition(pos);
-      locationSymbol.setVisible(true);
       locationSymbolOuter.setPosition(pos);
-      locationSymbolOuter.setVisible(true);
+      accuracyCircle.setCenter(pos);
+      accuracyCircle.setRadius(position.coords.accuracy);
+      if (position.coords.accuracy < 100) {
+        locationSymbol.setVisible(true);
+        locationSymbolOuter.setVisible(true);  
+        accuracyCircle.setVisible(false);
+      } else {
+        locationSymbol.setVisible(false);
+        locationSymbolOuter.setVisible(false);
+        accuracyCircle.setVisible(true);
+      }
     }
   };
 }
@@ -99,6 +120,7 @@ function refreshPositionWatcher() {
     if (locationSymbol) {
       locationSymbol.setVisible(true);
       locationSymbolOuter.setVisible(true);
+      accuracyCircle.setVisible(true);
     }
   } else {
     // console.log('do not watchPosition');
@@ -107,6 +129,7 @@ function refreshPositionWatcher() {
     if (locationSymbol) {
       locationSymbol.setVisible(false);
       locationSymbolOuter.setVisible(false);
+      accuracyCircle.setVisible(false);
     }
   }
 }
