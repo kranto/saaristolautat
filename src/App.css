@@ -1188,6 +1188,29 @@ h4 {
   background-color: #aed1fc;
 }
 
+.reset-button {
+  margin-bottom: 25px;
+  color: #606060;
+  border: none;
+  user-select: none;
+  box-shadow: rgb(0 0 0 / 30%) 0px 1px 4px -1px;
+  border-radius: 2px;
+  cursor: pointer;
+  background-color: #fbe6a7;
+  width: 60px;
+  height: 40px;
+}
+
+.reset-button:before {
+  content: "\f048";
+  font-family: FontAwesome;
+  -moz-osx-font-smoothing: grayscale;
+  font-size: 26px;
+  position:absolute;
+  top: 5px;
+  right: 21px;
+}
+
 .fmodal-enter {
   opacity: 0.01;
 }

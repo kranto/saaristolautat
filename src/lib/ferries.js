@@ -234,14 +234,39 @@ var mapOptions = {
   styles: [],
 };
 
+const resetButton = document.createElement("button");
+
+function initResetButton(map) {
+  resetButton.id = "reset-button";
+  resetButton.classList.add("reset-button");
+  resetButton.addEventListener("click", () => { resetMap(map); });
+
+  console.log(window.google.maps.ControlPosition);
+
+  map.controls[window.google.maps.ControlPosition.BOTTOM_CENTER].push(resetButton);
+
+  map.addListener("bounds_changed", () => { toggleResetButton(map); });
+}
+
+function resetMap(map) {
+  map.fitBounds({ south: 60, north: 60.5, west: 19.5, east: 22.5 });
+  google.maps.event.addListenerOnce(map, 'idle', onMapIdle);
+}
+
+function toggleResetButton(map) {
+  if (map.getBounds().intersects({south: 59.72, north:60.54, west: 19, east: 23})) {
+    resetButton.style.display = "none";
+  } else {
+    resetButton.style.display = "block";
+  }
+}
+
 export function createMap() {
   google = window.google;
   map = new google.maps.Map(document.getElementById('map'), mapOptions);
   map.setMapTypeId(store.getState().settings.mapTypeId);
-  map.fitBounds({ south: 60, north: 60.5, west: 20, east: 22.3 });
+  resetMap(map);
   updateMapStyles(map);
-
-  google.maps.event.addListenerOnce(map, 'idle', onMapIdle);
 
   map.addListener('zoom_changed', () => updateMapStyles(map));
   map.addListener('zoom_changed', () => hideObjects(map));
@@ -253,6 +278,8 @@ export function createMap() {
     updateMapStyles(map);
     rerender(map, true);
   });
+
+  initResetButton(map);
 
   // initKeepCenter(map, () => selected.length);
   return map;
