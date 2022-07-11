@@ -48,7 +48,10 @@ function showPosition(map) {
       lat: position.coords.latitude,
       lng: position.coords.longitude,
     };
-    if (!positionReceived && pos.lat >= 59.7 && pos.lat <= 60.5 && pos.lng >= 19.5 && pos.lng <= 23.0 && position.coords.accuracy <= 100) {
+    // if (!positionReceived && pos.lat >= 59.7 && pos.lat <= 60.5 && pos.lng >= 19.5 && pos.lng <= 23.0 && position.coords.accuracy <= 100) {
+    //   map.panTo(pos);
+    // }
+    if (position.coords.accuracy <= 100 && (!positionReceived || locationButtonState === 2)) {
       map.panTo(pos);
     }
     positionReceived = true;
@@ -104,14 +107,14 @@ if (typeof document.addEventListener === "undefined" || hidden === undefined) {
   document.addEventListener(visibilityChange, handleVisibilityChange, false);
 }
 
-let locationButtonStateActive = false;
+let locationButtonState = 0; // 0 - off, 1 - locate, 2 - track
 let positionWatcher = null;
 let showPositionOnMap = null;
 
 function refreshPositionWatcher() {
   // console.log('clearWatch');
   if (positionWatcher) navigator.geolocation.clearWatch(positionWatcher)
-  if (locationButtonStateActive && !document[hidden]) {
+  if (locationButtonState !== 0 && !document[hidden]) {
     // console.log('watchPosition');
     positionWatcher = navigator.geolocation.watchPosition(
       showPositionOnMap,
@@ -135,18 +138,30 @@ function refreshPositionWatcher() {
 }
 
 function togglePosition() {
-  switchPosition(!locationButtonStateActive);
+  switchPosition((locationButtonState + 1) % 3);
 }
 
-function switchPosition(switchOn) {
-    locationButtonStateActive = switchOn;
+function switchPosition(newState) {
+  locationButtonState = newState;
 
-  if (locationButtonStateActive) {
+  document.getElementById("location-button").classList.remove("active");
+  document.getElementById("location-button").classList.remove("follow");
+
+  if (locationButtonState !== 0) {
     document.getElementById("location-button").classList.add("active");
-  } else {
-    document.getElementById("location-button").classList.remove("active");
   }
+  
+  if (locationButtonState === 2) {
+    document.getElementById("location-button").classList.add("follow");
+  }
+
   refreshPositionWatcher();
+}
+
+function onDragEnd() {
+  if (locationButtonState === 2) {
+    switchPosition(1);
+  }
 }
 
 export default class LocationLayer {
@@ -160,6 +175,7 @@ export default class LocationLayer {
       this.positionButton.classList.add("location-button");
       this.positionButton.addEventListener("click", togglePosition)
       map.controls[window.google.maps.ControlPosition.RIGHT_BOTTOM].push(this.positionButton);
+      window.google.maps.event.addListener(map, 'dragstart', onDragEnd)
     }
 	}
 
