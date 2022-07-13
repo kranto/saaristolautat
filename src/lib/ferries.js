@@ -235,13 +235,12 @@ var mapOptions = {
 };
 
 const resetButton = document.createElement("button");
+const resetEvent = new Event("mapReset");
 
 function initResetButton(map) {
   resetButton.id = "reset-button";
   resetButton.classList.add("reset-button");
   resetButton.addEventListener("click", () => { resetMap(map); });
-
-  console.log(window.google.maps.ControlPosition);
 
   map.controls[window.google.maps.ControlPosition.BOTTOM_CENTER].push(resetButton);
 
@@ -251,6 +250,7 @@ function initResetButton(map) {
 function resetMap(map) {
   map.fitBounds({ south: 60, north: 60.5, west: 19.5, east: 22.5 });
   google.maps.event.addListenerOnce(map, 'idle', onMapIdle);
+  document.dispatchEvent(resetEvent);
 }
 
 function toggleResetButton(map) {

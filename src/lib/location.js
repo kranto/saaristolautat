@@ -12,10 +12,10 @@ function createLocationSymbol(scale, color, opacity) {
 let locationSymbol = null;
 let locationSymbolOuter = null;
 let accuracyCircle = null;
-let positionReceived = false;
+let latestPosition = null;
 
-function showPosition(map) {
-
+function initLocationSymbols(map) {
+  if (locationSymbol !== null) return;
   locationSymbol = new window.google.maps.Marker({
     clickable: false,
     icon: createLocationSymbol(6, '#3B84DF', 0.9),
@@ -41,36 +41,42 @@ function showPosition(map) {
     clickable: false,
     visible: false
   });
-  
-  return (position) => {
-    // console.log(position);
-    const pos = {
-      lat: position.coords.latitude,
-      lng: position.coords.longitude,
-    };
-    // if (!positionReceived && pos.lat >= 59.7 && pos.lat <= 60.5 && pos.lng >= 19.5 && pos.lng <= 23.0 && position.coords.accuracy <= 100) {
-    //   map.panTo(pos);
-    // }
-    if (position.coords.accuracy <= 100 && (!positionReceived || locationButtonState === 2)) {
-      map.panTo(pos);
+}
+
+function panToLatestPosition() {
+  if (latestPosition && latestPosition.acc <= 100) {
+    locationSymbol.getMap().panTo(latestPosition);
+  }
+}
+
+function showLatestPosition() {
+  if (!latestPosition) return;
+  if (!document[hidden] && positionWatcher) {
+    locationSymbol.setPosition(latestPosition);
+    locationSymbolOuter.setPosition(latestPosition);
+    accuracyCircle.setCenter(latestPosition);
+    accuracyCircle.setRadius(latestPosition.acc);
+    if (latestPosition.acc < 100) {
+      locationSymbol.setVisible(true);
+      locationSymbolOuter.setVisible(true);  
+      accuracyCircle.setVisible(false);
+    } else {
+      locationSymbol.setVisible(false);
+      locationSymbolOuter.setVisible(false);
+      accuracyCircle.setVisible(true);
     }
-    positionReceived = true;
-    if (!document[hidden] && positionWatcher) {
-      locationSymbol.setPosition(pos);
-      locationSymbolOuter.setPosition(pos);
-      accuracyCircle.setCenter(pos);
-      accuracyCircle.setRadius(position.coords.accuracy);
-      if (position.coords.accuracy < 100) {
-        locationSymbol.setVisible(true);
-        locationSymbolOuter.setVisible(true);  
-        accuracyCircle.setVisible(false);
-      } else {
-        locationSymbol.setVisible(false);
-        locationSymbolOuter.setVisible(false);
-        accuracyCircle.setVisible(true);
-      }
-    }
+  }
+}
+
+function onPositionChange(newPosition) {
+  const isFirstPosition = latestPosition === null;
+  latestPosition = {
+    lat: newPosition.coords.latitude,
+    lng: newPosition.coords.longitude,
+    acc: newPosition.coords.accuracy
   };
+  if (isFirstPosition || locationButtonState === 2) panToLatestPosition();
+  showLatestPosition();
 }
 
 function positioningError(error) {
@@ -109,26 +115,17 @@ if (typeof document.addEventListener === "undefined" || hidden === undefined) {
 
 let locationButtonState = 0; // 0 - off, 1 - locate, 2 - track
 let positionWatcher = null;
-let showPositionOnMap = null;
 
 function refreshPositionWatcher() {
-  // console.log('clearWatch');
   if (positionWatcher) navigator.geolocation.clearWatch(positionWatcher)
   if (locationButtonState !== 0 && !document[hidden]) {
-    // console.log('watchPosition');
     positionWatcher = navigator.geolocation.watchPosition(
-      showPositionOnMap,
+      onPositionChange,
       positioningError,
       {timeout: 10000, enableHighAccuracy: true})
-    if (locationSymbol) {
-      locationSymbol.setVisible(true);
-      locationSymbolOuter.setVisible(true);
-      accuracyCircle.setVisible(true);
-    }
+      showLatestPosition();
   } else {
-    // console.log('do not watchPosition');
     positionWatcher = null;
-    positionReceived = false;
     if (locationSymbol) {
       locationSymbol.setVisible(false);
       locationSymbolOuter.setVisible(false);
@@ -147,18 +144,23 @@ function switchPosition(newState) {
   document.getElementById("location-button").classList.remove("active");
   document.getElementById("location-button").classList.remove("follow");
 
+  if (locationButtonState === 0) {
+    latestPosition = null;
+  }
+
   if (locationButtonState !== 0) {
     document.getElementById("location-button").classList.add("active");
   }
   
   if (locationButtonState === 2) {
     document.getElementById("location-button").classList.add("follow");
+    panToLatestPosition();
   }
 
   refreshPositionWatcher();
 }
 
-function onDragEnd() {
+function stopTracking() {
   if (locationButtonState === 2) {
     switchPosition(1);
   }
@@ -169,13 +171,14 @@ export default class LocationLayer {
   init(map) {
     this.map = map;
     if (navigator.geolocation) {
-      showPositionOnMap = showPosition(map);
+      initLocationSymbols(map);
       this.positionButton = document.createElement("button");
       this.positionButton.id = "location-button"
       this.positionButton.classList.add("location-button");
       this.positionButton.addEventListener("click", togglePosition)
       map.controls[window.google.maps.ControlPosition.RIGHT_BOTTOM].push(this.positionButton);
-      window.google.maps.event.addListener(map, 'dragstart', onDragEnd)
+      window.google.maps.event.addListener(map, 'dragstart', stopTracking);
+      document.addEventListener("mapReset", stopTracking);
     }
 	}
 
