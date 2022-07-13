@@ -89,7 +89,7 @@ function hideLoader() {
   if (loaderTimeout && mapInitialized) {
     rerender(map, true);
     changePhase(phases.LOADER_CLOSED);
-    if (dontShowAgainVersion < currentBannerVersion && !location.hash && !selected.length) {
+    if (dontShowAgainVersion < currentBannerVersion && !location.hash && !selected.length && store.getState().uiState.phase < phases.BANNER_OPEN) {
       $('#bannerModal').modal({});
       setTimeout(() => {
         $('#bannerModal').modal({});
