@@ -32,9 +32,9 @@ function showPosition(map) {
   });
   accuracyCircle = new window.google.maps.Circle({
     strokeColor: '#3B84DF',
-    fillColor: '3B84DF',
+    fillColor: '#3B84DF',
     strokeOpacity: 0.8,
-    fillOpacity: 0.3,
+    fillOpacity: 0.4,
     map: map,
     center: {lat: 0, lng: 0},
     radius: 0,
@@ -74,7 +74,7 @@ function showPosition(map) {
 }
 
 function positioningError(error) {
-  switchPosition(false);
+  switchPosition(0);
   console.log(error);
   alert(error.message);
 }
