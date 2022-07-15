@@ -15,6 +15,9 @@ class SearchPanel extends Component {
 
   componentDidUpdate() {
     if (!this.props.open) ReactDOM.findDOMNode(this).scrollTop = 0;
+    if (this.state.searchPhrase !== this.props.searchPhrase) {
+      this.setState({searchPhrase: this.props.searchPhrase});
+    }
   }
 
   onSearchPhraseEdited(event) {
