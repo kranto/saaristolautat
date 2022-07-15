@@ -663,6 +663,18 @@ div#infopagecontent {
   box-shadow: -2px 2px #ddd;
 }
 
+#searchpanel {
+  top: 55px;
+  left: 20px;
+  width: 350px;
+}
+
+.slsearchbox {
+  margin: 5px;
+  width: 95%;
+  padding: 5px;
+}
+
 .box {
   height: 50px;
   padding-top: 15px;
@@ -1309,12 +1321,16 @@ h4 {
   .topbarbutton {
     font-size: 25px;
     margin: 2px;
+    max-height: 36px;
   }
   #topbartitle {
     padding: 5px;
   }
   #menu, #settings, #infopage {
     top: 40px;
+  }
+  #searchpanel {
+    top: 45px;
   }
   #wrapper2 {
     top: 40px;

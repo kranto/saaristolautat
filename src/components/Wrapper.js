@@ -10,8 +10,9 @@ import MapContainer from './MapContainer';
 import InfoContainer from './InfoContainer';
 import ScrollIndicator from './ScrollIndicator';
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
-import {toggleMenu, toggleSettings} from '../lib/uicontrol';
+import {toggleMenu, toggleSearch, toggleSettings} from '../lib/uicontrol';
 import { phases } from '../lib/constants';
+import SearchPanel from './SearchPanel';
 
 const $ = window.$;
 
@@ -95,10 +96,11 @@ class Wrapper extends Component {
         <MapContainer />
 
         <TopBar id="topbar" onMenuButtonClicked={toggleMenu} onSettingsButtonClicked={toggleSettings} 
-          onSearchButtonClicked={toggleSettings} searchOpen={this.props.uiState.searchOpen}
+          onSearchButtonClicked={toggleSearch} searchOpen={this.props.uiState.searchOpen}
           menuOpen={this.props.uiState.menuOpen} settingsOpen={this.props.uiState.settingsOpen}
           introduction={this.props.uiState.phase === phases.INTRODUCTION}/>
         <Menu open={this.props.uiState.menuOpen}/>
+        <SearchPanel open={this.props.uiState.searchOpen}/>
         <Settings open={this.props.uiState.settingsOpen}/>
         <div id="liveindpos"><LiveIndicator /></div>
         <Timetables />
