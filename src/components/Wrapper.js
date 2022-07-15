@@ -95,6 +95,7 @@ class Wrapper extends Component {
         <MapContainer />
 
         <TopBar id="topbar" onMenuButtonClicked={toggleMenu} onSettingsButtonClicked={toggleSettings} 
+          onSearchButtonClicked={toggleSettings} searchOpen={this.props.uiState.searchOpen}
           menuOpen={this.props.uiState.menuOpen} settingsOpen={this.props.uiState.settingsOpen}
           introduction={this.props.uiState.phase === phases.INTRODUCTION}/>
         <Menu open={this.props.uiState.menuOpen}/>

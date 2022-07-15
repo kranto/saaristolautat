@@ -530,7 +530,6 @@ div#infopagecontent {
 
 .topbarbutton {
   float: left;
-  width: 196px;
   max-height: 46px; 
   border: none;
   border-radius: 5px 5px 0 0;
@@ -545,6 +544,10 @@ div#infopagecontent {
   transition: background-color 100ms linear;
 }
 
+.topbarbutton.left {
+  width: 120px;
+}
+
 .topbarbutton .description {
   font-size: 12px;
   padding: 10px;
@@ -552,7 +555,13 @@ div#infopagecontent {
   transition: font-size 100ms ease-out;
 }
 
+.topbarbutton.search {
+  width: 50px;
+  padding-left: 10px;
+}
+
 .topbarbutton.right {
+  width: 196px;
   float: right;
   text-align: right;
   margin-left: 0px;
@@ -572,7 +581,7 @@ div#infopagecontent {
 }
 
 @media screen and (max-width: 512px) {
-  .topbarbutton {
+  .topbarbutton, .topbarbutton.left, .topbarbutton.search, .topbarbutton.right {
     width: 55px;
   }
   .topbarbutton .description {
