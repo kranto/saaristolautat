@@ -669,10 +669,14 @@ div#infopagecontent {
   width: 350px;
 }
 
-.slsearchbox {
+.searchbox {
   margin: 5px;
   width: 95%;
   padding: 5px;
+}
+
+input[type=search]::-webkit-search-cancel-button {
+  -webkit-appearance: searchfield-cancel-button;
 }
 
 .box {

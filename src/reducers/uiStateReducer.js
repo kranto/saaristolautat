@@ -3,6 +3,7 @@ import { phases } from '../lib/constants';
 export default function reducer(state = {
   menuOpen: false,
   settingsOpen: false,
+  searchOpen: false,
   phase: phases.INIT
 }, action) {
   switch (action.type) {

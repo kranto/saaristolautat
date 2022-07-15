@@ -1,28 +1,53 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
-import FullScreenButton from './FullScreenButton';
-import SettingsLayers from './SettingsLayers';
-import MapTypeSelector from './MapTypeSelector';
-import LocaleSelector from './LocaleSelector';
+import { connect } from 'react-redux';
+import { L2 } from '../lib/localizer';
+import { selectRoute } from '../lib/navigation';
+import { hideMenuAndSettings } from '../lib/uicontrol';
+import store from '../store';
 
-const isIOS = /(iPhone|iPad|iPod)/.test(window.navigator.userAgent);
+class SearchPanel extends Component {
 
-export default class SearchPanel extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { searchPhrase: props.searchPhrase || '' }
+  }
 
   componentDidUpdate() {
     if (!this.props.open) ReactDOM.findDOMNode(this).scrollTop = 0;
   }
 
-  results = [{title: "Utön reitti", type: "reitti", description: "Yhteysalus"}, {title: "Jurmo", type: "saari", description: "Saari Korppoossa"}];
+  onSearchPhraseEdited(event) {
+    this.setState({searchPhrase: event.target.value})
+    store.dispatch({type: "SEARCH_PHRASE_EDITED", payload: event.target.value})
+  }
+
+  onResultClicked(item) {
+    selectRoute(item.ref, true);
+    hideMenuAndSettings();
+  }
 
   render() {
     return (
       <div id="searchpanel" className={"slidedownmenu" + (this.props.open ? " open" : "")}>
-        <input type="text" name="slsearchbox" className="slsearchbox" placeholder="Search route, island, dock or vessel" maxlength="30"></input>
+        <input type="search" name="slsearchbox" className="searchbox" placeholder={L2("search.placeholder")} maxLength="30"
+        value={this.state.searchPhrase}
+        onChange={event => this.onSearchPhraseEdited(event)}></input>
         <div id="searchresults">
-          {this.results.map(r => (<div>{r.title}</div>))}        
+          {this.props.searchResults.map(r => (<div key={r.title} onClick={() => this.onResultClicked(r)}>{r.title}</div>))}        
         </div>
       </div>
     );
   }
 }
+
+const mapStateToProps = (state) => {
+  return {
+    locale: state.settings.locale,
+    searchPhrase: state.search.phrase,
+    searchResults: state.search.results
+  };
+};
+
+export default connect(mapStateToProps)(SearchPanel);
+

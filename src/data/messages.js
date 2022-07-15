@@ -122,7 +122,10 @@ const messagesRaw = { // FI SV EN
         ringroads: ["Rengastiet", "Ringvägarna", "Ring roads"],
         distances: ["Välimatkat", "Avstånden", "Distances"],
         live: ["Live", "Live", "Live"],
-    }    
+    },
+    search: {
+        placeholder: ["Hae reittejä, laitureita ja aluksia", "Search routes, docks, and vessels", "Search routes, docks, and vessels"]
+    }
 };
 
 function replaceArrayLeafs(node, replace) {
