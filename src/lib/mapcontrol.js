@@ -15,7 +15,7 @@ export function panTo(map, bounds, mapWidth) {
     panTo(map, bounds, mapWidth);
   }
   const tripleBounds = {north: 2*bounds.north - bounds.south, south: 2*bounds.south - bounds.north, west: 2*bounds.west - bounds.east, east: 2*bounds.east - bounds.west}
-  if (map.getZoom() < 12 && map.getBounds().union(tripleBounds).equals(map.getBounds())) {
+  if (map.getZoom() < 11 && map.getBounds().union(tripleBounds).equals(map.getBounds())) {
     map.setZoom(map.getZoom() + 1);
     panTo(map, bounds, mapWidth);
   }

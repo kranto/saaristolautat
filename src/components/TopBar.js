@@ -13,6 +13,7 @@ export default class TopBar extends Component {
         </button>
         <button type="button" className={"topbarbutton search" + (this.props.searchOpen ? " active" : "")} onClick={this.props.onSearchButtonClicked}>
           <i className="fa fa-search" aria-hidden="true"></i>
+          <span className={descriptionClasses}>{L2("topbar.search")}</span>
         </button>
         <div id="topbartitle">
           {L2("application.title")}

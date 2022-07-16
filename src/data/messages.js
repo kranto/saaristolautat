@@ -81,6 +81,7 @@ const messagesRaw = { // FI SV EN
     },
     topbar: {
         info: ["Info", "Info", "Info"],
+        search: ["Haku", "Sök", "Search"],
         settings: ["Asetukset", "Inställningar", "Settings"],
     },
     settings: {
@@ -124,7 +125,7 @@ const messagesRaw = { // FI SV EN
         live: ["Live", "Live", "Live"],
     },
     search: {
-        placeholder: ["Hae reittejä, laitureita ja aluksia", "Search routes, docks, and vessels", "Search routes, docks, and vessels"]
+        placeholder: ["Hae reittejä, laitureita ja aluksia", "Sök rutter, bryggor och fartyg", "Search routes, docks, and vessels"]
     }
 };
 
