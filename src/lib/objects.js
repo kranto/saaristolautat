@@ -10,7 +10,6 @@ export const objectIndex = {};
 let tooltip;
 let lastTooltipId = null;
 export function showPierTooltip(id, panTo=true) {
-  if (id === lastTooltipId) return;
   objects.filter(o => o.id === id).forEach(o => o.showTooltip(panTo));
   lastTooltipId = id;
 }
