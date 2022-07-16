@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import { connect } from 'react-redux';
 import { L2 } from '../lib/localizer';
 import { selectRoute } from '../lib/navigation';
+import { showPierTooltip } from '../lib/objects';
 import { hideMenuAndSettings } from '../lib/uicontrol';
 import store from '../store';
 
@@ -26,7 +27,8 @@ class SearchPanel extends Component {
   }
 
   onResultClicked(item) {
-    selectRoute(item.ref, true);
+    selectRoute(item.routeRef, true);
+    if (item.pierRef) showPierTooltip(item.pierRef, false);
     hideMenuAndSettings();
   }
 
@@ -37,7 +39,7 @@ class SearchPanel extends Component {
         value={this.state.searchPhrase}
         onChange={event => this.onSearchPhraseEdited(event)}></input>
         <div id="searchresults">
-          {this.props.searchResults.map(r => (<div key={r.title} onClick={() => this.onResultClicked(r)}>{r.title}</div>))}        
+          {this.props.searchResults.map(r => (<div className="searchhit" key={r.key} onClick={() => this.onResultClicked(r)}>{r.title} {r.specifier || ''}</div>))}        
         </div>
       </div>
     );

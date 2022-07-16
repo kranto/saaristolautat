@@ -76,7 +76,7 @@ class Wrapper extends Component {
     const touchFocusInInfo = infoOpen && (this.state.pointerOnInfoPanel || (isIOS && this.props.routeid !== previous))
     const pointerEvents = touchFocusInInfo ? "auto" : "none"
     return (
-      <div id="wrapper">
+      <div id="wrapper" className={infoOpen ? "info-open" : ""}>
         <div id="wrapper2" className={infoOpen ? "info-open" : ""} onScroll={this.onScroll.bind(this)}
           style={{ pointerEvents }}>
 
