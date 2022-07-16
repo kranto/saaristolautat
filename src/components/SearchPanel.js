@@ -36,7 +36,9 @@ class SearchPanel extends Component {
     if (this.props.searchResults.length === 0) return (<></>);
     return (
       <div id="searchresults">
-      {this.props.searchResults.map(r => (<div className="searchhit" key={r.key} onClick={() => this.onResultClicked(r)}>{r.title} {r.specifier || ''}</div>))}        
+      {this.props.searchResults.map((r, index) => (<div className="searchhit" key={r.key} 
+      onClick={() => this.onResultClicked(r)} tabIndex={(10+index).toString()}
+      onKeyDown={(event) => {if (event.key === "Enter") this.onResultClicked(r)}}>{r.title} {r.specifier || ''}</div>))}        
       </div>
     )
   }
@@ -47,7 +49,7 @@ class SearchPanel extends Component {
       <div id="searchpanel" className={"slidedownmenu" + (this.props.open ? " open" : "")}>
         <input type="search" name="slsearchbox" className="searchbox" placeholder={L2("search.placeholder")} maxLength="30"
         autoComplete="off" autoCorrect="off" spellCheck="false" 
-        value={this.state.searchPhrase}
+        value={this.state.searchPhrase} autoFocus={true} tabIndex="9"
         onChange={event => this.onSearchPhraseEdited(event)}></input>
         {this.showSearchResults()}
       </div>

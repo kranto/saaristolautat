@@ -704,6 +704,14 @@ div#infopagecontent {
   border: gray 1px solid;
   margin: 2px 0px;
   padding: 4px 6px;
+  cursor: pointer;
+}
+
+.searchhit:hover, .searchhit:focus {
+  position: relative;
+  background-color: #eee;
+  transition: font-size 100ms linear, background-color 100ms linear;
+  outline: none;
 }
 
 [type="search"] {

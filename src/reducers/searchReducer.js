@@ -45,7 +45,6 @@ function initData(data) {
   });
  
   searchData = [...routeData, ...pierData, ...vesselData];
-  console.log(searchData);
 }
 
 function searchPhrase(phrase) {
