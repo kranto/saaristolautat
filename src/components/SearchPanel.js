@@ -27,20 +27,29 @@ class SearchPanel extends Component {
   }
 
   onResultClicked(item) {
-    selectRoute(item.routeRef, true);
-    if (item.pierRef) showPierTooltip(item.pierRef, false);
     hideMenuAndSettings();
+    selectRoute(item.routeRef, true);
+    if (item.pierRef) setTimeout(() => {showPierTooltip(item.pierRef, false);}, 500);
+  }
+
+  showSearchResults() {
+    if (this.props.searchResults.length === 0) return (<></>);
+    return (
+      <div id="searchresults">
+      {this.props.searchResults.map(r => (<div className="searchhit" key={r.key} onClick={() => this.onResultClicked(r)}>{r.title} {r.specifier || ''}</div>))}        
+      </div>
+    )
   }
 
   render() {
+    if (!this.props.uiState.searchOpen) return (<div/>);
     return (
       <div id="searchpanel" className={"slidedownmenu" + (this.props.open ? " open" : "")}>
         <input type="search" name="slsearchbox" className="searchbox" placeholder={L2("search.placeholder")} maxLength="30"
+        autoComplete="off" autoCorrect="off" spellCheck="false" 
         value={this.state.searchPhrase}
         onChange={event => this.onSearchPhraseEdited(event)}></input>
-        <div id="searchresults">
-          {this.props.searchResults.map(r => (<div className="searchhit" key={r.key} onClick={() => this.onResultClicked(r)}>{r.title} {r.specifier || ''}</div>))}        
-        </div>
+        {this.showSearchResults()}
       </div>
     );
   }
@@ -50,7 +59,8 @@ const mapStateToProps = (state) => {
   return {
     locale: state.settings.locale,
     searchPhrase: state.search.phrase,
-    searchResults: state.search.results
+    searchResults: state.search.results,
+    uiState: state.uiState
   };
 };
 

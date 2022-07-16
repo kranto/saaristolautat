@@ -1,10 +1,11 @@
+import { getAllNames } from "../lib/datarenderer";
 import { LP } from "../lib/localizer";
 
 let rawData = null;
 let searchData = [];
 
 function canonizeName(name) {
-  return name.trim().toLowerCase().replace("å", "a").replace("ä", "a").replace("ö", "o");
+  return name.trim().toLowerCase().replaceAll("å", "a").replaceAll("ä", "a").replaceAll("ö", "o");
 }
 
 function routeSearchStrings(route) {
@@ -18,13 +19,19 @@ function vesselSearchStrings(vessel) {
 }
 
 function pierSearchStrings(pier) {
-  return [canonizeName(pier.name)];
+  const allNames = getAllNames(pier);
+  return [allNames.primary, ...allNames.other].map(canonizeName);
+}
+
+function getPierName(pier) {
+  const allNames = getAllNames(pier);
+  const other = allNames.other.length > 0 ? ` (${allNames.other.join(',')})`: ''; 
+  return `${allNames.primary}${other}`
 }
 
 function initData(data) {
   if (searchData.length > 0) return searchData;
 
-  console.log('----------- init ------------')
   const routes = data.data.routes;
 
   const routeData = [];
@@ -34,10 +41,11 @@ function initData(data) {
   Object.values(routes).filter(route => !route.obsolete).forEach(route => {
     routeData.push({search: routeSearchStrings(route), title: LP(route,"name"), specifier: `${LP(route, "specifier") || ''}`, routeRef: route.id, key: `${route.id}`})
     route.vessels.forEach(vessel => { vesselData.push({search: vesselSearchStrings(vessel), title: vessel.name, routeRef: route.id, key: `${route.id}:v:${vessel.name}`}); });
-    route.piers.forEach(pier => { pierData.push({search: pierSearchStrings(pier), title: pier.name, specifier: LP(pier.mun, "name"), routeRef: route.id, pierRef: pier.id, key: `${route.id}:d:${pier.id}`}); });
+    route.piers.forEach(pier => { pierData.push({search: pierSearchStrings(pier), title: getPierName(pier), specifier: LP(pier.mun, "name"), routeRef: route.id, pierRef: pier.id, key: `${route.id}:d:${pier.id}`}); });
   });
  
   searchData = [...routeData, ...pierData, ...vesselData];
+  console.log(searchData);
 }
 
 function searchPhrase(phrase) {
@@ -54,8 +62,6 @@ export default function reducer(state = {
     case "SEARCH_PHRASE_EDITED":
       const phrase = action.payload;
       return { ...state, phrase, results: searchPhrase(phrase) };
-    // case "MENU_AND_SETTINGS_HIDDEN":
-    //   return { ...state, phrase: '', results: [] };
     case "LOADING_DATA_FULFILLED":
       rawData = action.payload;
       return state;

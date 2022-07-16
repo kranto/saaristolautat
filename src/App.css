@@ -689,12 +689,21 @@ div#infopagecontent {
   left: 20px;
   transition: left 200ms ease-out;
   width: 350px;
+  font-size: 16px;
+  padding: 5px 10px 10px 10px;
+  border: gray 1px solid;
 }
 
 .searchbox {
-  margin: 5px;
-  width: 95%;
-  padding: 5px;
+  margin: 0;
+  width: 100%;
+  padding: 10px 6px;
+}
+
+.searchhit {
+  border: gray 1px solid;
+  margin: 2px 0px;
+  padding: 4px 6px;
 }
 
 [type="search"] {

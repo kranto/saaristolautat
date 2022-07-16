@@ -1,4 +1,5 @@
-import { L, currentLang } from './localizer';
+import { L, currentLang, LP } from './localizer';
+import _ from 'lodash';
 
 const locales = ["fi", "sv", "en"];
 
@@ -213,4 +214,10 @@ export function routeInfo(route, lang = currentLang) {
     });
 
     return info;
+}
+
+export function getAllNames(item, lang = currentLang) {
+    const primary = LP(item, "name")
+    const other = _.uniq(locales.map(locale => LP(item, "name", locale)).filter(name => name !== primary))
+    return {primary, other}
 }
