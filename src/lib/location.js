@@ -179,6 +179,7 @@ export default class LocationLayer {
       map.controls[window.google.maps.ControlPosition.RIGHT_BOTTOM].push(this.positionButton);
       window.google.maps.event.addListener(map, 'dragstart', stopTracking);
       document.addEventListener("mapReset", stopTracking);
+      document.addEventListener("mapPanned", stopTracking);
     }
 	}
 

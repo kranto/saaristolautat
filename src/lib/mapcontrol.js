@@ -1,3 +1,5 @@
+const pannedEvent = new Event("mapPanned");
+
 export function panTo(map, bounds, mapWidth) {
   if (!bounds) return;
   // pan to center of the bounds, then pan according to the info window and headerbar
@@ -19,6 +21,7 @@ export function panTo(map, bounds, mapWidth) {
     map.setZoom(map.getZoom() + 1);
     panTo(map, bounds, mapWidth);
   }
+  document.dispatchEvent(pannedEvent);
 }
 
 export function initKeepCenter(map, isSelected) {
