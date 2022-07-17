@@ -47,15 +47,23 @@ class SearchPanel extends Component {
 
   showSearchResults() {
     if (this.props.searchResults.length === 0) return (<></>);
-    console.log(this.props.searchResults.map(r => this.routeStyle(r.route)));
     return (
       <div id="searchresults">
-      {this.props.searchResults.map((r, index) => (<div className={`searchhit ${r.type}`} key={r.key} 
-      onClick={() => this.onResultClicked(r)} tabIndex={(10+index).toString()}
-      onKeyDown={(event) => {if (event.key === "Enter") this.onResultClicked(r)}}>
-        <div className="hitrouteline" style={this.routeStyle(r.route)}></div><span className="hittitle">{r.title}</span><span className="hitspecifier">{r.specifier || ''}</span></div>))}
-      </div>
-    )
+        {this.props.searchResults.map((group, gIndex) => (
+        <div className={`searchhitgroup ${group[0].type}`} key={group[0].key}>
+          {(group[0].type !== 'route') ? (<span><span className="searchhitgrouptitle">{group[0].title}</span><span className="searchhitgroupspecifier">{group[0].specifier}</span></span>): (<div/>)}
+          
+          <div className="searchhitgroupcontent">
+          {group.map((hit, index) => (
+            <div className={`searchhit ${hit.type}`} key={hit.key}
+              onClick={() => this.onResultClicked(hit)} tabIndex={(10+gIndex*100+index).toString()}
+              onKeyDown={(event) => {if (event.key === "Enter") this.onResultClicked(hit)}}>
+              <div className="hitrouteline" style={this.routeStyle(hit.route)}></div><div className="hitrouteinfo"><div className="hittitle">{hit.routetitle}</div><div className="hitspecifier">{hit.routespecifier || ''}</div></div>
+            </div>))
+          }
+          </div>
+        </div>))}
+      </div>)
   }
 
   render() {

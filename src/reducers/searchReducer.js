@@ -36,8 +36,28 @@ function getPierName(pier) {
   return `${allNames.primary}${other}`
 }
 
-function compareTitle(a, b) {
-  return a.title.localeCompare(b.title);
+function compareHits(a, b) {
+  return a.title.localeCompare(b.title) || a.specifier.localeCompare(b.specifier) || a.routetitle.localeCompare(b.routetitle) || a.routespecifier.localeCompare(b.routespecifier);
+}
+
+function groupHits(rawHits) {
+
+  const groups = [];
+  let lastGroup = [];
+
+  rawHits.forEach(hit => {
+    if (hit.type !== 'route' && (hit.type !== lastGroup[0]?.type || hit.title !== lastGroup[0]?.title || hit.specifier != lastGroup[0]?.specifier)) {
+      lastGroup = [hit];
+      groups.push(lastGroup);
+    } else {
+      if (groups.length == 0) {
+        groups.push(lastGroup);
+      }
+      lastGroup.push(hit);
+    }
+  });
+
+  return groups;
 }
 
 function initData(data) {
@@ -50,21 +70,21 @@ function initData(data) {
   const vesselData = [];
 
   Object.values(routes).filter(route => !route.obsolete).forEach(route => {
-    routeData.push({search: routeSearchStrings(route), type: "route", title: LP(route,"name"), specifier: `${LP(route, "specifier") || ''}`, route: route, key: `${route.id}`})
-    route.vessels.forEach(vessel => { vesselData.push({search: vesselSearchStrings(vessel), type: "vessel", title: vessel.name, route: route, vessel: vessel, key: `${route.id}:v:${vessel.name}`}); });
-    route.piers.forEach(pier => { pierData.push({search: pierSearchStrings(pier), type: "pier", title: getPierName(pier), specifier: LP(pier.mun, "name"), route: route, pier: pier, key: `${route.id}:d:${pier.id}`}); });
+    routeData.push({search: routeSearchStrings(route), type: "route", title: '', specifier: '', routetitle: LP(route,"name"), routespecifier: `${LP(route, "specifier") || ''}`, route: route, key: `${route.id}`})
+    route.vessels.forEach(vessel => { vesselData.push({search: vesselSearchStrings(vessel), type: "vessel", title: vessel.name, specifier: '', routetitle: LP(route,"name"), routespecifier: `${LP(route, "specifier") || ''}`, route: route, vessel: vessel, key: `${route.id}:v:${vessel.name}`}); });
+    route.piers.forEach(pier => { pierData.push({search: pierSearchStrings(pier), type: "pier", title: getPierName(pier), specifier: LP(pier.mun, "name"), routetitle: LP(route,"name"), routespecifier: `${LP(route, "specifier") || ''}`, route: route, pier: pier, key: `${route.id}:d:${pier.id}`}); });
   });
  
-  routeData.sort(compareTitle);
-  pierData.sort(compareTitle);
-  vesselData.sort(compareTitle);
+  routeData.sort(compareHits);
+  pierData.sort(compareHits);
+  vesselData.sort(compareHits);
   searchData = [...routeData, ...pierData, ...vesselData];
 }
 
 function searchPhrase(phrase) {
   initData(rawData);
   const canonizedPhrase = canonizeName(phrase);
-  return phrase.length === 0 ? [] : searchData.filter(item => item.search.filter(search => search.startsWith(canonizedPhrase)).length > 0);
+  return phrase.length === 0 ? [] : groupHits(searchData.filter(item => item.search.filter(search => search.startsWith(canonizedPhrase)).length > 0));
 }
 
 export default function reducer(state = {
