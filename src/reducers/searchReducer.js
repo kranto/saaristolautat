@@ -3,13 +3,19 @@ import { LP } from "../lib/localizer";
 
 let rawData = null;
 let searchData = [];
+const SKIP_WORDS = ["Route"]
 
 function canonizeName(name) {
   return name.trim().toLowerCase().replaceAll("å", "a").replaceAll("ä", "a").replaceAll("ö", "o");
 }
 
 function routeSearchStrings(route) {
-  return [canonizeName(LP(route,"name"))];
+  const name = LP(route,"name");
+  const parts = name.split(/[^A-Za-zåäöÅÄÖ]/)
+    .filter(part => part.length > 2)
+    .filter(part => part.match(/^[A-ZÅÖÄ]/))
+    .filter(part => !SKIP_WORDS.includes(part));
+  return [name, ...parts].map(canonizeName);
 }
 
 function vesselSearchStrings(vessel) {
