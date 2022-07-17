@@ -1,5 +1,4 @@
 import { getAllNames } from "../lib/datarenderer";
-import { shortName } from "../lib/datautils";
 import { LP } from "../lib/localizer";
 
 let rawData = null;
@@ -46,13 +45,10 @@ function groupHits(rawHits) {
   let lastGroup = [];
 
   rawHits.forEach(hit => {
-    if (hit.type !== 'route' && (hit.type !== lastGroup[0]?.type || hit.title !== lastGroup[0]?.title || hit.specifier != lastGroup[0]?.specifier)) {
+    if (hit.type !== lastGroup[0]?.type || hit.title !== lastGroup[0]?.title || hit.specifier !== lastGroup[0]?.specifier) {
       lastGroup = [hit];
       groups.push(lastGroup);
     } else {
-      if (groups.length == 0) {
-        groups.push(lastGroup);
-      }
       lastGroup.push(hit);
     }
   });
