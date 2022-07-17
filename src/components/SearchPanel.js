@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import { connect } from 'react-redux';
 import { L2 } from '../lib/localizer';
 import { selectRoute } from '../lib/navigation';
-import { showPierTooltip } from '../lib/objects';
+import { objectIndex, showPierTooltip } from '../lib/objects';
 import { hideMenuAndSettings } from '../lib/uicontrol';
 import store from '../store';
 
@@ -28,17 +28,32 @@ class SearchPanel extends Component {
 
   onResultClicked(item) {
     hideMenuAndSettings();
-    selectRoute(item.routeRef, true);
-    if (item.pierRef) setTimeout(() => {showPierTooltip(item.pierRef, false);}, 500);
+    selectRoute(item.route.id, true);
+    if (item.pier) setTimeout(() => {showPierTooltip(item.pier.id, false);}, 500);
+  }
+
+  routeStyle(route) {
+    const routeStyle = objectIndex[route.id].style;
+    return routeStyle ?
+      {
+        borderBottomWidth: routeStyle.weight + "px ",
+        borderBottomStyle: routeStyle.style,
+        borderBottomColor: routeStyle.color
+      } :
+      {
+        borderBottom: "none"
+      };
   }
 
   showSearchResults() {
     if (this.props.searchResults.length === 0) return (<></>);
+    console.log(this.props.searchResults.map(r => this.routeStyle(r.route)));
     return (
       <div id="searchresults">
-      {this.props.searchResults.map((r, index) => (<div className="searchhit" key={r.key} 
+      {this.props.searchResults.map((r, index) => (<div className={`searchhit ${r.type}`} key={r.key} 
       onClick={() => this.onResultClicked(r)} tabIndex={(10+index).toString()}
-      onKeyDown={(event) => {if (event.key === "Enter") this.onResultClicked(r)}}>{r.title} {r.specifier || ''}</div>))}        
+      onKeyDown={(event) => {if (event.key === "Enter") this.onResultClicked(r)}}>
+        <div className="hitrouteline" style={this.routeStyle(r.route)}></div><span className="hittitle">{r.title}</span><span className="hitspecifier">{r.specifier || ''}</span></div>))}
       </div>
     )
   }

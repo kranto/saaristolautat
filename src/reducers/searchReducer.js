@@ -1,4 +1,5 @@
 import { getAllNames } from "../lib/datarenderer";
+import { shortName } from "../lib/datautils";
 import { LP } from "../lib/localizer";
 
 let rawData = null;
@@ -35,6 +36,10 @@ function getPierName(pier) {
   return `${allNames.primary}${other}`
 }
 
+function compareTitle(a, b) {
+  return a.title.localeCompare(b.title);
+}
+
 function initData(data) {
   if (searchData.length > 0) return searchData;
 
@@ -45,11 +50,14 @@ function initData(data) {
   const vesselData = [];
 
   Object.values(routes).filter(route => !route.obsolete).forEach(route => {
-    routeData.push({search: routeSearchStrings(route), title: LP(route,"name"), specifier: `${LP(route, "specifier") || ''}`, routeRef: route.id, key: `${route.id}`})
-    route.vessels.forEach(vessel => { vesselData.push({search: vesselSearchStrings(vessel), title: vessel.name, routeRef: route.id, key: `${route.id}:v:${vessel.name}`}); });
-    route.piers.forEach(pier => { pierData.push({search: pierSearchStrings(pier), title: getPierName(pier), specifier: LP(pier.mun, "name"), routeRef: route.id, pierRef: pier.id, key: `${route.id}:d:${pier.id}`}); });
+    routeData.push({search: routeSearchStrings(route), type: "route", title: LP(route,"name"), specifier: `${LP(route, "specifier") || ''}`, route: route, key: `${route.id}`})
+    route.vessels.forEach(vessel => { vesselData.push({search: vesselSearchStrings(vessel), type: "vessel", title: vessel.name, route: route, vessel: vessel, key: `${route.id}:v:${vessel.name}`}); });
+    route.piers.forEach(pier => { pierData.push({search: pierSearchStrings(pier), type: "pier", title: getPierName(pier), specifier: LP(pier.mun, "name"), route: route, pier: pier, key: `${route.id}:d:${pier.id}`}); });
   });
  
+  routeData.sort(compareTitle);
+  pierData.sort(compareTitle);
+  vesselData.sort(compareTitle);
   searchData = [...routeData, ...pierData, ...vesselData];
 }
 

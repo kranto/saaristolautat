@@ -714,6 +714,38 @@ div#infopagecontent {
   outline: none;
 }
 
+.searchhit.pier:before {
+  font-family: FontAwesome;
+  content: "\f13d";
+  -moz-osx-font-smoothing: grayscale;
+  margin-right: 10px;
+}
+
+.searchhit.vessel:before {
+  content: "\f21a";
+  font-family: FontAwesome;
+  -moz-osx-font-smoothing: grayscale;
+  margin-right: 10px;
+}
+
+.searchhit .hittitle {
+
+}
+
+.searchhit .hitspecifier {
+  margin-left: 15px;
+  color: gray;
+  font-size: 0.7em;
+}
+
+.hitrouteline {
+  width: 30px;
+  display: inline-block;
+  bottom: 5px;
+  position: relative;
+  margin-right: 10px;
+}
+
 [type="search"] {
   -webkit-appearance: none;
   outline-offset: -2px;
