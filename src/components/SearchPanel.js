@@ -58,7 +58,7 @@ class SearchPanel extends Component {
             <div className={`searchhit ${hit.type}`} key={hit.key}
               onClick={() => this.onResultClicked(hit)} tabIndex={(10+gIndex*100+index).toString()}
               onKeyDown={(event) => {if (event.key === "Enter") this.onResultClicked(hit)}}>
-              <div className="hitrouteline" style={this.routeStyle(hit.route)}></div><div className="hitrouteinfo"><div className="hittitle">{hit.routetitle}</div><div className="hitspecifier">{hit.routespecifier || ''}</div></div>
+              <div className="hitroutelineouter"><div className="hitrouteline" style={this.routeStyle(hit.route)}></div></div><div className="hitrouteinfo"><div className="hittitle">{hit.routetitle}</div><div className="hitspecifier">{hit.routespecifier || ''}</div></div>
             </div>))
           }
           </div>

@@ -45,7 +45,7 @@ function groupHits(rawHits) {
   let lastGroup = [];
 
   rawHits.forEach(hit => {
-    if (hit.type !== lastGroup[0]?.type || hit.title !== lastGroup[0]?.title || hit.specifier !== lastGroup[0]?.specifier) {
+    if (lastGroup.length === 0 || hit.type !== lastGroup[0].type || hit.title !== lastGroup[0].title || hit.specifier !== lastGroup[0].specifier) {
       lastGroup = [hit];
       groups.push(lastGroup);
     } else {
