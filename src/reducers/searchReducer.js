@@ -26,7 +26,8 @@ function vesselSearchStrings(vessel) {
 
 function pierSearchStrings(pier) {
   const allNames = getAllNames(pier);
-  return [allNames.primary, ...allNames.other].map(canonizeName);
+  const allMunNames = getAllNames(pier.mun);
+  return [allNames.primary, ...allNames.other, allMunNames.primary, ...allMunNames.other].map(canonizeName);
 }
 
 function getPierName(pier) {
