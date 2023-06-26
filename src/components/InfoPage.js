@@ -81,18 +81,18 @@ class InfoPage extends Component {
               Ajoneuvojen kuljettaminen Ålandstrafikenin lautoilla on maksullista paitsi vaijerilosseilla. Hinnoittelusta johtuen käytännössä maksullista on ainoastaan lähtö saaristoon Ahvenanmantereelta tai Manner-Suomesta eli Hummelvikistä, Långnäsistä, Svinöstä, Vuonaisista ja Galtbystä. Saarten välillä kulkeminen sekä saaristosta poistuminen on maksutonta. Matkustajista ei peritä erikseen maksua.
           </p>
             <p>
-              Maksu määräytyy vuodenajan, ajoneuvon sekä matkan pituuden ja keston mukaan. Jos matkustaa saman vuorokauden aikana koko matkan Suomesta Ahvenanmantereelle, on maksu huomattavasti korkeampi kuin saaristossa yövyttäessä. Verkosta etukäteen ostettuna maksuista saa 10 % alennuksen.
+              Maksu määräytyy vuodenajan, ajoneuvon sekä matkan pituuden ja keston mukaan. Jos matkustaa saman vuorokauden aikana koko matkan Suomesta Ahvenanmantereelle, on maksu huomattavasti korkeampi kuin saaristossa yövyttäessä. Verkosta etukäteen ostettuna maksuista saa 20 % alennuksen. Ns. vihreillä lähdöillä (grön avgång) alennus on 80 % normaalihinnasta.
           </p>
             <p>
-              Esimerkkihintoja kesällä 2018:
+              Esimerkkihintoja kesällä 2023:
             </p>
             <table>
               <tbody>
                 <tr><th colSpan="2">Yhteys</th><th><i className="fa fa-bicycle" aria-hidden="true"></i></th><th><i className="fa fa-motorcycle" aria-hidden="true"></i></th><th><i className="fa fa-car" aria-hidden="true"></i></th></tr>
-                <tr><td><i className="fa fa-exchange" aria-hidden="true"></i></td><td>Manner-Suomi - saaristo - Manner-Suomi</td><td>6 €</td><td>21 €</td><td>34 €</td></tr>
-                <tr><td><i className="fa fa-exchange" aria-hidden="true"></i></td><td>Vuosnainen - Brändö - Vuosnainen<br />(poikkeus edelliseen)</td><td>6 €</td><td>16 €</td><td>22 €</td></tr>
-                <tr><td><i className="fa fa-long-arrow-right" aria-hidden="true"></i></td><td>Manner-Suomi - Ahvenanmanner<br />(yöpyminen saaristossa)</td><td>6 €</td><td>21 €</td><td>34 €</td></tr>
-                <tr><td><i className="fa fa-long-arrow-right" aria-hidden="true"></i></td><td>Manner-Suomi - Ahvenanmanner<br />(saman vuorokauden aikana)</td><td>24 €</td><td>74 €</td><td>122 €</td></tr>
+                <tr><td><i className="fa fa-exchange" aria-hidden="true"></i></td><td>Manner-Suomi - saaristo - Manner-Suomi</td><td>7 €</td><td>25 €</td><td>42 €</td></tr>
+                <tr><td><i className="fa fa-exchange" aria-hidden="true"></i></td><td>Vuosnainen - Brändö - Vuosnainen<br />(poikkeus edelliseen)</td><td>7 €</td><td>20 €</td><td>26 €</td></tr>
+                <tr><td><i className="fa fa-long-arrow-right" aria-hidden="true"></i></td><td>Manner-Suomi - Ahvenanmanner<br />(yöpyminen saaristossa)</td><td>7 €</td><td>25 €</td><td>42 €</td></tr>
+                <tr><td><i className="fa fa-long-arrow-right" aria-hidden="true"></i></td><td>Manner-Suomi - Ahvenanmanner<br />(saman vuorokauden aikana)</td><td>26 €</td><td>81 €</td><td>134 €</td></tr>
               </tbody>
             </table>
             <p>
