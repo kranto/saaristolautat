@@ -17,7 +17,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "mv public/data .data.save; REACT_APP_VERSION=$(date) react-scripts build; mv .data.save public/data",
+    "build": "mv public/data .data.save; REACT_APP_VERSION=$(date +'%Y%m%d%H%M%S') react-scripts build; mv .data.save public/data",
     "copytest": "scp -r build/* dh:test/",
     "copystaging": "scp -r build/* dh:prod/staging/",
     "copyprod": "scp -r build/* dh:prod/",

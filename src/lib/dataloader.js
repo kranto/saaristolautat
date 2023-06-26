@@ -1,8 +1,9 @@
 import axios from 'axios';
 import store from '../store';
 
+const reactAppVersion = process.env.REACT_APP_VERSION || '20230601000000';
 const baseUri = 'data/';
-const indexUri = baseUri + 'index.json?v=' + (Math.random() + "").substring(2);
+const indexUri = baseUri + 'index.json?v=' + (Math.random() + "").substring(2) + "&app_v=" + reactAppVersion;
 const indexP = axios.get(indexUri);
 
 indexP.then(({data: indexData}) => {
