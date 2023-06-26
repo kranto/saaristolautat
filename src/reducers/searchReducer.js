@@ -67,9 +67,8 @@ function initData(data) {
   const vesselData = [];
 
   Object.values(routes).filter(route => !route.obsolete).forEach(route => {
-    console.log(route)
     routeData.push({search: routeSearchStrings(route), type: "route", title: '', specifier: '', routetitle: LP(route,"name"), routespecifier: `${LP(route, "specifier") || ''}`, route: route, key: `${route.id}`})
-    route.vessels.forEach(vessel => { vesselData.push({search: vesselSearchStrings(vessel), type: "vessel", title: vessel.name, specifier: route.operator[0]?.name || '', routetitle: LP(route,"name"), routespecifier: `${LP(route, "specifier") || ''}`, route: route, vessel: vessel, key: `${route.id}:v:${vessel.name}`}); });
+    route.vessels.forEach(vessel => { vesselData.push({search: vesselSearchStrings(vessel), type: "vessel", title: vessel.name, specifier: route.operator[0] ? route.operator[0].name : '', routetitle: LP(route,"name"), routespecifier: `${LP(route, "specifier") || ''}`, route: route, vessel: vessel, key: `${route.id}:v:${vessel.name}`}); });
     route.piers.forEach(pier => { pierData.push({search: pierSearchStrings(pier), type: "pier", title: getPierName(pier), specifier: LP(pier.mun, "name"), routetitle: LP(route,"name"), routespecifier: `${LP(route, "specifier") || ''}`, route: route, pier: pier, key: `${route.id}:d:${pier.id}`}); });
   });
  
