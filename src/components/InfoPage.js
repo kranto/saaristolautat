@@ -170,19 +170,19 @@ class InfoPage extends Component {
             <h2>{L2("menu.linksinfo")}</h2>
 
             <h3>{L2("infopage.ferries")}</h3>
-            {link(["http://lautta.net/?lang=" + lang],
-              "lauttanet",
-              "Lautta.net",
-              ["Kaikkien Manner-Suomen lauttojen portaali. Aikataulut, reittihaku, tiedotteet ym.",
-                "Portal till alla Fastlands-Finlands färjor. Tidtabeller, ruttsökning, meddelanden osv.",
-                "Portal to all road ferries in Mainland Finland. Timetables, route finder, announcements etc."
-              ], lang)}
-            {link(["http://www.ely-keskus.fi/web/ely/saaristoliikenne", "http://www.ely-keskus.fi/sv/web/ely/saaristoliikenne", "http://www.ely-keskus.fi/en/web/ely-en/transport"],
+            {link(["https://www.ely-keskus.fi/saaristoliikenne", "https://www.ely-keskus.fi/sv/saaristoliikenne", "https://www.ely-keskus.fi/en/web/ely-en/transport"],
               "ely",
               ["Varsinais-Suomen ELY-keskus", "NTM-centralen i Egentliga Finland", "ELY Centre in Southwest Finland"],
               ["Manner-Suomen maantielautta- ja yhteysalusliikenteen järjestäjä",
                 "Fastlands-Finlands landsvägs- och förbindelsefartygstrafikens organisatör",
                 "Authority responsible for organizing ferry routes in Mainland Finland"
+              ], lang)}
+            {link(["https://yhteysalus.fi/", "https://xn--frbindelsebt-3cb1u.fi/", "https://commuterferry.fi/"],
+              "ely",
+              ["Saariston yhteysalusliikenne", "Förbindelsebåtstrafiken i skärgården", "Commuter ferry traffic in the archipelago"],
+              ["ELY-keskuksen ylläpitämä yhteysalusliikenteen pääsivu",
+                "NTM-centralens huvudsidan för förbindelsebåtstrafiken",
+                "The main page of commuter ferry traffic by ELY Centre"
               ], lang)}
             {link(["http://www.finferries.fi/", "http://www.finferries.fi/sv/", "http://www.finferries.fi/en/"],
               "finferries",
@@ -191,7 +191,7 @@ class InfoPage extends Component {
                 "Fastlands-Finlands viktigaste landvägsfärjoperatör",
                 "The main operator of ferries in Mainland Finland"
               ], lang)}
-            {link("http://www.alandstrafiken.ax/" + lang,
+            {link("http://www.alandstrafiken.ax/",
               "alandstrafiken",
               "Alandstrafiken.ax",
               ["Ahvenanmaan lauttojen ja muun julkisen liikenteen järjestäjä. Aikataulut, varaukset, tiedotteet ym.",
@@ -201,20 +201,20 @@ class InfoPage extends Component {
 
             <h3>{L2("infopage.touristinfo")}</h3>
 
-            {link(["http://saaristonrengastie.fi/", "http://saaristonrengastie.fi/sv", "http://saaristonrengastie.fi/en"],
+            {link(["https://visitparainen.fi/saariston-rengastie/", "https://visitparainen.fi/sv/skargardens-ringvag/", "https://visitparainen.fi/en/archipelago-trail/"],
               "rengastie",
               ["Saarison rengastie", "Skärgårdens ringväg", "Saariston rengastie - The Archipelago Trail"],
               ["Turun saariston matkailuneuvonta",
               "Åbo skärgårdens turistinformation",
               "Turku Archipelago Tourist Information Center"], lang)}
-            {link(["http://www.visitaland.com/fi/", "http://www.visitaland.com/", "http://www.visitaland.com/en/"],
+            {link(["https://www.visitaland.com/fi/", "https://www.visitaland.com/", "https://www.visitaland.com/en/"],
               "visitaland",
               "Visit Åland",
               ["Ahvenanmaan matkailuneuvonta",
                 "Ålands turistinformation",
                 "Åland Tourist information Center"
               ], lang)}
-            {link(["http://www.aland.travel/index-fi.html", "http://www.aland.travel/index.html", "http://www.aland.travel/index-en.html"],
+            {link(["https://www.aland.travel/fi", "https://www.aland.travel/", "https://www.aland.travel/en"],
               "alandtravel",
               "Åland.travel",
               ["Ahvenanmaan saaristokuntien matkailutietoa. Föglö, Sottunga, Kumlinge, Vårdö, Brändö, Kökar.",
@@ -225,15 +225,15 @@ class InfoPage extends Component {
               <ul>
               <li>{linkSpan(["https://visitparainen.fi/fi/", "https://visitparainen.fi/sv/", "https://visitparainen.fi/en/"], "pargas", ["Visit Pargas: Parainen - Nauvo - Korppoo - Houtskari - Iniö", "Visit Pargas: Pargas - Nagu - Korpo - Houtskär - Iniö", "Visit Pargas: Pargas - Nagu - Korpo - Houtskär - Iniö"], lang) }</li>
               <li>{linkSpan(["https://www.visitnaantali.com/", "https://www.visitnaantali.com/sv", "https://www.visitnaantali.com/en"], "naantali", ["Visit Naantali: Naantali - Rymättylä - Velkua", "Visit Naantali: Nådendal - Rimito - Velkua", "Visit Naantali: Naantali - Rymättylä - Velkua"], lang) }</li>
-              <li>{linkSpan(["http://www.visitturku.fi/", "http://www.visitturku.fi/sv", "http://www.visitturku.fi/en"], "turku", ["Visit Turku", "Visit Turku / Åbo", "Visit Turku"], lang) }</li>
+              <li>{linkSpan(["https://visitturku.fi/", "https://se.visitturku.fi/", "https://en.visitturku.fi/"], "turku", ["Visit Turku", "Visit Turku / Åbo", "Visit Turku"], lang) }</li>
               <li>{linkSpan(["https://www.visitkimitoon.fi/fi/", "https://www.visitkimitoon.fi/", "https://www.visitkimitoon.fi/en/"], "kemiö", ["Visit Kemiönsaari", "Visit Kimitoön", "Visit Kimitoön"], lang) }</li>
               <li>{linkSpan(["https://tourism.hanko.fi/", "https://tourism.hanko.fi/sv/", "https://tourism.hanko.fi/en/"], "hanko", ["Hanko", "Hangö", "Hanko"], lang) }</li>
-              <li>{linkSpan(["https://www.kustavi.fi/", "https://www.kustavi.fi/?language=sv", "https://www.kustavi.fi/?language=en"], "kustavi", ["Kustavi", "Gustavs", "Kustavi"], lang) }</li>
-              <li>{linkSpan(["http://brando.ax/fi/", "http://brando.ax/sv/", "http://brando.ax/en/"], "brändö", "Brändö", lang) }</li>
+              <li>{linkSpan(["https://kustavi.fi/", "https://kustavi.fi/sv", "https://kustavi.fi/en/"], "kustavi", ["Kustavi", "Gustavs", "Kustavi"], lang) }</li>
+              <li>{linkSpan(["http://www.brando.ax/suomi/", "http://www.brando.ax/", "http://www.brando.ax/english/"], "brändö", "Brändö", lang) }</li>
               <li>{linkSpan(["https://www.kumlinge.ax/fi/tule-ja-tutustu", "https://www.kumlinge.ax/bo-besoka", "https://www.kumlinge.ax/en/stay-visit"], "kumlinge", "Kumlinge", lang) }</li>
-              <li>{linkSpan(["http://www2.kokar.ax/fi-fi/kokarin/matkailu", "https://www.kokar.ax/", "http://www2.kokar.ax/en-en/kokar/tourism"], "kökar", "Kökar", lang) }</li>
+              <li>{linkSpan(["https://www.kokar.ax/?lang=fi", "https://www.kokar.ax/", "https://www.kokar.ax/?lang=en"], "kökar", "Kökar", lang) }</li>
               <li>{linkSpan("http://www.sottunga.ax/turism", "sottunga", "Sottunga", lang) }</li>
-              <li>{linkSpan(["http://www.foglo.ax/sv/for_turister/suomeksi", "http://www.foglo.ax/sv/for_turister", "http://www.foglo.ax/sv/for_turister/in_english"], "föglö", "Föglö", lang) }</li>
+              <li>{linkSpan("https://www.foglo.ax/se-och-gora", "föglö", "Föglö", lang) }</li>
             </ul>
 
           </div>
@@ -261,7 +261,7 @@ class InfoPage extends Component {
             </div>
             <div id="licensebox">
               <p>
-                Saaristolautat.fi © Kyösti Ranto 2018&mdash;2022
+                Saaristolautat.fi © Kyösti Ranto 2018&mdash;2023
               </p>
 
               <div style={{ marginTop: "10px" }}></div>
