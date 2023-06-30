@@ -26,13 +26,11 @@ export default function reducer(state = initialSettings, action) {
 function handleAction(state, action) {
   switch (action.type) {
     case "LOCALE_SET":
-      setToLocalStorage('language', action.payload);
       return { ...state, locale: action.payload };
     case "FULLSCREEN_CHANGED":
       return { ...state, isFullScreen: action.payload };
     case "LAYER_SET":
       const layers = Object.assign({}, state.layers, action.payload);
-      setToLocalStorage("layers", JSON.stringify(layers));
       return { ...state, layers: layers };
     case "MAP_TYPE_SELECTED":
       return { ...state, mapTypeId: action.payload };
