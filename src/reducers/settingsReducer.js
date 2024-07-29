@@ -13,6 +13,12 @@ let initialSettings = getFromLocalStorage("settings") ||
   mapTypeId: 'roadmap'
 };
 
+// fix unsupported locales (de etc.)
+const locales = ["fi", "sv", "en"];
+if (locales.indexOf(initialSettings.locale) < 0) {
+  initialSettings.locale = "en"
+}
+
 initialSettings = {...initialSettings, isFullScreen: false};
 
 setToLocalStorage("settings", initialSettings);
