@@ -70,10 +70,10 @@ class InfoPage extends Component {
             {onlyInFinnish}
             <h3>Lauttareitit</h3>
             <ul className="ferrieslist">
-              <li><div className="infopageroute" style={{ borderColor: "#db0a00" }}></div><strong>Pohjoinen linja</strong> yhdistää Manner-Suomen Kustavin Brändön kautta Ahvenanmantereen Vårdöhön.</li>
-              <li><div className="infopageroute" style={{ borderColor: "#00a000" }}></div><strong>Eteläinen linja</strong> yhdistää Manner-Suomen Korppoon Ahvenanmantereen Lumparlandiin.</li>
-              <li><div className="infopageroute" style={{ borderColor: "#f7c71a" }}></div><strong>Poikittainen linja</strong> yhdistää Eteläisen ja Pohjoisen linjan Lumparlandista Kumlingeen.</li>
-              <li><div className="infopageroute" style={{ borderColor: "#004d9d" }}></div> <strong>Föglön linja</strong> yhdistää Föglön saaristokunnan Ahvenanmantereen Lumparlandiin.</li >
+              <li><div className="infopageroute" style={{ borderColor: "#7a2736" }}></div><strong>Pohjoinen linja</strong> yhdistää Manner-Suomen Kustavin Brändön kautta Ahvenanmantereen Vårdöhön.</li>
+              <li><div className="infopageroute" style={{ borderColor: "#3c854a" }}></div><strong>Eteläinen linja</strong> yhdistää Manner-Suomen Korppoon Ahvenanmantereen Lumparlandiin.</li>
+              <li><div className="infopageroute" style={{ borderColor: "#c85534" }}></div><strong>Poikittainen linja</strong> yhdistää Eteläisen ja Pohjoisen linjan Lumparlandista Kumlingeen.</li>
+              <li><div className="infopageroute" style={{ borderColor: "#34509f" }}></div> <strong>Föglön linja</strong> yhdistää Föglön saaristokunnan Ahvenanmantereen Lumparlandiin.</li >
               <li><div className="infopageroute" style={{ borderColor: "#00a000", borderTopWidth: "5px", borderTopStyle: "dotted" }}></div> <strong>Vaijerilossit</strong> kulkevat lyhyitä etappeja pääsääntöisesti ilman aikataulua.</li >
             </ul >
             <h3>Hinnat</h3>
@@ -254,14 +254,13 @@ class InfoPage extends Component {
               <h5>Seuraa Saaristolauttoja ja anna palautetta</h5>
               <ul>
                 <li><a href="https://www.facebook.com/saaristolautat/" rel="noopener noreferrer" target="facebook"><i className="fa fa-facebook-official fbcolor" aria-hidden="true"></i><span>@saaristolautat</span></a></li>
-                <li><a href="https://twitter.com/saaristolautat/" rel="noopener noreferrer" target="twitter"><i className="fa fa-twitter twittercolor" aria-hidden="true"></i><span>@saaristolautat</span></a></li>
                 <li><a href="https://www.instagram.com/saaristolautat.fi/" rel="noopener noreferrer" target="instagram"><i className="fa fa-instagram instagramcolor" aria-hidden="true"></i><span>@saaristolautat.fi</span></a></li>
                 <li><a href="mailto:feedback@saaristolautat.fi?subject=Palautetta Saaristolautat-sovelluksesta"><i className="fa fa-envelope-o" aria-hidden="true" style={{ color: "#000" }}></i><span>feedback@saaristolautat.fi</span></a></li>
               </ul>
             </div>
             <div id="licensebox">
               <p>
-                Saaristolautat.fi © Kyösti Ranto 2018&mdash;2024
+                Saaristolautat.fi © Kyösti Ranto 2018&mdash;2025
               </p>
 
               <div style={{ marginTop: "10px" }}></div>
