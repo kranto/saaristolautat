@@ -79,24 +79,26 @@ class InfoPage extends Component {
             <h3>Hinnat</h3>
             <p>
               Ajoneuvojen kuljettaminen Ålandstrafikenin lautoilla on maksullista paitsi vaijerilosseilla. Hinnoittelusta johtuen käytännössä maksullista on ainoastaan lähtö saaristoon Ahvenanmantereelta tai Manner-Suomesta eli Hummelvikistä, Långnäsistä, Svinöstä, Vuonaisista ja Galtbystä. Saarten välillä kulkeminen sekä saaristosta poistuminen on maksutonta. Matkustajista ei peritä erikseen maksua.
-          </p>
+            </p>
             <p>
-              Maksu määräytyy vuodenajan, ajoneuvon sekä matkan pituuden ja keston mukaan. Jos matkustaa saman vuorokauden aikana koko matkan Suomesta Ahvenanmantereelle, on maksu huomattavasti korkeampi kuin saaristossa yövyttäessä. Verkosta etukäteen ostettuna maksuista saa 20 % alennuksen. Ns. vihreillä lähdöillä (grön avgång) alennus on 80 % normaalihinnasta.
-          </p>
+              Maksu määräytyy ajoneuvotyypin mukaan. Jos matkustaa saman vuorokauden aikana koko matkan Suomesta Ahvenanmantereelle tai päinvastoin, on maksu huomattavasti korkeampi kuin saaristossa yövyttäessä. Verkosta etukäteen ostettuna maksuista saa 20 % alennuksen.
+            </p>
             <p>
-              Esimerkkihintoja kesällä 2023:
+              Esimerkkihintoja vuonna 2025:
             </p>
             <table>
               <tbody>
                 <tr><th colSpan="2">Yhteys</th><th><i className="fa fa-bicycle" aria-hidden="true"></i></th><th><i className="fa fa-motorcycle" aria-hidden="true"></i></th><th><i className="fa fa-car" aria-hidden="true"></i></th></tr>
-                <tr><td><i className="fa fa-exchange" aria-hidden="true"></i></td><td>Manner-Suomi - saaristo - Manner-Suomi</td><td>7 €</td><td>25 €</td><td>42 €</td></tr>
-                <tr><td><i className="fa fa-exchange" aria-hidden="true"></i></td><td>Vuosnainen - Brändö - Vuosnainen<br />(poikkeus edelliseen)</td><td>7 €</td><td>20 €</td><td>26 €</td></tr>
-                <tr><td><i className="fa fa-long-arrow-right" aria-hidden="true"></i></td><td>Manner-Suomi - Ahvenanmanner<br />(yöpyminen saaristossa)</td><td>7 €</td><td>25 €</td><td>42 €</td></tr>
-                <tr><td><i className="fa fa-long-arrow-right" aria-hidden="true"></i></td><td>Manner-Suomi - Ahvenanmanner<br />(saman vuorokauden aikana)</td><td>26 €</td><td>81 €</td><td>134 €</td></tr>
+                <tr><td><i className="fa fa-exchange" aria-hidden="true"></i></td><td>Manner-Suomi - saaristo - Manner-Suomi</td><td>6 €</td><td>21 €</td><td>40 €</td></tr>
+                <tr><td><i className="fa fa-long-arrow-right" aria-hidden="true"></i></td><td>Manner-Suomi - Ahvenanmanner<br />(yöpyminen saaristossa)</td><td>6 €</td><td>21 €</td><td>21 €</td></tr>
+                <tr><td><i className="fa fa-long-arrow-right" aria-hidden="true"></i></td><td>Manner-Suomi - Ahvenanmanner<br />(saman vuorokauden aikana)</td><td>28 €</td><td>87 €</td><td>143 €</td></tr>
               </tbody>
             </table>
             <p>
-              Useimmille lautoille voi varata paikan moottoriajoneuvolle ja suosituimpiin aikoihin se on ehdottomasti suositeltavaa. Varauksen voi tehdä <a href="http://online.alandstrafiken.ax/Login/Customer.aspx" rel="noopener noreferrer" target="other">verkossa</a> tai<br />puhelimitse <i className="fa fa-phone" aria-hidden="true"></i>&nbsp;<a className="tel" href="tel:+3581825600">+358&nbsp;18&nbsp;25&nbsp;600</a>.
+              Koko hinnasto löytyy <a href="https://www.alandstrafiken.ax/farjetrafik/farjepriser" rel="noopener noreferrer" target="other">Ålandstrafikenin sivuilta</a>.
+            </p>
+            <p>
+              Useimmille lautoille voi varata paikan moottoriajoneuvolle ja suosituimpiin aikoihin se on ehdottomasti suositeltavaa. Varauksen voi tehdä <a href="https://www.alandstrafiken.ax/" rel="noopener noreferrer" target="other">verkossa</a> tai<br />puhelimitse <i className="fa fa-phone" aria-hidden="true"></i>&nbsp;<a className="tel" href="tel:+3581825600">+358&nbsp;18&nbsp;25&nbsp;600</a>.
           </p>
           </div >
           : ""}
