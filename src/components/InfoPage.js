@@ -57,10 +57,11 @@ class InfoPage extends Component {
             <p>Maarianhaminasta on linja-autoyhteyksiä ympäri Ahvenanmannerta, mm. kaikkiin satamiin. Reitit ja aikataulut näet <a href="http://www.alandstrafiken.ax/fi/aikataulut/bussien-aikatalut" rel="noopener noreferrer" target="_blank">Ålandstrafikenin</a> sivuilta.</p>
             <p>Maarianhaminaan voi myös <strong>lentää</strong> Turusta ja Helsingistä.</p>
             <h3>Polkupyörällä</h3>
-            <p>Turusta pääsee Saariston rengastietä Kaarinan kautta Paraisille ja siitä edelleen Nauvoon ja Korppooseen. Vastapäivään voi polkea vaikkapa Naantalin kautta Velkuan Teersaloon ja jatkaa lautalla Taivassalon Hakkenpäähän.</p>
-            <p>Turusta pääsee Nauvoon myös Pientä Rengastietä Naantalin ja Rymättylän kautta tai suoraan risteilyaluksella Aurajoen rannasta. Ja kannattaa muistaa, että myös linja-autot kuljettavat pyöriä, jos tilaa on.</p>
+            <p>Turusta pääsee <a href="https://visitparainen.fi/saariston-rengastie/" rel="noopener noreferrer" target="_blank">Saariston rengastietä</a> Kaarinan kautta Paraisille ja siitä edelleen Nauvoon ja Korppooseen. Vastapäivään voi polkea vaikkapa Naantalin kautta Velkuan Teersaloon ja jatkaa lautalla Taivassalon Hakkenpäähän.</p>
+            <p>Turusta pääsee Nauvoon myös <a href="https://visitparainen.fi/pieni-rengastie/" rel="noopener noreferrer" target="_blank">Pientä Rengastietä</a> Naantalin ja Rymättylän kautta tai suoraan <a href="https://vitharun.fi/fi/aikataulut/turku-seili-nauvo/" rel="noopener noreferrer" target="_blank">risteilyaluksella Aurajoen rannasta</a>. Ja kannattaa muistaa, että myös linja-autot kuljettavat pyöriä, jos tilaa on.</p>
             <p>Korppoosta ja Kustavista on helppo siirtyä Ahvenanmaan lautoille ja jatkaa matkaa Brändöhön tai eteläisellä linjalla vaikkapa Kökariin ja Föglöhön. Ahvenanmaan matkan voi taittaa myös suoraan autolautalla Turusta, Helsingistä tai Naantalista. Ahvenanmaalta voi myös piipahtaa Ruotsin puolella Grisslehamnissa tai Kapellskärissä.</p>
-            <p>Pyöräilijälle on vaihtoehtoja saaristossa lähes loputtomasti. Kesän 2018 uutuus on yhteys Hangon ja Kemiönsaaren Kasnäsin välillä. Lähes kaikki alukset ottavat polkupyörän kyytiin. Varmista tarvittaessa suoraan alukselta.</p>
+            <p>Suosittu  reitistö on myös Salon, Kemiönsaaren ja Hangon kautta kulkeva <a href="https://www.bikeland.fi/rannikkoreitti" rel="noopener noreferrer" target="_blank">Rannikkoreitti</a>.</p>
+            <p>Pyöräilijälle on vaihtoehtoja saaristossa lähes loputtomasti. Lähes kaikki saariston alukset ottavat polkupyörän kyytiin. Varmista tarvittaessa suoraan alukselta.</p>
           </div>
           : ""}
 
