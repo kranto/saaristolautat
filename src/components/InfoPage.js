@@ -54,7 +54,7 @@ class InfoPage extends Component {
             <h3>Julkisilla</h3>
             <p><strong>Junalla</strong> pääsee Turkuun, Saloon, Tammisaareen ja Hankoon. Tarkista aikataulut <a href="http://www.vr.fi" rel="noopener noreferrer" target="_blank">VR</a>:n palvelusta.</p>
             <p>Turusta on <strong>linja-autoyhteyksiä</strong> Kemiönsaaren Taalintehtaalle, Paraisille, Nauvoon, Korppooseen ja Houtskariin sekä Taivassalon kautta Kustaviin. Aikataulut löydät <a href="http://www.matkahuolto.fi" rel="noopener noreferrer" target="_blank">Matkahuollon</a> palvelusta.</p>
-            <p>Maarianhaminasta on linja-autoyhteyksiä ympäri Ahvenanmannerta, mm. kaikkiin satamiin. Reitit ja aikataulut näet <a href="http://www.alandstrafiken.ax/fi/aikataulut/bussien-aikatalut" rel="noopener noreferrer" target="_blank">Ålandstrafikenin</a> sivuilta.</p>
+            <p>Maarianhaminasta on linja-autoyhteyksiä ympäri Ahvenanmannerta, mm. kaikkiin satamiin. Reitit ja aikataulut näet <a href="https://www.alandstrafiken.ax/busstrafik" rel="noopener noreferrer" target="_blank">Ålandstrafikenin</a> sivuilta.</p>
             <p>Maarianhaminaan voi myös <strong>lentää</strong> Turusta ja Helsingistä.</p>
             <h3>Polkupyörällä</h3>
             <p>Turusta pääsee <a href="https://visitparainen.fi/saariston-rengastie/" rel="noopener noreferrer" target="_blank">Saariston rengastietä</a> Kaarinan kautta Paraisille ja siitä edelleen Nauvoon ja Korppooseen. Vastapäivään voi polkea vaikkapa Naantalin kautta Velkuan Teersaloon ja jatkaa lautalla Taivassalon Hakkenpäähän.</p>
@@ -138,7 +138,7 @@ class InfoPage extends Component {
                   <input type="checkbox" id="infolivelayercb" checked={this.props.layers.live} onChange={this.onChange.bind(this)}/>
                   <label className="layerselector" htmlFor="infolivelayercb">Live-karttataso</label>
                 </div>
-                <p>Liikennetietojen lähde <a href="http://www.liikennevirasto.fi">Liikennevirasto</a> / <a href="http://digitraffic.liikennevirasto.fi/meriliikenne/">meri.digitraffic.fi</a>, lisenssi <a href="http://creativecommons.org/licenses/by/4.0/">CC 4.0 BY</a></p>
+                <p>Liikennetietojen lähde <a href="http://www.liikennevirasto.fi">Liikennevirasto</a> / <a href="https://www.digitraffic.fi/meriliikenne/">digitraffic.fi</a>, lisenssi <a href="http://creativecommons.org/licenses/by/4.0/">CC 4.0 BY</a></p>
                 <hr/>
                 <h3>Marinetraffic</h3>
                 <p>Kattavamman näkymän Saaristomeren ja koko maailman meriliikenteeseen saa mm. Marinetraffic.com-palvelusta</p>
