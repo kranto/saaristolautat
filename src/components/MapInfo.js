@@ -54,7 +54,7 @@ class MapInfo extends Component {
                 <div id="mapInfo" className="mapInfo">
                     {lang === "fi" &&
                     <p className="mapInfoText">
-                        Googlen karttapalvelun hinnoittelu on muuttunut, eikä sitä voida näyttää.
+                        Googlen karttapalvelun hinnoittelu on muuttunut, eikä karttaa voida näyttää.
                         <br/>Voit etsiä Saaristomeren reittejä, aluksia ja laitureita käyttäen yläpalkin
                         <span> <i>hakutoimintoa</i> <i className="fa fa-search" aria-hidden="true"></i> </span>
                         tai valita haluamasi reitin alla olevasta listasta.
