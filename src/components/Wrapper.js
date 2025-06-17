@@ -7,6 +7,7 @@ import Menu from './Menu';
 import LiveIndicator from './LiveIndicator';
 import Timetables from './Timetables';
 import MapContainer from './MapContainer';
+import MapInfo from './MapInfo';
 import InfoContainer from './InfoContainer';
 import ScrollIndicator from './ScrollIndicator';
 import ReactCSSTransitionGroup from 'react-transition-group/CSSTransitionGroup';
@@ -94,6 +95,7 @@ class Wrapper extends Component {
         </div>
 
         <MapContainer />
+        <MapInfo />
 
         <TopBar id="topbar" onMenuButtonClicked={toggleMenu} onSettingsButtonClicked={toggleSettings} 
           onSearchButtonClicked={toggleSearch} searchOpen={this.props.uiState.searchOpen}

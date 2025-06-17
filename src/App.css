@@ -470,6 +470,16 @@ div#infopagecontent {
   top: -0px; 
 }
 
+.mapInfo {
+  height: 80%;
+  width: 40%; 
+  transform: scale(1); 
+  position: absolute; 
+  left: 30%;
+  top: 15%;
+  overflow-y: scroll;
+}
+
 .btn:focus, .btn.active:focus, button:focus, select:focus {outline:0;}
 
 .btn-default.active, .btn-default.active:focus {
@@ -1413,7 +1423,7 @@ h4 {
   .info-open #searchpanel {
     left: 420px;
     transition: left 200ms ease-out;
-  }  
+  }
 }
 
 @media screen and (max-width: 767px) {
@@ -1433,6 +1443,13 @@ h4 {
   .info-leave.info-leave-active {
     top: 100%;
     transition: top 200ms ease-in;
+  }
+
+  .mapInfo {
+    height: 80%;
+    width: 70%; 
+    left: 15%; 
+    top: 10%;
   }
 }
 
