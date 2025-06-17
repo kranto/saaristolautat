@@ -51,7 +51,7 @@ txtol.init = function(OverlayView) { // window.google.maps.OverlayView
 
   TxtOverlay.prototype.draw = function() {
     if (!this.visible) return;
-    if (!this.map_.getBounds().contains(this.pos)) {
+    if (!this.map_.getBounds()?.contains(this.pos)) {
       this.div_.style.visibility = "hidden";
       return;
     } else {

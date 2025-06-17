@@ -478,6 +478,11 @@ div#infopagecontent {
   left: 30%;
   top: 15%;
   overflow-y: scroll;
+  transition: left 200ms ease-out;
+}
+
+.mapInfoText {
+  font-size: 1.2em;
 }
 
 .btn:focus, .btn.active:focus, button:focus, select:focus {outline:0;}
@@ -1218,6 +1223,12 @@ h4 {
   right: 0px;
   top: 0px;
   z-index: 100;
+  background-image: url("static_map.jpg");
+  background-size: auto 130%;
+  background-repeat: repeat-x;
+  background-color: rgba(255,255,255,0.85);
+  background-blend-mode: lighten;
+  background-position: center;
 }
 
 @media screen and (max-width: 767px) {
@@ -1423,6 +1434,13 @@ h4 {
   .info-open #searchpanel {
     left: 420px;
     transition: left 200ms ease-out;
+  }
+
+}
+
+@media screen and (min-width: 768px) and (max-width: 1400px) {
+  .info-open .mapInfo {
+    left: 420px;
   }
 }
 
