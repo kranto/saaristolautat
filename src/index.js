@@ -27,12 +27,12 @@ const getMapKey = () => {
 	switch (hostname) {
 	case 'saaristolautat.fi': 
 	case 'www.saaristolautat.fi': 
-		return 'AIzaSyA__hjJJ5vFz6-8XwU-T0h8iI5bWJdD6P8';
+		return 'apikeyhere';
 	case 'demo.saaristolautat.fi':
-		return 'AIzaSyCu0O7p5TDu2QmzghtSXzbJ3PByvi0KRbw';
+		return 'apikeyhere';
 	case 'test.saaristolautat.fi':
 	case 'localhost':
-		return 'AIzaSyAX_N6yFjHfac6v9-xiwA31yg1twAMMyGA';	
+		return 'apikeyhere';
 	default:
 		return '';
 	}
