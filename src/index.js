@@ -12,6 +12,8 @@ import './lib/dataloader';
 import { initRoutes } from './lib/routes';
 import LocationLayer from './lib/location';
 
+const $ = window.$;
+
 window.initApplication = () => {
 	txtol.init(window.google.maps.OverlayView);
 	const map = createMap();
@@ -20,6 +22,13 @@ window.initApplication = () => {
 	initRoutes(map);
 	new LiveLayer().init(map, txtol);
 	new LocationLayer().init(map);
+	setTimeout(fallbackIfMapDidntLoadProperly, 1400)
+}
+
+const fallbackIfMapDidntLoadProperly = () => {
+	const isError = $(".gm-err-container").length > 0
+	$("#map").toggleClass("hide", isError);
+	$("#mapInfo").toggleClass("hide", !isError);
 }
 
 const getMapKey = () => {
@@ -27,12 +36,12 @@ const getMapKey = () => {
 	switch (hostname) {
 	case 'saaristolautat.fi': 
 	case 'www.saaristolautat.fi': 
-		return 'apikeyhere';
+		return 'AIzaSyA__hjJJ5vFz6-8XwU-T0h8iI5bWJdD6P8';
 	case 'demo.saaristolautat.fi':
 		return 'apikeyhere';
 	case 'test.saaristolautat.fi':
 	case 'localhost':
-		return 'apikeyhere';
+		return 'AIzaSyAX_N6yFjHfac6v9-xiwA31yg1twAMMyGA';
 	default:
 		return '';
 	}
@@ -41,7 +50,7 @@ const getMapKey = () => {
 const loadGoogleMaps = () => {
 	const googleMapScript = document.createElement('script');
 	const key = getMapKey();
-	googleMapScript.setAttribute('src','https://maps.googleapis.com/maps/api/js?key=' + key + '&v=quarterly&callback=initApplication');
+	googleMapScript.setAttribute('src','https://maps.googleapis.com/maps/api/js?key=' + key + '&v=quarterly&callback=initApplication&loading=async');
 	document.body.appendChild(googleMapScript);	
 }
 

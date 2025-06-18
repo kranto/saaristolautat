@@ -50,32 +50,30 @@ class MapInfo extends Component {
     render() {
         const { locale: lang } = this.props;
         return (
-            <div id="mapcontainer">
-                <div id="mapInfo" className="mapInfo">
-                    {lang === "fi" &&
-                    <p className="mapInfoText">
-                        Googlen karttapalvelun hinnoittelu on muuttunut, eikä karttaa voida näyttää.
-                        <br/>Voit etsiä Saaristomeren reittejä, aluksia ja laitureita käyttäen yläpalkin
-                        <span> <i>hakutoimintoa</i> <i className="fa fa-search" aria-hidden="true"></i> </span>
-                        tai valita haluamasi reitin alla olevasta listasta.
-                    </p>}
-                    {lang === "sv" &&
-                    <p className="mapInfoText">
-                        Prissättningen för Google Maps har ändrats och kartan kan inte visas här.
-                        <br/>Du kan söka efter rutter, fartyg och hamnar i Skärgårdshavet med hjälp av 
-                        <span> <i>sökfunktionen</i> <i className="fa fa-search" aria-hidden="true"></i> </span>
-                        i den övre fältet eller välja önskad rutt från listan nedan.                    
-                    </p>}
-                    {lang === "en" && 
-                    <p className="mapInfoText">
-                        Pricing of Google Maps has changed and the map cannot be displayed here.
-                        <br/>You can search for routes, vessels, and docks in the Archipelago Sea using 
-                        <span> <i>the search function</i> <i className="fa fa-search" aria-hidden="true"></i> </span>
-                        in the top bar or select the desired route from the list below.
-                    </p>}
-                    <div>
-                        {this.renderRoutes()}
-                    </div>
+            <div id="mapInfo" className="mapInfo hide">
+                {lang === "fi" &&
+                <p className="mapInfoText">
+                    Googlen karttapalvelun hinnoittelu on muuttunut, eikä karttaa voida näyttää.
+                    <br/>Voit etsiä Saaristomeren reittejä, aluksia ja laitureita käyttäen yläpalkin
+                    <span> <i>hakutoimintoa</i> <i className="fa fa-search" aria-hidden="true"></i> </span>
+                    tai valita haluamasi reitin alla olevasta listasta.
+                </p>}
+                {lang === "sv" &&
+                <p className="mapInfoText">
+                    Prissättningen för Google Maps har ändrats och kartan kan inte visas här.
+                    <br/>Du kan söka efter rutter, fartyg och hamnar i Skärgårdshavet med hjälp av 
+                    <span> <i>sökfunktionen</i> <i className="fa fa-search" aria-hidden="true"></i> </span>
+                    i den övre fältet eller välja önskad rutt från listan nedan.                    
+                </p>}
+                {lang === "en" && 
+                <p className="mapInfoText">
+                    Pricing of Google Maps has changed and the map cannot be displayed here.
+                    <br/>You can search for routes, vessels, and docks in the Archipelago Sea using 
+                    <span> <i>the search function</i> <i className="fa fa-search" aria-hidden="true"></i> </span>
+                    in the top bar or select the desired route from the list below.
+                </p>}
+                <div>
+                    {this.renderRoutes()}
                 </div>
             </div>
         );
