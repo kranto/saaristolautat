@@ -9,7 +9,7 @@ import Timetables from './Timetables';
 import MapContainer from './MapContainer';
 import InfoContainer from './InfoContainer';
 import ScrollIndicator from './ScrollIndicator';
-import ReactCSSTransitionGroup from 'react-transition-group/CSSTransitionGroup';
+import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import {toggleMenu, toggleSearch, toggleSettings} from '../lib/uicontrol';
 import { phases } from '../lib/constants';
 import SearchPanel from './SearchPanel';
@@ -82,15 +82,15 @@ class Wrapper extends Component {
 
           <div className="mapoverlay" style={{ pointerEvents }}></div>
 
-          <ReactCSSTransitionGroup transitionName="info"
-            transitionEnterTimeout={200}
-            transitionLeaveTimeout={200}>
+          <TransitionGroup component={null}>
             {infoOpen ?
-              <InfoContainer key="1" 
-              onMouseEnter={this.onMouseEnterInfo.bind(this)}
-              onMouseLeave={this.onMouseLeaveInfo.bind(this)} />
-              : ""}
-          </ReactCSSTransitionGroup>
+              <CSSTransition key="info" classNames="info" timeout={200}>
+                <InfoContainer
+                  onMouseEnter={this.onMouseEnterInfo.bind(this)}
+                  onMouseLeave={this.onMouseLeaveInfo.bind(this)} />
+              </CSSTransition>
+              : null}
+          </TransitionGroup>
         </div>
 
         <MapContainer />

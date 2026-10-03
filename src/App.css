@@ -1358,7 +1358,7 @@ h4 {
   transition: opacity 500ms ease-in;
 }
 
-.fmodal-leave.fmodal-leave-active {
+.fmodal-exit.fmodal-exit-active {
   opacity: 0.01;
   transition: opacity 300ms ease-in;
 }
@@ -1399,7 +1399,7 @@ h4 {
     left: 0px;
     transition: left 200ms ease-out;
   }
-  .info-leave.info-leave-active {
+  .info-exit.info-exit-active {
     left: -400px;
     transition: left 200ms ease-in;
   }
@@ -1430,7 +1430,7 @@ h4 {
     top: 80%;
     transition: top 200ms ease-out;
   }
-  .info-leave.info-leave-active {
+  .info-exit.info-exit-active {
     top: 100%;
     transition: top 200ms ease-in;
   }
@@ -1477,14 +1477,14 @@ h4 {
   transition: opacity 200ms linear;
 }
 
-.infocontent-leave {
+.infocontent-exit {
   opacity: 1;
   pointer-events: none;
   position: relative;
   top: 0px;
 }
 
-.infocontent-leave.infocontent-leave-active {
+.infocontent-exit.infocontent-exit-active {
   opacity: 0;
   transition: opacity 200ms linear;
 }
@@ -1498,11 +1498,11 @@ h4 {
   transition: opacity 200ms linear; 
 }
 
-#loader.loader-leave {
+#loader.loader-exit {
   opacity: 1;
 }
 
-#loader.loader-leave.loader-leave-active {
+#loader.loader-exit.loader-exit-active {
   opacity: 0;
   transition: opacity 700ms linear;
 }

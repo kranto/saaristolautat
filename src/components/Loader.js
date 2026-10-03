@@ -1,17 +1,16 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import ReactCSSTransitionGroup from 'react-transition-group/CSSTransitionGroup';
+import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import { L2 } from '../lib/localizer';
 import { phases } from '../lib/constants';
 
 class Loader extends Component {
   render() {
     return (
-      <ReactCSSTransitionGroup transitionName="loader"
-        transitionEnterTimeout={200}
-        transitionLeaveTimeout={700}>
+      <TransitionGroup component={null}>
         {(this.props.phase >= phases.LOADER_OPEN && this.props.phase < phases.LOADER_CLOSED) ? (
-          <div id="loader" key="loader">
+          <CSSTransition key="loader" classNames="loader" timeout={{ enter: 200, exit: 700 }}>
+          <div id="loader">
             <div id="loaderbox">
               <div id="loaderheader">
                 <img src="/mstile-70x70.png" alt="Logo" />
@@ -33,8 +32,9 @@ class Loader extends Component {
               <br/>
               {process.env.REACT_APP_VERSION}
             </div>
-          </div>) : ""}
-      </ReactCSSTransitionGroup>
+          </div>
+          </CSSTransition>) : null}
+      </TransitionGroup>
     );
   }
 }

@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import ReactCSSTransitionGroup from 'react-transition-group/CSSTransitionGroup';
+import { CSSTransition, TransitionGroup } from 'react-transition-group';
 
 export default class FModal extends Component {
   constructor(props) {
@@ -41,11 +41,13 @@ export default class FModal extends Component {
       this.fmodalRef.current.scrollTop = 0;
     }
     return (
-      <ReactCSSTransitionGroup transitionName="fmodal"
-        transitionEnterTimeout={500}
-        transitionLeaveTimeout={300}>
-        {this.props.show ? this.contents() : ""}
-      </ReactCSSTransitionGroup>
+      <TransitionGroup component={null}>
+        {this.props.show ? (
+          <CSSTransition key="fmodal" classNames="fmodal" timeout={{ enter: 500, exit: 300 }}>
+            {this.contents()}
+          </CSSTransition>
+        ) : null}
+      </TransitionGroup>
     );
   }
 }
