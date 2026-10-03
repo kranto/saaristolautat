@@ -7,7 +7,7 @@ import reducer from "./reducers";
 
 const middlewareList = [promise(), thunk];
 
-if (process.env.NODE_ENV === `development`) {
+if (import.meta.env.DEV) {
   middlewareList.push(createLogger());
 }
 

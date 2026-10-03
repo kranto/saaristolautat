@@ -1,5 +1,4 @@
 import { L, currentLang, LP } from './localizer';
-import _ from 'lodash';
 
 const locales = ["fi", "sv", "en"];
 
@@ -121,7 +120,17 @@ function ew(target, needle) {
 }
 
 function getWww(item) {
-    return item.www ? [{ class: "www", text: item.www.replace(/^http(s?):\/\//, "").replace(/\/$/, ""), specifier: "", uri: item.www, target: "info" }] : [];
+    return [item.www || []].flat().map(www => {
+        const uri = www.uri || www;
+        if (typeof uri !== "string") return null;
+        return {
+            class: "www",
+            specifier: www.name ? " - " + www.name : "",
+            text: uri.replace(/^http(s?):\/\//, "").replace(/\/$/, ""),
+            uri,
+            target: "www"
+        };
+    }).filter(Boolean);
 }
 
 function getEmail(item) {
@@ -218,6 +227,6 @@ export function routeInfo(route, lang = currentLang) {
 
 export function getAllNames(item, lang = currentLang) {
     const primary = LP(item, "name")
-    const other = _.uniq(locales.map(locale => LP(item, "name", locale)).filter(name => name !== primary))
+    const other = [...new Set(locales.map(locale => LP(item, "name", locale)).filter(name => name !== primary))]
     return {primary, other}
 }

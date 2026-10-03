@@ -8,7 +8,7 @@ const getJson = uri => fetch(uri).then(response => {
   return response.json();
 }).then(data => ({data}));
 
-const reactAppVersion = process.env.REACT_APP_VERSION || '20230601000000';
+const reactAppVersion = import.meta.env.VITE_APP_VERSION || '20230601000000';
 const baseUri = 'data/';
 const indexUri = baseUri + 'index.json?v=' + (Math.random() + "").substring(2) + "&app_v=" + reactAppVersion;
 const indexP = getJson(indexUri);

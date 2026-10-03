@@ -30,7 +30,7 @@ class Loader extends Component {
             <div style={{ position: "absolute", bottom: "2px", textAlign: "right", width: "100%", color: "#bbb", fontSize: "10px" }}>
               {this.props.dataVersion}
               <br/>
-              {process.env.REACT_APP_VERSION}
+              {import.meta.env.VITE_APP_VERSION}
             </div>
           </div>
           </CSSTransition>) : null}

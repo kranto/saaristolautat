@@ -3,11 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "homepage": ".",
+  "engines": {
+    "node": ">=24"
+  },
   "dependencies": {
     "react": "17.0.2",
     "react-dom": "17.0.2",
     "react-redux": "7.2.9",
-    "react-scripts": "5.0.1",
     "react-transition-group": "4.4.5",
     "redux": "4.2.1",
     "redux-logger": "^3.0.6",
@@ -15,16 +17,11 @@
     "redux-thunk": "2.4.2"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "mv public/data .data.save; REACT_APP_VERSION=$(date +'%Y%m%d%H%M%S') react-scripts build; mv .data.save public/data",
+    "start": "vite",
+    "build": "mv public/data .data.save; VITE_APP_VERSION=$(date +'%Y%m%d%H%M%S') vite build; status=$?; mv .data.save public/data; exit $status",
     "copytest": "scp -r build/* dh:test/",
     "copystaging": "scp -r build/* dh:prod/staging/",
-    "copyprod": "scp -r build/* dh:prod/",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
-  },
-  "eslintConfig": {
-    "extends": "react-app"
+    "copyprod": "scp -r build/* dh:prod/"
   },
   "browserslist": [
     ">0.2%",
@@ -33,6 +30,8 @@
     "not op_mini all"
   ],
   "devDependencies": {
-    "lato-font": "^3.0.0"
+    "@vitejs/plugin-react": "^6.1.1",
+    "lato-font": "^3.0.0",
+    "vite": "^8.3.2"
   }
 }
