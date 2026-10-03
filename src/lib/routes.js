@@ -79,6 +79,11 @@ export function initRoutes(map) {
       route.legs.forEach(leg => leg.addRoute(route));
       return route;
     });
+
+    const zoom = map.getZoom();
+    const mapTypeId = map.getMapTypeId();
+    const layers = store.getState().settings.layers;
+    lauttaLegs.forEach(leg => leg.rerender(zoom, mapTypeId, layers));
   }
 
   let unsubscribe;
