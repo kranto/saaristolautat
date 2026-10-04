@@ -9,6 +9,7 @@ const OPENFREEMAP_STYLE = 'https://tiles.openfreemap.org/styles/liberty';
 const RASTER_BASE_LAYERS = {
   OSM: 'base-osm'
 };
+const SHOW_MAP_DEBUG = typeof window !== 'undefined' && ['localhost', '127.0.0.1', '::1'].includes(window.location.hostname);
 const googleZoomToMapLibre = zoom => Number(zoom) - 1;
 const legacyEmSize = em => ['interpolate', ['linear'], ['zoom'], 4, em * 6, 18, em * 20];
 
@@ -376,7 +377,9 @@ function flattenMapData(collections, data, locale) {
 }
 
 function applyLayerSettings(map, layers = {}) {
-  if (!map?.isStyleLoaded()) return;
+  if (!map) return;
+  const styleLayers = map.getStyle()?.layers;
+  if (!styleLayers) return;
   const groups = {
     roadferries: ['ferry-routes-shadow', 'ferry-routes', 'ferry-routes-hit'],
     conn4: ['connecting-routes-shadow', 'connecting-routes', 'connecting-routes-hit'],
@@ -385,7 +388,7 @@ function applyLayerSettings(map, layers = {}) {
     ringroads: ['ring-roads'],
     distances: ['distance-pins']
   };
-  const styleLayerIds = map.getStyle().layers.map(layer => layer.id);
+  const styleLayerIds = styleLayers.map(layer => layer.id);
   styleLayerIds.forEach(id => {
     if (id.startsWith('cable-ferry-')) groups.roadferries.push(id);
     if (id.startsWith('distance-boxes-')) groups.distances.push(id);
@@ -422,8 +425,11 @@ function MapLibrePrototype({ data, geojson, dispatch, embedded = false, layers, 
   const hasSelectionRef = useRef(false);
   const liveFeaturesRef = useRef([]);
   const mapTypeRef = useRef(mapTypeId);
+  const layersRef = useRef(layers);
+  layersRef.current = layers;
   const [status, setStatus] = useState('Ladataan karttaa…');
   const [selection, setSelection] = useState(null);
+  const [mapDebug, setMapDebug] = useState(null);
 
   useEffect(() => {
     if (!mapContainer.current || mapRef.current) return undefined;
@@ -447,11 +453,39 @@ function MapLibrePrototype({ data, geojson, dispatch, embedded = false, layers, 
       map.off('styledata', collapseAttribution);
     };
     map.on('styledata', collapseAttribution);
+    const updateMapDebug = () => {
+      if (!SHOW_MAP_DEBUG) return;
+      const bounds = map.getBounds();
+      setMapDebug({
+        west: bounds.getWest(), south: bounds.getSouth(),
+        east: bounds.getEast(), north: bounds.getNorth(), zoom: map.getZoom()
+      });
+    };
+    map.on('moveend', updateMapDebug);
+    let resizeFrame;
+    const resizeMap = () => {
+      if (resizeFrame) window.cancelAnimationFrame(resizeFrame);
+      resizeFrame = window.requestAnimationFrame(() => {
+        resizeFrame = undefined;
+        map.resize();
+        updateMapDebug();
+      });
+    };
+    const resizeObserver = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(resizeMap) : null;
+    resizeObserver?.observe(mapContainer.current);
+    const resizeWhenVisible = () => {
+      if (!document.hidden) resizeMap();
+    };
+    window.addEventListener('resize', resizeMap);
+    window.addEventListener('pageshow', resizeMap);
+    document.addEventListener('visibilitychange', resizeWhenVisible);
+    window.screen?.orientation?.addEventListener?.('change', resizeMap);
     map.on('load', () => {
       customizeBaseMap(map);
       addRasterBaseMaps(map);
       setBaseMap(map, mapTypeRef.current);
       collapseAttribution();
+      updateMapDebug();
       setStatus('Kartta valmis');
       if (embedded) dispatch({ type: 'PHASE_CHANGED', payload: phases.NORMAL_USE });
     });
@@ -460,6 +494,13 @@ function MapLibrePrototype({ data, geojson, dispatch, embedded = false, layers, 
       setStatus('Karttapohjan lataus epäonnistui');
     });
     return () => {
+      if (resizeFrame) window.cancelAnimationFrame(resizeFrame);
+      resizeObserver?.disconnect();
+      window.removeEventListener('resize', resizeMap);
+      window.removeEventListener('pageshow', resizeMap);
+      document.removeEventListener('visibilitychange', resizeWhenVisible);
+      window.screen?.orientation?.removeEventListener?.('change', resizeMap);
+      map.off('moveend', updateMapDebug);
       map.remove();
       mapRef.current = null;
     };
@@ -473,6 +514,7 @@ function MapLibrePrototype({ data, geojson, dispatch, embedded = false, layers, 
     function addLayers() {
       if (map.getSource('saaristolautat')) {
         map.getSource('saaristolautat').setData(sourceData);
+        applyLayerSettings(map, layersRef.current);
         return;
       }
       map.addSource('saaristolautat', { type: 'geojson', data: sourceData, generateId: true });
@@ -781,7 +823,7 @@ function MapLibrePrototype({ data, geojson, dispatch, embedded = false, layers, 
       const pierCount = sourceData.features.filter(feature => feature.properties.kind === 'pier').length;
       const placeCount = sourceData.features.filter(feature => feature.properties.kind === 'place').length;
       setStatus(`${routeCount} reittiosuutta · ${pierCount} laituria · ${placeCount} paikannimeä`);
-      applyLayerSettings(map, layers);
+      applyLayerSettings(map, layersRef.current);
     }
 
     if (map.loaded()) addLayers();
@@ -931,9 +973,18 @@ function MapLibrePrototype({ data, geojson, dispatch, embedded = false, layers, 
     }
   }, [infoContent, infoContent2]);
 
-  if (embedded) {
-    return <div ref={mapContainer} id="map" className="map maplibre-embedded" aria-label="Saaristolauttojen kartta" />;
-  }
+  const debugElement = SHOW_MAP_DEBUG && mapDebug && (
+    <output className="map-debug" aria-label="Kartan rajat ja zoom-taso">
+      W {mapDebug.west.toFixed(5)} · S {mapDebug.south.toFixed(5)} · E {mapDebug.east.toFixed(5)} · N {mapDebug.north.toFixed(5)} · z {mapDebug.zoom.toFixed(2)}
+    </output>
+  );
+
+  if (embedded) return (
+    <>
+      <div ref={mapContainer} id="map" className="map maplibre-embedded" aria-label="Saaristolauttojen kartta" />
+      {debugElement}
+    </>
+  );
 
   return (
     <main className="map-prototype">
@@ -953,6 +1004,7 @@ function MapLibrePrototype({ data, geojson, dispatch, embedded = false, layers, 
         <small>Zoomaa, siirrä karttaa ja klikkaa kohteita.</small>
         {selection && <p><b>Valittu:</b> {selection.name}</p>}
       </aside>
+      {debugElement}
     </main>
   );
 }
