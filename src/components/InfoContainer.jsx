@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import { connect } from 'react-redux';
-import ReactCSSTransitionGroup from 'react-transition-group/CSSTransitionGroup';
+import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import InfoContent from './InfoContent';
 import InfoContent2 from './InfoContent2';
 
@@ -37,14 +37,15 @@ class InfoContainer extends Component {
         onMouseEnter={this.props.onMouseEnter}
         onMouseDown={this.props.onMouseEnter}
         onTouchStart={this.props.onMouseEnter}>
-        <ReactCSSTransitionGroup transitionName="infocontent"
-          transitionEnterTimeout={500}
-          transitionLeaveTimeout={500}>
-
-          <InfoContent isHidden={this.state.hidden} setHidden={this.setHidden.bind(this)}
-            locale={this.props.locale} routeid={this.props.routeid} data={this.props.data} key={this.props.routeid} />
-          <InfoContent2 locale={this.props.locale} targets={this.props.targets} key={this.props.infoContent2key}/>
-        </ReactCSSTransitionGroup>
+        <TransitionGroup component={null}>
+          <CSSTransition key={`route-${this.props.routeid || 'none'}`} classNames="infocontent" timeout={500}>
+            <InfoContent isHidden={this.state.hidden} setHidden={this.setHidden.bind(this)}
+              locale={this.props.locale} routeid={this.props.routeid} data={this.props.data} />
+          </CSSTransition>
+          <CSSTransition key={`targets-${this.props.infoContent2key || 'none'}`} classNames="infocontent" timeout={500}>
+            <InfoContent2 locale={this.props.locale} targets={this.props.targets} />
+          </CSSTransition>
+        </TransitionGroup>
       </div>
     );
   }

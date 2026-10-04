@@ -5,6 +5,7 @@ import { hideMenuAndSettings } from './uicontrol';
 import { lauttaRoutes } from './routes';
 
 const { history, location, $ } = window;
+let hashRetry;
 
 $(document).ready(() => {
   if (window.location.hash) setTimeout(onhashchange, 2000);
@@ -12,12 +13,19 @@ $(document).ready(() => {
 });
 
 window.onhashchange = () => {
+  const { data, geojson } = store.getState().data;
+  if (!data.routes || !data.piers || geojson.length === 0) {
+    clearTimeout(hashRetry);
+    hashRetry = setTimeout(window.onhashchange, 250);
+    return;
+  }
+
   var hash = location.hash.substring(1);
-  if (store.getState().data.data.routes[hash]) {
+  if (data.routes[hash]) {
     var newState = { route: hash, timetable: null };
     history.replaceState(newState, null, window.location.pathname);
     navigateTo(newState, true);
-  } else if (store.getState().data.data.piers[hash]) {
+  } else if (data.piers[hash]) {
     //history.go(-1);
     showPierTooltip(hash, true);
   }

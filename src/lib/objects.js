@@ -588,6 +588,10 @@ export function initObjectRenderer(map, txtol) {
       geojson.forEach(function (featureCollection) {
         renderFeatureCollection(featureCollection, data, objects);
       });
+      const zoom = map.getZoom();
+      const mapTypeId = map.getMapTypeId();
+      const layers = store.getState().settings.layers;
+      objects.forEach(object => object.rerender(zoom, mapTypeId, layers));
     } else if (!unsubscribe) {
       unsubscribe = store.subscribe(onStateChange);
     }
