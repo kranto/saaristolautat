@@ -128,13 +128,25 @@ function addDirectionalPinImages(map) {
     const context = canvas.getContext('2d');
     context.strokeStyle = '#0000d0';
     context.fillStyle = 'rgba(0, 0, 208, 0.5)';
-    context.lineWidth = 3;
+    context.lineWidth = 1;
+    const endX = 32 + dx * 26;
+    const endY = 32 + dy * 26;
+    const perpendicularX = -dy * 1.4;
+    const perpendicularY = dx * 1.4;
     context.beginPath();
     context.moveTo(32, 32);
-    context.lineTo(32 + dx * 24, 32 + dy * 24);
+    context.lineTo(endX + perpendicularX, endY + perpendicularY);
+    context.lineTo(endX - perpendicularX, endY - perpendicularY);
+    context.closePath();
+    context.fill();
+    context.beginPath();
+    context.moveTo(32, 32);
+    context.lineTo(endX + perpendicularX, endY + perpendicularY);
+    context.moveTo(32, 32);
+    context.lineTo(endX - perpendicularX, endY - perpendicularY);
     context.stroke();
     context.beginPath();
-    context.arc(32 + dx * 26, 32 + dy * 26, 7, 0, Math.PI * 2);
+    context.arc(endX, endY, 4, 0, Math.PI * 2);
     context.fill();
     context.stroke();
     map.addImage(imageName, context.getImageData(0, 0, 64, 64), { pixelRatio: 2 });
@@ -623,7 +635,7 @@ function MapLibrePrototype({ data, geojson, dispatch, embedded = false, layers, 
       map.addLayer({
         id: 'distance-pins', type: 'symbol', source: 'saaristolautat',
         filter: ['==', ['get', 'kind'], 'pin'], minzoom: 10,
-        layout: { 'icon-image': ['concat', 'direction-pin-', ['get', 'subtype']], 'icon-size': 0.6, 'icon-allow-overlap': true }
+        layout: { 'icon-image': ['concat', 'direction-pin-', ['get', 'subtype']], 'icon-size': 1.8, 'icon-allow-overlap': true }
       });
       const boxRanges = [...new Set(sourceData.features.filter(feature => feature.properties.kind === 'box')
         .map(feature => `${feature.properties.objectMinZoom}-${feature.properties.objectMaxZoom}`))];
