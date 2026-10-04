@@ -124,6 +124,28 @@ function addDirectionalPinImages(map) {
   });
 }
 
+function addDistanceSignImage(map) {
+  if (map.hasImage('distance-sign')) return;
+  const canvas = document.createElement('canvas');
+  canvas.width = 48;
+  canvas.height = 36;
+  const context = canvas.getContext('2d');
+  const radius = 6;
+  context.beginPath();
+  context.roundRect(3, 3, 42, 30, radius);
+  context.fillStyle = 'rgba(0,101,189,0.7)';
+  context.fill();
+  context.strokeStyle = '#ffffff';
+  context.lineWidth = 5;
+  context.stroke();
+  map.addImage('distance-sign', context.getImageData(0, 0, 48, 36), {
+    pixelRatio: 2,
+    stretchX: [[12, 36]],
+    stretchY: [[12, 24]],
+    content: [10, 8, 38, 28]
+  });
+}
+
 function addLiveVesselImages(map) {
   const addImage = (name, moving) => {
     if (map.hasImage(name)) return;
@@ -415,6 +437,7 @@ function MapLibrePrototype({ data, geojson, dispatch, embedded = false, layers, 
       map.addSource('saaristolautat', { type: 'geojson', data: sourceData, generateId: true });
       addCableFerryRingImage(map);
       addDirectionalPinImages(map);
+      addDistanceSignImage(map);
 
       const roadRanges = [...new Set(sourceData.features.filter(feature => feature.properties.kind === 'road')
         .map(feature => `${feature.properties.objectMinZoom}-${feature.properties.objectMaxZoom}`))];
@@ -581,11 +604,14 @@ function MapLibrePrototype({ data, geojson, dispatch, embedded = false, layers, 
           id: `distance-boxes-${range}`, type: 'symbol', source: 'saaristolautat', minzoom: from, maxzoom: to + 1,
           filter: ['all', ['==', ['get', 'kind'], 'box'], ['==', ['get', 'objectMinZoom'], from], ['==', ['get', 'objectMaxZoom'], to]],
           layout: {
-            'text-field': ['get', 'description'], 'text-font': ['Noto Sans Regular'], 'text-size': legacyEmSize(0.9),
+            'text-field': ['get', 'description'], 'text-font': ['Noto Sans Bold'], 'text-size': legacyEmSize(0.9),
+            'text-line-height': 1.1, 'text-max-width': 100,
             'text-offset': ['array', 'number', 2, ['get', 'labelOffset']], 'text-anchor': ['get', 'labelTextAnchor'], 'text-optional': true,
-            'text-allow-overlap': true, 'text-ignore-placement': true
+            'text-allow-overlap': true, 'text-ignore-placement': true,
+            'icon-image': 'distance-sign', 'icon-text-fit': 'both', 'icon-text-fit-padding': [4, 6, 4, 6],
+            'icon-allow-overlap': true, 'icon-ignore-placement': true
           },
-          paint: { 'text-color': '#ffffff', 'text-halo-color': 'rgba(0,101,189,0.8)', 'text-halo-width': 5 }
+          paint: { 'text-color': '#ffffff' }
         });
       });
 
