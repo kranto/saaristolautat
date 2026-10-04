@@ -35,7 +35,7 @@ function onStateChanged() {
     selectedRoute = newState.selection.infoContent;
     if (selectedRoute) {
       const object = objectIndex[selectedRoute];
-      showSelected([object]);
+      if (object) showSelected([object]);
     };
   }
   const tmp = newState.selection.infoContent2 ? newState.selection.infoContent2.map(l => l.id).join("-") : null;
@@ -47,11 +47,11 @@ function onStateChanged() {
 setTimeout(() => store.subscribe(onStateChanged), 100);
 
 function onLayersChanged() {
-  rerender(map, true);
+  if (map) rerender(map, true);
 }
 
 function onLocaleChanged() {
-  if (objects) {
+  if (map && objects) {
     objects.filter(o => o.init).forEach(o => o.init());
     rerender(map, true);
   }
@@ -118,7 +118,7 @@ $(document).ready(() => {
 });
 
 export function panToObject(id) {
-  panTo(map, objectIndex[id].bounds, $("#mapcontainer").outerWidth());
+  if (map && objectIndex[id]) panTo(map, objectIndex[id].bounds, $("#mapcontainer").outerWidth());
 }
 
 export function select(targets, mouseEvent) {
@@ -161,7 +161,8 @@ function latLng2Point(latLng, map) {
 }
 
 export function unselectAll(pushState) {
-  if (selected.length === 0) return;
+  const selection = store.getState().selection;
+  if (selected.length === 0 && !selection.infoContent && !selection.infoContent2) return;
 
   if (typeof pushState === 'undefined') pushState = true;
   if (pushState) history.pushState({ route: null }, null, null);

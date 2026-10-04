@@ -3,6 +3,7 @@ import { map, panToObject, unselectAll } from './ferries';
 import { showPierTooltip } from './objects';
 import { hideMenuAndSettings } from './uicontrol';
 import { lauttaRoutes } from './routes';
+import { shortName, description } from './datautils';
 
 const { history, location, $ } = window;
 let hashRetry;
@@ -98,7 +99,15 @@ function navigateTo(state, panTo) {
       store.dispatch({ type: "INFOCONTENT_SELECTED", payload: state.route });
       if (panTo) panToObject(state.route);
     } else if (Array.isArray(state.route)) {
-      const routes = lauttaRoutes.filter(r => state.route.indexOf(r.id) >= 0);
+      const data = store.getState().data.data;
+      const routes = lauttaRoutes.length ? lauttaRoutes.filter(r => state.route.indexOf(r.id) >= 0) :
+        (data.lauttaRoutes || []).filter(route => state.route.indexOf(route.id) >= 0).map(route => ({
+          id: route.id,
+          name: shortName(route),
+          details: description(route),
+          operator: data.lauttaOperators?.[route.operators?.[0]],
+          style: { color: '#e08080', weight: 1.5, style: 'dotted', opacity: 0.7 }
+        })).filter(route => route.operator);
       store.dispatch({ type: "INFOCONTENT2_SELECTED", payload: routes });
     }
     if (state.timetable) {

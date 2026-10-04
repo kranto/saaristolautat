@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import './MapLibrePrototype.css';
+import { phases } from '../lib/constants';
 
 const OPENFREEMAP_STYLE = 'https://tiles.openfreemap.org/styles/liberty';
 const googleZoomToMapLibre = zoom => Number(zoom) - 1;
@@ -48,21 +49,21 @@ function customizeBaseMap(map) {
 
 }
 
-function localizedName(item = {}) {
-  const name = item.name_fi || item.name || item.sname_fi || item.sname || '';
+function localizedName(item = {}, locale = 'fi') {
+  const name = item[`name_${locale}`] || item[`sname_${locale}`] || item.name || item.sname || '';
   return name.replace(/<br\s*\/?\s*>/gi, '\n');
 }
 
-function localizedLongName(item = {}) {
-  const firstName = localizedName(item);
+function localizedLongName(item = {}, locale = 'fi') {
+  const firstName = localizedName(item, locale);
   const alternatives = [item.sname, item.sname_fi, item.sname_sv, item.sname_en, item.name, item.name_fi, item.name_sv, item.name_en]
     .map(name => (name || '').replace(/<br\s*\/?\s*>/gi, '\n'))
     .filter((name, index, names) => name && name !== firstName && names.indexOf(name) === index);
   return [firstName, ...alternatives].join('\n');
 }
 
-function localizedDescription(item = {}) {
-  return (item.description_fi || item.description || '').replace(/<br\s*\/?\s*>/gi, '\n');
+function localizedDescription(item = {}, locale = 'fi') {
+  return (item[`description_${locale}`] || item.description || '').replace(/<br\s*\/?\s*>/gi, '\n');
 }
 
 const TEXT_ANCHORS = {
@@ -156,7 +157,7 @@ function cableFerryRingFeatures(feature) {
   })));
 }
 
-function flattenMapData(collections, data) {
+function flattenMapData(collections, data, locale) {
   const features = [];
 
   function visit(item, inherited = {}) {
@@ -180,8 +181,8 @@ function flattenMapData(collections, data) {
 
     const ref = properties.ref || inherited.ref || '';
     const sourceItem = isPier ? data.piers?.[ref] : isRoute ? data.routes?.[ref] : properties;
-    const name = localizedName(sourceItem || properties);
-    const longName = localizedLongName(sourceItem || properties);
+    const name = localizedName(sourceItem || properties, locale);
+    const longName = localizedLongName(sourceItem || properties, locale);
     if (isPlace && !name) return;
     const pierDefaults = {
       '1': { marker: 8, label: 8 }, '2': { marker: 9, label: 9 },
@@ -193,6 +194,7 @@ function flattenMapData(collections, data) {
       mun2: { from: 8, to: 30 }, island1: { from: 9, to: 30 }
     };
     const subtype = properties.ssubtype || inherited.ssubtype || '';
+    const layerTarget = subtype === 'conn4' ? 'conn4' : ['conn5', 'conn50'].includes(subtype) ? 'conn5' : 'roadferries';
     const simpleKind = properties.stype === 'route' ? 'ringroad' : properties.stype;
     const placement = properties.anchor ? labelProperties({ labelAnchor: properties.anchor }) : labelProperties(properties);
     const normalizedFeature = {
@@ -203,8 +205,9 @@ function flattenMapData(collections, data) {
         kind: isPier ? 'pier' : isRoute ? 'route' : isPlace ? 'place' : simpleKind,
         name,
         longName,
-        description: localizedDescription(properties),
+        description: localizedDescription(properties, locale),
         subtype,
+        layerTarget,
         color: properties.color || inherited.color || '',
         markerMinZoom: googleZoomToMapLibre(properties.markerVisibleFrom ?? pierDefaults[subtype]?.marker ?? 30),
         labelMinZoom: googleZoomToMapLibre(properties.labelVisibleFrom ?? pierDefaults[subtype]?.label ?? placeDefaults[subtype]?.from ?? 30),
@@ -241,7 +244,7 @@ function flattenMapData(collections, data) {
         type: 'Feature',
         properties: {
           kind: 'route', ref: `longdistance-route-${route.id}`,
-          name: localizedName(route), subtype: 'longdistance', color: ''
+          name: localizedName(route, locale), subtype: 'longdistance', color: ''
         },
         geometry: {
           type: 'LineString',
@@ -258,7 +261,29 @@ function popupHtml(feature) {
   return `<div class="map-popup"><span>${type}</span><strong>${feature.properties.name}</strong></div>`;
 }
 
-function MapLibrePrototype({ data, geojson }) {
+function applyLayerSettings(map, layers = {}) {
+  if (!map?.isStyleLoaded()) return;
+  const groups = {
+    roadferries: ['ferry-routes-shadow', 'ferry-routes', 'ferry-routes-hit'],
+    conn4: ['connecting-routes-shadow', 'connecting-routes', 'connecting-routes-hit'],
+    conn5: ['cruise-routes', 'cruise-routes-hit'],
+    longdistanceferries: ['long-distance-routes', 'long-distance-routes-hit'],
+    ringroads: ['ring-roads'],
+    distances: ['distance-pins']
+  };
+  const styleLayerIds = map.getStyle().layers.map(layer => layer.id);
+  styleLayerIds.forEach(id => {
+    if (id.startsWith('cable-ferry-')) groups.roadferries.push(id);
+    if (id.startsWith('distance-boxes-')) groups.distances.push(id);
+  });
+  Object.entries(groups).forEach(([setting, ids]) => {
+    ids.forEach(id => {
+      if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', layers[setting] ? 'visible' : 'none');
+    });
+  });
+}
+
+function MapLibrePrototype({ data, geojson, dispatch, embedded = false, layers, locale, infoContent, infoContent2 }) {
   const mapContainer = useRef(null);
   const mapRef = useRef(null);
   const popupRef = useRef(null);
@@ -283,6 +308,7 @@ function MapLibrePrototype({ data, geojson }) {
     map.on('load', () => {
       customizeBaseMap(map);
       setStatus('Kartta valmis');
+      if (embedded) dispatch({ type: 'PHASE_CHANGED', payload: phases.NORMAL_USE });
     });
     map.on('error', event => {
       console.error('MapLibre error', event.error);
@@ -292,12 +318,12 @@ function MapLibrePrototype({ data, geojson }) {
       map.remove();
       mapRef.current = null;
     };
-  }, []);
+  }, [dispatch, embedded]);
 
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !data?.piers || !geojson?.length) return undefined;
-    const sourceData = flattenMapData(geojson, data);
+    const sourceData = flattenMapData(geojson, data, locale);
 
     function addLayers() {
       if (map.getSource('saaristolautat')) {
@@ -356,18 +382,30 @@ function MapLibrePrototype({ data, geojson }) {
         0.7
       ];
       const solidRouteFilter = ['all', ['==', ['get', 'kind'], 'route'], ['!', ['in', ['get', 'subtype'], ['literal', ['conn5', 'conn50', 'cableferry', 'longdistance']]]]];
+      const roadFerryRouteFilter = ['all', solidRouteFilter, ['==', ['get', 'layerTarget'], 'roadferries']];
+      const connectingRouteFilter = ['all', solidRouteFilter, ['==', ['get', 'layerTarget'], 'conn4']];
       const cableFerryMinZooms = [...new Set(sourceData.features
         .filter(feature => feature.properties.kind === 'route' && feature.properties.subtype === 'cableferry')
         .map(feature => feature.properties.objectMinZoom))].sort((a, b) => a - b);
 
       map.addLayer({
         id: 'ferry-routes-shadow', type: 'line', source: 'saaristolautat',
-        filter: solidRouteFilter, minzoom: 7,
+        filter: roadFerryRouteFilter, minzoom: 7,
         paint: { 'line-color': '#ffffff', 'line-width': ['+', routeWidth, 2], 'line-opacity': 0.85 }
       });
       map.addLayer({
         id: 'ferry-routes', type: 'line', source: 'saaristolautat',
-        filter: solidRouteFilter, minzoom: 7,
+        filter: roadFerryRouteFilter, minzoom: 7,
+        paint: { 'line-color': routeColor, 'line-width': routeWidth, 'line-opacity': routeOpacity }
+      });
+      map.addLayer({
+        id: 'connecting-routes-shadow', type: 'line', source: 'saaristolautat',
+        filter: connectingRouteFilter, minzoom: 7,
+        paint: { 'line-color': '#ffffff', 'line-width': ['+', routeWidth, 2], 'line-opacity': 0.85 }
+      });
+      map.addLayer({
+        id: 'connecting-routes', type: 'line', source: 'saaristolautat',
+        filter: connectingRouteFilter, minzoom: 7,
         paint: { 'line-color': routeColor, 'line-width': routeWidth, 'line-opacity': routeOpacity }
       });
 
@@ -421,7 +459,8 @@ function MapLibrePrototype({ data, geojson }) {
       });
 
       const routeHitLayers = [
-        { id: 'ferry-routes-hit', filter: solidRouteFilter, minzoom: 7 },
+        { id: 'ferry-routes-hit', filter: roadFerryRouteFilter, minzoom: 7 },
+        { id: 'connecting-routes-hit', filter: connectingRouteFilter, minzoom: 7 },
         { id: 'cruise-routes-hit', filter: ['all', ['==', ['get', 'kind'], 'route'], ['in', ['get', 'subtype'], ['literal', ['conn5', 'conn50']]]], minzoom: 8 },
         ...cableFerryMinZooms.map(minZoom => ({
           id: `cable-ferry-routes-hit-${String(minZoom).replace('.', '-')}`,
@@ -468,7 +507,7 @@ function MapLibrePrototype({ data, geojson }) {
       const pierLayers = [];
       pierStyles.forEach(pierStyle => {
         const items = sourceData.features.filter(feature => feature.properties.kind === 'pier' && feature.properties.subtype === pierStyle.type);
-        [...new Set(items.map(feature => feature.properties.markerMinZoom))].filter(zoom => zoom < 30).forEach(zoom => {
+        [...new Set(items.map(feature => feature.properties.markerMinZoom))].filter(zoom => zoom < 24).forEach(zoom => {
           const id = `piers-${pierStyle.type}-${zoom}`;
           pierLayers.push(id);
           map.addLayer({ id, type: 'circle', source: 'saaristolautat', minzoom: zoom,
@@ -476,7 +515,7 @@ function MapLibrePrototype({ data, geojson }) {
             paint: { 'circle-radius': pierStyle.radius, 'circle-color': '#e00000', 'circle-opacity': pierStyle.opacity }
           });
         });
-        [...new Set(items.map(feature => feature.properties.labelMinZoom))].filter(zoom => zoom < 30).forEach(zoom => map.addLayer({
+        [...new Set(items.map(feature => feature.properties.labelMinZoom))].filter(zoom => zoom < 24).forEach(zoom => map.addLayer({
           id: `pier-labels-${pierStyle.type}-${zoom}`, type: 'symbol', source: 'saaristolautat', minzoom: zoom,
           filter: ['all', ['==', ['get', 'kind'], 'pier'], ['==', ['get', 'subtype'], pierStyle.type], ['==', ['get', 'labelMinZoom'], zoom]],
           layout: {
@@ -545,6 +584,24 @@ function MapLibrePrototype({ data, geojson }) {
           map.setFilter('route-selected-highlight', ['all', ['==', ['get', 'kind'], 'route'], ['in', ['get', 'ref'], ['literal', refs]]]);
           const selectedName = names.join(' / ');
           setSelection({ name: selectedName });
+          if (feature.properties.subtype === 'longdistance') {
+            const routeIds = refs.map(ref => Number(ref.replace('longdistance-route-', ''))).filter(Number.isFinite);
+            const targets = routeIds.map(id => data.lauttaRoutes?.find(route => route.id === id)).filter(Boolean).map(route => {
+              const operator = data.lauttaOperators?.[route.operators?.[0]];
+              return {
+                id: route.id,
+                name: localizedName(route, locale),
+                details: localizedDescription(route, locale),
+                operator,
+                style: { color: '#e08080', weight: 1.5, style: 'dotted', opacity: 0.7 }
+              };
+            }).filter(target => target.operator);
+            window.history.pushState({ route: routeIds, timetable: null }, null, null);
+            dispatch({ type: 'INFOCONTENT2_SELECTED', payload: targets });
+          } else if (refs.length === 1) {
+            window.history.pushState({ route: refs[0], timetable: null }, null, null);
+            dispatch({ type: 'INFOCONTENT_SELECTED', payload: refs[0] });
+          }
           popupRef.current?.remove();
           popupRef.current = new maplibregl.Popup({ closeButton: false, offset: 4 })
             .setLngLat(event.lngLat).setHTML(popupHtml({ properties: { ...feature.properties, name: selectedName } })).addTo(map);
@@ -569,12 +626,37 @@ function MapLibrePrototype({ data, geojson }) {
       const pierCount = sourceData.features.filter(feature => feature.properties.kind === 'pier').length;
       const placeCount = sourceData.features.filter(feature => feature.properties.kind === 'place').length;
       setStatus(`${routeCount} reittiosuutta · ${pierCount} laituria · ${placeCount} paikannimeä`);
+      applyLayerSettings(map, layers);
     }
 
     if (map.loaded()) addLayers();
     else map.once('load', addLayers);
     return undefined;
-  }, [data, geojson]);
+  }, [data, dispatch, geojson, locale]);
+
+  useEffect(() => {
+    applyLayerSettings(mapRef.current, layers);
+  }, [layers]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map?.getLayer('route-selected-highlight')) return;
+    const refs = infoContent
+      ? [infoContent]
+      : (infoContent2 || []).map(route => `longdistance-route-${route.id}`);
+    map.setFilter('route-selected-highlight', refs.length
+      ? ['all', ['==', ['get', 'kind'], 'route'], ['in', ['get', 'ref'], ['literal', refs]]]
+      : ['all', ['==', ['get', 'kind'], 'route'], ['==', ['get', 'ref'], '__no-route__']]);
+    if (!refs.length) {
+      popupRef.current?.remove();
+      popupRef.current = null;
+      setSelection(null);
+    }
+  }, [infoContent, infoContent2]);
+
+  if (embedded) {
+    return <div ref={mapContainer} id="map" className="map maplibre-embedded" aria-label="Saaristolauttojen kartta" />;
+  }
 
   return (
     <main className="map-prototype">
@@ -598,5 +680,12 @@ function MapLibrePrototype({ data, geojson }) {
   );
 }
 
-const mapStateToProps = state => ({ data: state.data.data || {}, geojson: state.data.geojson || [] });
+const mapStateToProps = state => ({
+  data: state.data.data || {},
+  geojson: state.data.geojson || [],
+  layers: state.settings.layers,
+  locale: state.settings.locale,
+  infoContent: state.selection.infoContent,
+  infoContent2: state.selection.infoContent2
+});
 export default connect(mapStateToProps)(MapLibrePrototype);

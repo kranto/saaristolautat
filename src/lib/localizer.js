@@ -1,7 +1,12 @@
-import store from '../store';
 import messages from '../data/messages';
 
-export let currentLang;
+const supportedLocales = ['fi', 'sv', 'en'];
+const browserLocale = window.navigator.language.split('-')[0];
+export let currentLang = supportedLocales.includes(browserLocale) ? browserLocale : 'en';
+
+export function setCurrentLang(locale) {
+  currentLang = supportedLocales.includes(locale) ? locale : 'en';
+}
 
 export const L = (lang, args) => {
   if (args === "" || args === null) return "";
@@ -36,10 +41,3 @@ function deepGet(obj, properties) {
     return deepGet(obj[properties[0]], properties.slice(1));
   }
 }
-
-let unsubscribe;
-function onStateChange() {
-  if (!unsubscribe) unsubscribe = store.subscribe(onStateChange);
-  currentLang = store.getState().settings.locale;
-}
-onStateChange();

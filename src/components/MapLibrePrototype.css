@@ -1,5 +1,6 @@
 .map-prototype { position: fixed; inset: 0; overflow: hidden; background: #f1fafb; font-family: 'Lato', sans-serif; color: #24342f; }
 .map-prototype__canvas { position: absolute; inset: 0; }
+.maplibre-embedded { position: absolute; inset: 0; width: 100%; height: 100%; }
 .map-prototype__header { position: absolute; z-index: 2; top: 16px; left: 16px; right: 16px; display: flex; align-items: flex-start; justify-content: space-between; pointer-events: none; }
 .map-prototype__brand, .map-prototype__status, .map-prototype__legend { background: rgba(255,255,255,.94); box-shadow: 0 8px 30px rgba(28,54,47,.16); border: 1px solid rgba(47,94,81,.12); backdrop-filter: blur(10px); }
 .map-prototype__brand { display: flex; align-items: center; gap: 10px; padding: 7px 14px 7px 8px; border-radius: 12px; }

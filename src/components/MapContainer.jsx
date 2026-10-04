@@ -1,11 +1,10 @@
-import React, { Component } from 'react';
+import React from 'react';
+import MapLibrePrototype from './MapLibrePrototype';
 
-export default class MapContainer extends Component {
-    render() {
-        return (
-            <div id="mapcontainer">
-                <div id="map" className="map"></div>
-            </div>
-        );
-    }
+export default function MapContainer() {
+  return (
+    <div id="mapcontainer">
+      <MapLibrePrototype embedded />
+    </div>
+  );
 }

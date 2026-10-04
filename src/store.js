@@ -2,7 +2,8 @@ import { applyMiddleware, createStore } from "redux";
 import { createLogger } from "redux-logger";
 import thunk from "redux-thunk";
 import promise from "redux-promise-middleware";
-import dataReducer from "./reducers/dataReducer";
+import reducer from "./reducers";
+import { setCurrentLang } from "./lib/localizer";
 
 const middlewareList = [promise(), thunk];
 
@@ -12,6 +13,8 @@ if (import.meta.env.DEV) {
 
 const middleware = applyMiddleware(...middlewareList);
 
-const reducer = (state = {}, action) => ({ data: dataReducer(state.data, action) });
+const store = createStore(reducer, middleware);
+setCurrentLang(store.getState().settings.locale);
+store.subscribe(() => setCurrentLang(store.getState().settings.locale));
 
-export default createStore(reducer, middleware);
+export default store;

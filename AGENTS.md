@@ -4,6 +4,8 @@
 
 - The current branch replaces the Google map view with a MapLibre GL JS prototype using OpenFreeMap's Liberty style.
 - The main implementation is in `src/components/MapLibrePrototype.jsx` and `src/components/MapLibrePrototype.css`.
+- The MapLibre component is embedded in the legacy application through `src/components/MapContainer.jsx`; its standalone prototype chrome is disabled in embedded mode.
+- Keep `src/lib/localizer.js` independent of the Redux store. The store updates the active locale after initialization, avoiding an ESM circular-initialization failure.
 - Preserve the old map's object-specific styling and visibility values from `src/lib/styles.js`, `src/lib/objects.js`, and the GeoJSON-like data files.
 - Google Maps and MapLibre use different visual zoom conventions here because Google uses 256 px tiles and MapLibre vector tiles use 512 px tiles. Convert old data zooms with `MapLibre zoom = Google zoom - 1`.
 - MapLibre `maxzoom` is exclusive. An old inclusive upper zoom must therefore become converted zoom + 1.

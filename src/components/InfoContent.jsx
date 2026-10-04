@@ -19,7 +19,7 @@ export default class InfoContent extends Component {
       return <div />;
     }
 
-    const routeStyle = objectIndex[route].style;
+    const routeStyle = objectIndex[route]?.style;
     const infoTitleStyle = routeStyle ?
       {
         borderBottomWidth: routeStyle.weight + "px ",
