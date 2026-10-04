@@ -6,6 +6,9 @@ import './MapLibrePrototype.css';
 import { phases } from '../lib/constants';
 
 const OPENFREEMAP_STYLE = 'https://tiles.openfreemap.org/styles/liberty';
+const RASTER_BASE_LAYERS = {
+  OSM: 'base-osm'
+};
 const googleZoomToMapLibre = zoom => Number(zoom) - 1;
 const legacyEmSize = em => ['interpolate', ['linear'], ['zoom'], 4, em * 6, 18, em * 20];
 
@@ -47,6 +50,20 @@ function customizeBaseMap(map) {
     }
   });
 
+}
+
+function addRasterBaseMaps(map) {
+  if (!map.getSource('osm-raster')) map.addSource('osm-raster', {
+    type: 'raster', tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'], tileSize: 256, maxzoom: 19,
+    attribution: '© OpenStreetMap contributors'
+  });
+  if (!map.getLayer('base-osm')) map.addLayer({ id: 'base-osm', type: 'raster', source: 'osm-raster', layout: { visibility: 'none' } });
+}
+
+function setBaseMap(map, mapTypeId) {
+  Object.entries(RASTER_BASE_LAYERS).forEach(([type, layerId]) => {
+    if (map.getLayer(layerId)) map.setLayoutProperty(layerId, 'visibility', mapTypeId === type ? 'visible' : 'none');
+  });
 }
 
 function localizedName(item = {}, locale = 'fi') {
@@ -386,12 +403,13 @@ function applyLayerSettings(map, layers = {}) {
   });
 }
 
-function MapLibrePrototype({ data, geojson, dispatch, embedded = false, layers, locale, infoContent, infoContent2 }) {
+function MapLibrePrototype({ data, geojson, dispatch, embedded = false, layers, locale, mapTypeId, infoContent, infoContent2 }) {
   const mapContainer = useRef(null);
   const mapRef = useRef(null);
   const hoverPopupRef = useRef(null);
   const hasSelectionRef = useRef(false);
   const liveFeaturesRef = useRef([]);
+  const mapTypeRef = useRef(mapTypeId);
   const [status, setStatus] = useState('Ladataan karttaa…');
   const [selection, setSelection] = useState(null);
 
@@ -408,9 +426,20 @@ function MapLibrePrototype({ data, geojson, dispatch, embedded = false, layers, 
     });
     mapRef.current = map;
     map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'bottom-right');
+    map.addControl(new maplibregl.ScaleControl({ maxWidth: 120, unit: 'metric' }), 'bottom-left');
     map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-left');
+    const collapseAttribution = () => {
+      const attribution = map.getContainer().querySelector('.maplibregl-ctrl-attrib.maplibregl-compact-show');
+      if (!attribution) return;
+      attribution.querySelector('.maplibregl-ctrl-attrib-button')?.click();
+      map.off('styledata', collapseAttribution);
+    };
+    map.on('styledata', collapseAttribution);
     map.on('load', () => {
       customizeBaseMap(map);
+      addRasterBaseMaps(map);
+      setBaseMap(map, mapTypeRef.current);
+      collapseAttribution();
       setStatus('Kartta valmis');
       if (embedded) dispatch({ type: 'PHASE_CHANGED', payload: phases.NORMAL_USE });
     });
@@ -753,6 +782,12 @@ function MapLibrePrototype({ data, geojson, dispatch, embedded = false, layers, 
   }, [layers]);
 
   useEffect(() => {
+    mapTypeRef.current = mapTypeId;
+    const map = mapRef.current;
+    if (map) setBaseMap(map, mapTypeId);
+  }, [mapTypeId]);
+
+  useEffect(() => {
     const map = mapRef.current;
     if (!map) return undefined;
     let interval;
@@ -915,6 +950,7 @@ const mapStateToProps = state => ({
   geojson: state.data.geojson || [],
   layers: state.settings.layers,
   locale: state.settings.locale,
+  mapTypeId: state.settings.mapTypeId,
   infoContent: state.selection.infoContent,
   infoContent2: state.selection.infoContent2
 });

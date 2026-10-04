@@ -10,7 +10,7 @@ let initialSettings = getFromLocalStorage("settings") ||
     live: false,
   },
   locale: window.navigator.language.split("-")[0] || "fi",
-  mapTypeId: 'roadmap'
+  mapTypeId: 'openfreemap'
 };
 
 // fix unsupported locales (de etc.)
@@ -20,6 +20,12 @@ if (locales.indexOf(initialSettings.locale) < 0) {
 }
 
 initialSettings = {...initialSettings, isFullScreen: false};
+
+// Google and the old raster map types are not available in the MapLibre view.
+// Migrate existing saved settings to the currently supported base map.
+if (!["openfreemap", "OSM"].includes(initialSettings.mapTypeId)) {
+  initialSettings.mapTypeId = 'openfreemap';
+}
 
 setToLocalStorage("settings", initialSettings);
 

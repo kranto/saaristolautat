@@ -9,7 +9,7 @@ class MapTypeSelector extends Component {
         this.state = { open: false }
     }
 
-    mapTypes = ["roadmap", "satellite", "hybrid", "terrain", "OSM", "MMLTAUSTA", "MMLMAASTO"];
+    mapTypes = ["openfreemap", "OSM"];
 
     onClick(event) {
         if (this.state.open) {
@@ -35,7 +35,7 @@ class MapTypeSelector extends Component {
             return (
                 <div key={mapType} data-target={mapType} onClick={this.onClick.bind(this)} className={classes}>
                     <div style={{ position: "relative", pointerEvents: "none" }}>
-                        <img src={"img/" + mapType + ".png"} alt={mapType} style={{ maxWidth: "100%", maxHeight: "100%" }}></img>
+                        <img src={"img/" + mapType + ".png"} alt={mapType} style={{ maxWidth: "100%", maxHeight: "100%" }} />
                         <div className="text">{L2("mapTypes." + mapType)}</div>
                     </div>
                 </div>

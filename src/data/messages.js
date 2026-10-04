@@ -106,6 +106,7 @@ const messagesRaw = { // FI SV EN
         trafficinfo: ["Liikennetietojen lähde", "Trafikuppgifternas källa", "Source of traffic information"],
     },
     mapTypes: {
+        openfreemap: ["OpenFreeMap", "OpenFreeMap", "OpenFreeMap"],
         roadmap: ["Google tiekartta", "Google vägkarta", "Google Roadmap"],
         satellite: ["Google satelliitti", "Google satellit", "Google Satellite"],
         hybrid: ["Google hybridi", "Google hybrid", "Google Hybrid"],
