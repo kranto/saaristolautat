@@ -23,16 +23,16 @@ function customizeBaseMap(map) {
     } else if (layer.type === 'symbol' && layer.layout?.['text-field']) {
       map.setPaintProperty(layer.id, 'text-opacity', ['step', ['zoom'], 1, 7, 0, 12, 1]);
     } else if (layer.type === 'background') {
-      map.setPaintProperty(layer.id, 'background-color', '#bfd8bd');
+      map.setPaintProperty(layer.id, 'background-color', '#b8dfc2');
     } else if (sourceLayer === 'water' && layer.type === 'fill') {
       map.setPaintProperty(layer.id, 'fill-color', '#f3f7fd');
       map.setPaintProperty(layer.id, 'fill-opacity', 1);
     } else if (sourceLayer === 'waterway' && layer.type === 'line') {
       map.setPaintProperty(layer.id, 'line-color', '#dce7f3');
     } else if (sourceLayer === 'landcover' && layer.type === 'fill') {
-      map.setPaintProperty(layer.id, 'fill-color', '#acd2b1');
+      map.setPaintProperty(layer.id, 'fill-color', '#addbb9');
     } else if (sourceLayer === 'landuse' && layer.type === 'fill') {
-      map.setPaintProperty(layer.id, 'fill-color', '#b8d4b5');
+      map.setPaintProperty(layer.id, 'fill-color', '#b9ddbf');
     } else if (sourceLayer === 'transportation' && layer.type === 'line') {
       map.setLayerZoomRange(layer.id, Math.min(layer.minzoom ?? 0, 7), layer.maxzoom ?? 24);
       const isCasing = layerId.includes('casing');
@@ -122,6 +122,65 @@ function addDirectionalPinImages(map) {
     context.stroke();
     map.addImage(imageName, context.getImageData(0, 0, 64, 64), { pixelRatio: 2 });
   });
+}
+
+function addLiveVesselImages(map) {
+  const addImage = (name, moving) => {
+    if (map.hasImage(name)) return;
+    const canvas = document.createElement('canvas');
+    canvas.width = 40;
+    canvas.height = 40;
+    const context = canvas.getContext('2d');
+    context.translate(20, 20);
+    context.beginPath();
+    if (moving) {
+      context.moveTo(-5, 10);
+      context.lineTo(-5, -10);
+      context.lineTo(0, -15);
+      context.lineTo(5, -10);
+      context.lineTo(5, 10);
+      context.lineTo(0, 5);
+    } else {
+      context.moveTo(0, -4.5);
+      context.lineTo(4.5, 0);
+      context.lineTo(0, 4.5);
+      context.lineTo(-4.5, 0);
+    }
+    context.closePath();
+    context.fillStyle = 'rgba(160,48,255,0.65)';
+    context.strokeStyle = '#a030ff';
+    context.lineWidth = 3;
+    context.fill();
+    context.stroke();
+    map.addImage(name, context.getImageData(0, 0, 40, 40), { pixelRatio: 2 });
+  };
+  addImage('live-vessel-moving', true);
+  addImage('live-vessel-stopped', false);
+}
+
+const emptyFeatureCollection = () => ({ type: 'FeatureCollection', features: [] });
+const normalRouteOpacities = new WeakMap();
+
+function updateLiveIndicator(map, features, dispatch) {
+  const current = features.filter(feature => feature.properties.age < 600);
+  if (!current.length) {
+    dispatch({ type: 'UPDATE_INDICATOR_MSG', payload: ['live.notavailable'] });
+    return;
+  }
+  if (map.getZoom() < googleZoomToMapLibre(8)) {
+    dispatch({ type: 'UPDATE_INDICATOR_MSG', payload: ['live.zoomin'] });
+    return;
+  }
+  const visible = current.filter(feature => map.getBounds().contains(feature.geometry.coordinates));
+  if (!visible.length) {
+    dispatch({ type: 'UPDATE_INDICATOR_MSG', payload: ['live.notvisible'] });
+    return;
+  }
+  const moving = visible.filter(feature => feature.properties.sog > 0.1);
+  const ages = (moving.length ? moving : visible).map(feature => feature.properties.age);
+  const min = Math.round(Math.min(...ages) / 60);
+  const max = Math.round(Math.max(...ages) / 60);
+  dispatch({ type: 'UPDATE_INDICATOR_MSG', payload: min === max ? ['live.delay1', min] : ['live.delay2', min, max] });
 }
 
 function pointAlongLine(coordinates, fraction) {
@@ -285,6 +344,24 @@ function applyLayerSettings(map, layers = {}) {
       if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', layers[setting] ? 'visible' : 'none');
     });
   });
+  const routeLayerIds = styleLayerIds.filter(id =>
+    ['ferry-routes-shadow', 'ferry-routes', 'connecting-routes-shadow', 'connecting-routes', 'cruise-routes', 'long-distance-routes'].includes(id) ||
+    id.startsWith('cable-ferry-routes-')
+  ).filter(id => !id.includes('-hit'));
+  let opacityIndex = normalRouteOpacities.get(map);
+  if (!opacityIndex) {
+    opacityIndex = new Map();
+    normalRouteOpacities.set(map, opacityIndex);
+  }
+  routeLayerIds.forEach(id => {
+    if (!map.getLayer(id)) return;
+    if (!opacityIndex.has(id)) opacityIndex.set(id, map.getPaintProperty(id, 'line-opacity') ?? 1);
+    const opacity = opacityIndex.get(id);
+    map.setPaintProperty(id, 'line-opacity', layers.live ? ['*', opacity, 0.2] : opacity);
+  });
+  styleLayerIds.filter(id => id.startsWith('cable-ferry-rings-')).forEach(id => {
+    if (map.getLayer(id)) map.setPaintProperty(id, 'icon-opacity', layers.live ? 0.2 : 1);
+  });
 }
 
 function MapLibrePrototype({ data, geojson, dispatch, embedded = false, layers, locale, infoContent, infoContent2 }) {
@@ -292,6 +369,7 @@ function MapLibrePrototype({ data, geojson, dispatch, embedded = false, layers, 
   const mapRef = useRef(null);
   const hoverPopupRef = useRef(null);
   const hasSelectionRef = useRef(false);
+  const liveFeaturesRef = useRef([]);
   const [status, setStatus] = useState('Ladataan karttaa…');
   const [selection, setSelection] = useState(null);
 
@@ -641,6 +719,120 @@ function MapLibrePrototype({ data, geojson, dispatch, embedded = false, layers, 
   useEffect(() => {
     applyLayerSettings(mapRef.current, layers);
   }, [layers]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return undefined;
+    let interval;
+    let dimmingTimeout;
+    let cancelled = false;
+
+    const ensureLiveLayers = () => {
+      if (!map.getStyle()?.layers?.length) return false;
+      addLiveVesselImages(map);
+      if (!map.getSource('live-history')) map.addSource('live-history', { type: 'geojson', data: emptyFeatureCollection() });
+      if (!map.getSource('live-vessels')) map.addSource('live-vessels', { type: 'geojson', data: emptyFeatureCollection() });
+      if (!map.getLayer('live-history')) map.addLayer({
+        id: 'live-history', type: 'line', source: 'live-history', minzoom: googleZoomToMapLibre(8),
+        paint: { 'line-color': '#a0a0a0', 'line-width': 0.5, 'line-opacity': 0.7 }
+      });
+      if (!map.getLayer('live-vessels')) map.addLayer({
+        id: 'live-vessels', type: 'symbol', source: 'live-vessels', minzoom: googleZoomToMapLibre(8),
+        layout: {
+          'icon-image': ['case', ['>', ['get', 'sog'], 0.1], 'live-vessel-moving', 'live-vessel-stopped'],
+          'icon-size': ['interpolate', ['linear'], ['zoom'],
+            7, ['case', ['>', ['get', 'sog'], 0.1], 0.8, 0.65],
+            12, ['case', ['>', ['get', 'sog'], 0.1], 1.3, 0.9]
+          ],
+          'icon-rotate': ['case', ['>', ['get', 'sog'], 0.1], ['get', 'cog'], 0],
+          'icon-rotation-alignment': 'map', 'icon-allow-overlap': true, 'icon-ignore-placement': true
+        },
+        paint: { 'icon-opacity': ['get', 'opacity'] }
+      });
+      if (!map.getLayer('live-vessel-labels')) map.addLayer({
+        id: 'live-vessel-labels', type: 'symbol', source: 'live-vessels', minzoom: googleZoomToMapLibre(9),
+        layout: {
+          'text-field': ['get', 'name'],
+          'text-font': ['Noto Sans Bold'],
+          'text-size': ['case', ['>', ['get', 'sog'], 0.1], 12, 8],
+          'text-offset': ['case', ['>', ['get', 'sog'], 0.1], ['literal', [-0.35, -0.35]], ['literal', [-0.2, -0.2]]],
+          'text-anchor': 'bottom-right',
+          'text-allow-overlap': true, 'text-ignore-placement': true
+        },
+        paint: { 'text-color': '#880078', 'text-halo-color': 'rgba(255,255,255,0.9)', 'text-halo-width': 1 }
+      });
+      return true;
+    };
+
+    const clearLiveData = () => {
+      map.getSource('live-vessels')?.setData(emptyFeatureCollection());
+      map.getSource('live-history')?.setData(emptyFeatureCollection());
+      liveFeaturesRef.current = [];
+      dispatch({ type: 'UPDATE_INDICATOR_MSG', payload: '' });
+    };
+
+    const loadLiveData = async () => {
+      try {
+        const [vesselsResponse, historyResponse] = await Promise.all([
+          fetch('https://live.saaristolautat.fi/livedata.json'),
+          fetch('https://live.saaristolautat.fi/livehistory.json')
+        ]);
+        if (!vesselsResponse.ok || !historyResponse.ok) throw new Error('Live data request failed');
+        const [vessels, history] = await Promise.all([vesselsResponse.json(), historyResponse.json()]);
+        if (cancelled || !ensureLiveLayers()) return;
+        const now = Date.now();
+        const features = (vessels.features || []).map(feature => {
+          const age = Math.max(0, now - Number(feature.properties?.timestampExternal || 0)) / 1000;
+          return {
+            ...feature,
+            properties: {
+              ...feature.properties,
+              name: feature.properties?.vessel?.name || '', age,
+              opacity: Math.max(0.3, 1 - 0.7 * Math.max(0, age - 180) / 600)
+            }
+          };
+        }).filter(feature => feature.properties.age < 600);
+        liveFeaturesRef.current = features;
+        map.getSource('live-vessels').setData({ type: 'FeatureCollection', features });
+        map.getSource('live-history').setData(history);
+        updateLiveIndicator(map, features, dispatch);
+      } catch (error) {
+        if (!cancelled) {
+          console.error('Live data error', error);
+          dispatch({ type: 'UPDATE_INDICATOR_MSG', payload: ['live.notavailable'] });
+        }
+      }
+    };
+
+    const onMoveEnd = () => updateLiveIndicator(map, liveFeaturesRef.current, dispatch);
+    const start = () => {
+      ensureLiveLayers();
+      if (!layers.live) {
+        clearLiveData();
+        return;
+      }
+      dispatch({ type: 'UPDATE_INDICATOR_MSG', payload: 'live.loading' });
+      const applyDimming = () => {
+        if (!cancelled) applyLayerSettings(map, { ...layers, live: true });
+      };
+      applyDimming();
+      dimmingTimeout = window.setTimeout(applyDimming, 0);
+      map.once('idle', applyDimming);
+      loadLiveData();
+      interval = window.setInterval(loadLiveData, 10000);
+      map.on('moveend', onMoveEnd);
+    };
+    if (map.getSource('saaristolautat') || map.isStyleLoaded()) start();
+    else map.once('load', start);
+
+    return () => {
+      cancelled = true;
+      if (interval) window.clearInterval(interval);
+      if (dimmingTimeout) window.clearTimeout(dimmingTimeout);
+      map.off('load', start);
+      map.off('moveend', onMoveEnd);
+    };
+  }, [dispatch, layers.live]);
 
   useEffect(() => {
     const map = mapRef.current;
