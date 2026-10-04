@@ -121,7 +121,16 @@ function ew(target, needle) {
 }
 
 function getWww(item) {
-    return item.www ? [{ class: "www", text: item.www.replace(/^http(s?):\/\//, "").replace(/\/$/, ""), specifier: "", uri: item.www, target: "info" }] : [];
+    return [item.www || []].flat().map(www => {
+        const uri = www.uri || www;
+        return {
+            class: "www",
+            specifier: www.name ? " - " + www.name : "",
+            text: uri.replace(/^http(s?):\/\//, "").replace(/\/$/, ""),
+            uri,
+            target: "www"
+        };
+    });
 }
 
 function getEmail(item) {
