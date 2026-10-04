@@ -222,14 +222,32 @@ function flattenMapData(collections, data) {
   }
 
   collections.forEach(collection => visit(collection));
-  (data.lauttaLegs || []).forEach(leg => {
+  const longDistanceLegs = new Map((data.lauttaLegs || []).map(leg => [leg.id, leg]));
+  longDistanceLegs.forEach(leg => {
     features.push({
       type: 'Feature',
-      properties: { kind: 'route', ref: `longdistance-${leg.id}`, name: leg.name, subtype: 'longdistance', color: '' },
+      properties: { kind: 'longdistance-base', ref: `longdistance-leg-${leg.id}`, name: leg.name, subtype: 'longdistance', color: '' },
       geometry: {
         type: 'LineString',
         coordinates: leg.path.split(' ').map(point => point.split(',').slice(0, 2).map(Number))
       }
+    });
+  });
+  (data.lauttaRoutes || []).forEach(route => {
+    (route.legs || []).forEach(legId => {
+      const leg = longDistanceLegs.get(legId);
+      if (!leg) return;
+      features.push({
+        type: 'Feature',
+        properties: {
+          kind: 'route', ref: `longdistance-route-${route.id}`,
+          name: localizedName(route), subtype: 'longdistance', color: ''
+        },
+        geometry: {
+          type: 'LineString',
+          coordinates: leg.path.split(' ').map(point => point.split(',').slice(0, 2).map(Number))
+        }
+      });
     });
   });
   return { type: 'FeatureCollection', features };
@@ -386,13 +404,18 @@ function MapLibrePrototype({ data, geojson }) {
 
       map.addLayer({
         id: 'long-distance-routes', type: 'line', source: 'saaristolautat',
-        filter: ['all', ['==', ['get', 'kind'], 'route'], ['==', ['get', 'subtype'], 'longdistance']],
+        filter: ['==', ['get', 'kind'], 'longdistance-base'],
         minzoom: 6, maxzoom: 11,
         paint: { 'line-color': '#e08080', 'line-width': 1.5, 'line-opacity': 0.4, 'line-dasharray': [1, 1] }
       });
 
       map.addLayer({
-        id: 'route-highlight', type: 'line', source: 'saaristolautat',
+        id: 'route-selected-highlight', type: 'line', source: 'saaristolautat',
+        filter: ['all', ['==', ['get', 'kind'], 'route'], ['==', ['get', 'ref'], '__no-route__']],
+        paint: { 'line-color': '#f97cdc', 'line-width': ['+', routeWidth, 8], 'line-opacity': 0.7 }
+      });
+      map.addLayer({
+        id: 'route-hover-highlight', type: 'line', source: 'saaristolautat',
         filter: ['all', ['==', ['get', 'kind'], 'route'], ['==', ['get', 'ref'], '__no-route__']],
         paint: { 'line-color': '#f97cdc', 'line-width': ['+', routeWidth, 8], 'line-opacity': 0.7 }
       });
@@ -494,18 +517,21 @@ function MapLibrePrototype({ data, geojson }) {
         map.on('mouseenter', layer, event => {
           const feature = event.features?.[0];
           if (!feature) return;
+          const hoveredFeatures = map.queryRenderedFeatures(event.point, { layers: [layer] });
+          const refs = [...new Set(hoveredFeatures.map(item => item.properties.ref))];
+          const names = [...new Set(hoveredFeatures.map(item => item.properties.name).filter(Boolean))];
           map.getCanvas().style.cursor = 'pointer';
-          map.setFilter('route-highlight', ['all', ['==', ['get', 'kind'], 'route'], ['==', ['get', 'ref'], feature.properties.ref]]);
+          map.setFilter('route-hover-highlight', ['all', ['==', ['get', 'kind'], 'route'], ['in', ['get', 'ref'], ['literal', refs]]]);
           hoverPopupRef.current?.remove();
           hoverPopupRef.current = new maplibregl.Popup({ closeButton: false, closeOnClick: false, className: 'route-hover-popup', offset: 14 })
             .setLngLat(event.lngLat)
-            .setHTML(`<strong>${feature.properties.name}</strong>`)
+            .setHTML(names.map(name => `<strong>${name}</strong>`).join('<br>'))
             .addTo(map);
         });
         map.on('mousemove', layer, event => hoverPopupRef.current?.setLngLat(event.lngLat));
         map.on('mouseleave', layer, () => {
           map.getCanvas().style.cursor = '';
-          map.setFilter('route-highlight', ['all', ['==', ['get', 'kind'], 'route'], ['==', ['get', 'ref'], '__no-route__']]);
+          map.setFilter('route-hover-highlight', ['all', ['==', ['get', 'kind'], 'route'], ['==', ['get', 'ref'], '__no-route__']]);
           hoverPopupRef.current?.remove();
           hoverPopupRef.current = null;
         });
@@ -513,10 +539,15 @@ function MapLibrePrototype({ data, geojson }) {
           if (map.queryRenderedFeatures(event.point, { layers: pierLayers }).length) return;
           const feature = event.features?.[0];
           if (!feature) return;
-          setSelection({ name: feature.properties.name });
+          const clickedFeatures = map.queryRenderedFeatures(event.point, { layers: [layer] });
+          const refs = [...new Set(clickedFeatures.map(item => item.properties.ref))];
+          const names = [...new Set(clickedFeatures.map(item => item.properties.name).filter(Boolean))];
+          map.setFilter('route-selected-highlight', ['all', ['==', ['get', 'kind'], 'route'], ['in', ['get', 'ref'], ['literal', refs]]]);
+          const selectedName = names.join(' / ');
+          setSelection({ name: selectedName });
           popupRef.current?.remove();
           popupRef.current = new maplibregl.Popup({ closeButton: false, offset: 4 })
-            .setLngLat(event.lngLat).setHTML(popupHtml(feature)).addTo(map);
+            .setLngLat(event.lngLat).setHTML(popupHtml({ properties: { ...feature.properties, name: selectedName } })).addTo(map);
         });
       });
 
@@ -526,6 +557,7 @@ function MapLibrePrototype({ data, geojson }) {
         map.on('click', layer, event => {
           const feature = event.features?.[0];
           if (!feature) return;
+          map.setFilter('route-selected-highlight', ['all', ['==', ['get', 'kind'], 'route'], ['==', ['get', 'ref'], '__no-route__']]);
           setSelection({ name: feature.properties.name });
           popupRef.current?.remove();
           popupRef.current = new maplibregl.Popup({ closeButton: false, offset: 10 })
