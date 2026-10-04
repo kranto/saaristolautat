@@ -15,6 +15,7 @@
 - Cable-ferry visibility is data-driven. `pargasnagu`, `nagukorpo`, and `vartsala` have `visibleFrom: 8` in the old Google zoom convention; most cable ferries use the default 9 and Högsar uses 11.
 - Do not configure a MapLibre vector source with `tileSize: 256`; MapLibre requires vector tile sources to use 512 px tiles and throws during map loading otherwise.
 - `roads.json` contains hand-maintained road segments that supplement roads missing from low-zoom basemap tiles. Future road additions should preferably be imported from selected OpenStreetMap/Overpass GeoJSON rather than drawn manually.
+- Use `scripts/roads/update_roads.py` and the tracked `scripts/roads/road-imports.json` manifest for repeatable road additions. The manifest keeps legacy Google `minZ`/`maxZ` values; the renderer performs the MapLibre zoom conversion.
 
 ## Verification
 
