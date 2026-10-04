@@ -2,8 +2,7 @@ import { applyMiddleware, createStore } from "redux";
 import { createLogger } from "redux-logger";
 import thunk from "redux-thunk";
 import promise from "redux-promise-middleware";
-
-import reducer from "./reducers";
+import dataReducer from "./reducers/dataReducer";
 
 const middlewareList = [promise(), thunk];
 
@@ -12,5 +11,7 @@ if (import.meta.env.DEV) {
 }
 
 const middleware = applyMiddleware(...middlewareList);
+
+const reducer = (state = {}, action) => ({ data: dataReducer(state.data, action) });
 
 export default createStore(reducer, middleware);
