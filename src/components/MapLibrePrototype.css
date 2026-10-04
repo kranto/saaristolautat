@@ -19,9 +19,6 @@
 .legend-cruise { width: 24px; height: 3px; background: repeating-linear-gradient(90deg, #ff7c0a 0 5px, transparent 5px 9px); }
 .legend-pier { width: 10px; height: 10px; margin-left: 7px; margin-right: 7px; border-radius: 50%; background: #c92036; box-shadow: 0 0 0 2px white, 0 0 0 3px #d7dedc; }
 .maplibregl-popup-content { border-radius: 9px; box-shadow: 0 5px 22px rgba(20,45,38,.22); padding: 10px 13px; }
-.map-popup span, .map-popup strong { display: block; }
-.map-popup span { margin-bottom: 2px; color: #71817c; font-size: 10px; text-transform: uppercase; letter-spacing: .08em; }
-.map-popup strong { font-size: 14px; }
 .route-hover-popup .maplibregl-popup-content { padding: 7px 11px; border: 3px solid #6269cc; color: #25292a; font-size: 14px; }
 .route-hover-popup .maplibregl-popup-tip { border-top-color: #6269cc; }
 .maplibregl-ctrl-bottom-right { bottom: 18px; right: 10px; }

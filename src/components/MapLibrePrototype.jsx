@@ -157,6 +157,14 @@ function cableFerryRingFeatures(feature) {
   })));
 }
 
+function cableFerryHighlightFeature(feature) {
+  return {
+    type: 'Feature',
+    properties: { kind: 'cable-ferry-highlight', ref: feature.properties.ref },
+    geometry: { type: 'Point', coordinates: pointAlongLine(feature.geometry.coordinates, 0.5) }
+  };
+}
+
 function flattenMapData(collections, data, locale) {
   const features = [];
 
@@ -221,6 +229,7 @@ function flattenMapData(collections, data, locale) {
     features.push(normalizedFeature);
     if (normalizedFeature.properties.subtype === 'cableferry') {
       features.push(...cableFerryRingFeatures(normalizedFeature));
+      features.push(cableFerryHighlightFeature(normalizedFeature));
     }
   }
 
@@ -256,11 +265,6 @@ function flattenMapData(collections, data, locale) {
   return { type: 'FeatureCollection', features };
 }
 
-function popupHtml(feature) {
-  const type = feature.properties.kind === 'pier' ? 'Laituri' : 'Lauttareitti';
-  return `<div class="map-popup"><span>${type}</span><strong>${feature.properties.name}</strong></div>`;
-}
-
 function applyLayerSettings(map, layers = {}) {
   if (!map?.isStyleLoaded()) return;
   const groups = {
@@ -286,8 +290,8 @@ function applyLayerSettings(map, layers = {}) {
 function MapLibrePrototype({ data, geojson, dispatch, embedded = false, layers, locale, infoContent, infoContent2 }) {
   const mapContainer = useRef(null);
   const mapRef = useRef(null);
-  const popupRef = useRef(null);
   const hoverPopupRef = useRef(null);
+  const hasSelectionRef = useRef(false);
   const [status, setStatus] = useState('Ladataan karttaa…');
   const [selection, setSelection] = useState(null);
 
@@ -457,6 +461,16 @@ function MapLibrePrototype({ data, geojson, dispatch, embedded = false, layers, 
         filter: ['all', ['==', ['get', 'kind'], 'route'], ['==', ['get', 'ref'], '__no-route__']],
         paint: { 'line-color': '#f97cdc', 'line-width': ['+', routeWidth, 8], 'line-opacity': 0.7 }
       });
+      map.addLayer({
+        id: 'cable-ferry-selected-highlight', type: 'circle', source: 'saaristolautat',
+        filter: ['all', ['==', ['get', 'kind'], 'cable-ferry-highlight'], ['==', ['get', 'ref'], '__no-route__']],
+        paint: { 'circle-radius': 13, 'circle-color': '#f97cdc', 'circle-opacity': 0.25, 'circle-stroke-color': '#f97cdc', 'circle-stroke-width': 4, 'circle-stroke-opacity': 0.8 }
+      });
+      map.addLayer({
+        id: 'cable-ferry-hover-highlight', type: 'circle', source: 'saaristolautat',
+        filter: ['all', ['==', ['get', 'kind'], 'cable-ferry-highlight'], ['==', ['get', 'ref'], '__no-route__']],
+        paint: { 'circle-radius': 11, 'circle-color': '#f97cdc', 'circle-opacity': 0.2, 'circle-stroke-color': '#f97cdc', 'circle-stroke-width': 3, 'circle-stroke-opacity': 0.75 }
+      });
 
       const routeHitLayers = [
         { id: 'ferry-routes-hit', filter: roadFerryRouteFilter, minzoom: 7 },
@@ -504,12 +518,10 @@ function MapLibrePrototype({ data, geojson, dispatch, embedded = false, layers, 
         { type: '4', radius: ['step', ['zoom'], 1, 9, 2, 10, 3, 11, 4], opacity: ['step', ['zoom'], 0.5, 12, 0.8], em: 1, font: 'Noto Sans Regular' },
         { type: '5', radius: 0, opacity: 0, em: 1, font: 'Noto Sans Regular' }
       ];
-      const pierLayers = [];
       pierStyles.forEach(pierStyle => {
         const items = sourceData.features.filter(feature => feature.properties.kind === 'pier' && feature.properties.subtype === pierStyle.type);
         [...new Set(items.map(feature => feature.properties.markerMinZoom))].filter(zoom => zoom < 24).forEach(zoom => {
           const id = `piers-${pierStyle.type}-${zoom}`;
-          pierLayers.push(id);
           map.addLayer({ id, type: 'circle', source: 'saaristolautat', minzoom: zoom,
             filter: ['all', ['==', ['get', 'kind'], 'pier'], ['==', ['get', 'subtype'], pierStyle.type], ['==', ['get', 'markerMinZoom'], zoom]],
             paint: { 'circle-radius': pierStyle.radius, 'circle-color': '#e00000', 'circle-opacity': pierStyle.opacity }
@@ -561,6 +573,7 @@ function MapLibrePrototype({ data, geojson, dispatch, embedded = false, layers, 
           const names = [...new Set(hoveredFeatures.map(item => item.properties.name).filter(Boolean))];
           map.getCanvas().style.cursor = 'pointer';
           map.setFilter('route-hover-highlight', ['all', ['==', ['get', 'kind'], 'route'], ['in', ['get', 'ref'], ['literal', refs]]]);
+          map.setFilter('cable-ferry-hover-highlight', ['all', ['==', ['get', 'kind'], 'cable-ferry-highlight'], ['in', ['get', 'ref'], ['literal', refs]]]);
           hoverPopupRef.current?.remove();
           hoverPopupRef.current = new maplibregl.Popup({ closeButton: false, closeOnClick: false, className: 'route-hover-popup', offset: 14 })
             .setLngLat(event.lngLat)
@@ -571,17 +584,18 @@ function MapLibrePrototype({ data, geojson, dispatch, embedded = false, layers, 
         map.on('mouseleave', layer, () => {
           map.getCanvas().style.cursor = '';
           map.setFilter('route-hover-highlight', ['all', ['==', ['get', 'kind'], 'route'], ['==', ['get', 'ref'], '__no-route__']]);
+          map.setFilter('cable-ferry-hover-highlight', ['all', ['==', ['get', 'kind'], 'cable-ferry-highlight'], ['==', ['get', 'ref'], '__no-route__']]);
           hoverPopupRef.current?.remove();
           hoverPopupRef.current = null;
         });
         map.on('click', layer, event => {
-          if (map.queryRenderedFeatures(event.point, { layers: pierLayers }).length) return;
           const feature = event.features?.[0];
           if (!feature) return;
           const clickedFeatures = map.queryRenderedFeatures(event.point, { layers: [layer] });
           const refs = [...new Set(clickedFeatures.map(item => item.properties.ref))];
           const names = [...new Set(clickedFeatures.map(item => item.properties.name).filter(Boolean))];
           map.setFilter('route-selected-highlight', ['all', ['==', ['get', 'kind'], 'route'], ['in', ['get', 'ref'], ['literal', refs]]]);
+          map.setFilter('cable-ferry-selected-highlight', ['all', ['==', ['get', 'kind'], 'cable-ferry-highlight'], ['in', ['get', 'ref'], ['literal', refs]]]);
           const selectedName = names.join(' / ');
           setSelection({ name: selectedName });
           if (feature.properties.subtype === 'longdistance') {
@@ -602,24 +616,14 @@ function MapLibrePrototype({ data, geojson, dispatch, embedded = false, layers, 
             window.history.pushState({ route: refs[0], timetable: null }, null, null);
             dispatch({ type: 'INFOCONTENT_SELECTED', payload: refs[0] });
           }
-          popupRef.current?.remove();
-          popupRef.current = new maplibregl.Popup({ closeButton: false, offset: 4 })
-            .setLngLat(event.lngLat).setHTML(popupHtml({ properties: { ...feature.properties, name: selectedName } })).addTo(map);
         });
       });
 
-      pierLayers.forEach(layer => {
-        map.on('mouseenter', layer, () => { map.getCanvas().style.cursor = 'pointer'; });
-        map.on('mouseleave', layer, () => { map.getCanvas().style.cursor = ''; });
-        map.on('click', layer, event => {
-          const feature = event.features?.[0];
-          if (!feature) return;
-          map.setFilter('route-selected-highlight', ['all', ['==', ['get', 'kind'], 'route'], ['==', ['get', 'ref'], '__no-route__']]);
-          setSelection({ name: feature.properties.name });
-          popupRef.current?.remove();
-          popupRef.current = new maplibregl.Popup({ closeButton: false, offset: 10 })
-            .setLngLat(event.lngLat).setHTML(popupHtml(feature)).addTo(map);
-        });
+      map.on('click', event => {
+        if (!hasSelectionRef.current) return;
+        if (map.queryRenderedFeatures(event.point, { layers: routeLayers }).length) return;
+        window.history.pushState({ route: null, timetable: null }, null, null);
+        dispatch({ type: 'INFOCONTENT_UNSELECTED', payload: null });
       });
 
       const routeCount = sourceData.features.filter(feature => feature.properties.kind === 'route').length;
@@ -640,6 +644,7 @@ function MapLibrePrototype({ data, geojson, dispatch, embedded = false, layers, 
 
   useEffect(() => {
     const map = mapRef.current;
+    hasSelectionRef.current = Boolean(infoContent || infoContent2);
     if (!map?.getLayer('route-selected-highlight')) return;
     const refs = infoContent
       ? [infoContent]
@@ -647,9 +652,10 @@ function MapLibrePrototype({ data, geojson, dispatch, embedded = false, layers, 
     map.setFilter('route-selected-highlight', refs.length
       ? ['all', ['==', ['get', 'kind'], 'route'], ['in', ['get', 'ref'], ['literal', refs]]]
       : ['all', ['==', ['get', 'kind'], 'route'], ['==', ['get', 'ref'], '__no-route__']]);
+    map.setFilter('cable-ferry-selected-highlight', refs.length
+      ? ['all', ['==', ['get', 'kind'], 'cable-ferry-highlight'], ['in', ['get', 'ref'], ['literal', refs]]]
+      : ['all', ['==', ['get', 'kind'], 'cable-ferry-highlight'], ['==', ['get', 'ref'], '__no-route__']]);
     if (!refs.length) {
-      popupRef.current?.remove();
-      popupRef.current = null;
       setSelection(null);
     }
   }, [infoContent, infoContent2]);
