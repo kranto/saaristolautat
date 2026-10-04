@@ -644,9 +644,12 @@ function MapLibrePrototype({ data, geojson, dispatch, embedded = false, layers, 
 
       routeLayers.forEach(layer => {
         map.on('mouseenter', layer, event => {
-          const feature = event.features?.[0];
+          const allHoveredFeatures = map.queryRenderedFeatures(event.point, { layers: routeLayers });
+          const feature = allHoveredFeatures[0];
           if (!feature) return;
-          const hoveredFeatures = map.queryRenderedFeatures(event.point, { layers: [layer] });
+          const hoveredFeatures = feature.properties.subtype === 'longdistance'
+            ? allHoveredFeatures.filter(item => item.properties.subtype === 'longdistance')
+            : [feature];
           const refs = [...new Set(hoveredFeatures.map(item => item.properties.ref))];
           const names = [...new Set(hoveredFeatures.map(item => item.properties.name).filter(Boolean))];
           map.getCanvas().style.cursor = 'pointer';
@@ -667,9 +670,12 @@ function MapLibrePrototype({ data, geojson, dispatch, embedded = false, layers, 
           hoverPopupRef.current = null;
         });
         map.on('click', layer, event => {
-          const feature = event.features?.[0];
+          const allClickedFeatures = map.queryRenderedFeatures(event.point, { layers: routeLayers });
+          const feature = allClickedFeatures[0];
           if (!feature) return;
-          const clickedFeatures = map.queryRenderedFeatures(event.point, { layers: [layer] });
+          const clickedFeatures = feature.properties.subtype === 'longdistance'
+            ? allClickedFeatures.filter(item => item.properties.subtype === 'longdistance')
+            : [feature];
           const refs = [...new Set(clickedFeatures.map(item => item.properties.ref))];
           const names = [...new Set(clickedFeatures.map(item => item.properties.name).filter(Boolean))];
           map.setFilter('route-selected-highlight', ['all', ['==', ['get', 'kind'], 'route'], ['in', ['get', 'ref'], ['literal', refs]]]);
