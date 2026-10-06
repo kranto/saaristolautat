@@ -215,6 +215,19 @@ function addLiveVesselImages(map) {
 }
 
 const emptyFeatureCollection = () => ({ type: 'FeatureCollection', features: [] });
+
+function accuracyCircleFeature(lng, lat, radius) {
+  const latitudeRadius = radius / 111320;
+  const longitudeRadius = radius / (111320 * Math.cos(lat * Math.PI / 180));
+  const coordinates = Array.from({ length: 65 }, (_, index) => {
+    const angle = index / 64 * Math.PI * 2;
+    return [lng + Math.cos(angle) * longitudeRadius, lat + Math.sin(angle) * latitudeRadius];
+  });
+  return {
+    type: 'Feature', properties: {},
+    geometry: { type: 'Polygon', coordinates: [coordinates] }
+  };
+}
 const normalRouteOpacities = new WeakMap();
 
 function updateLiveIndicator(map, features, dispatch) {
@@ -429,6 +442,7 @@ function MapLibrePrototype({ data, geojson, dispatch, embedded = false, layers, 
   const hasSelectionRef = useRef(false);
   const liveFeaturesRef = useRef([]);
   const sourceDataRef = useRef(null);
+  const stopLocationTrackingRef = useRef(() => {});
   const mapTypeRef = useRef(mapTypeId);
   const layersRef = useRef(layers);
   layersRef.current = layers;
@@ -467,6 +481,7 @@ function MapLibrePrototype({ data, geojson, dispatch, embedded = false, layers, 
       features.forEach(feature => extendCoordinates(feature.geometry?.coordinates));
       if (bounds.isEmpty()) return false;
 
+      stopLocationTrackingRef.current();
       const desktop = map.getContainer().clientWidth >= 768;
       map.fitBounds(bounds, {
         padding: desktop
@@ -484,6 +499,142 @@ function MapLibrePrototype({ data, geojson, dispatch, embedded = false, layers, 
     map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'bottom-right');
     map.addControl(new maplibregl.ScaleControl({ maxWidth: 120, unit: 'metric' }), 'bottom-left');
     map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-left');
+
+    let locationMode = 0;
+    let positionWatcher = null;
+    let latestPosition = null;
+    let locationMarker = null;
+    const locationButton = document.createElement('button');
+    locationButton.type = 'button';
+    locationButton.className = 'location-button maplibre-location-button';
+    const locationControlContainer = document.createElement('div');
+    locationControlContainer.className = 'maplibregl-ctrl maplibre-location-control';
+    locationControlContainer.appendChild(locationButton);
+    const locationControl = {
+      onAdd: () => locationControlContainer,
+      onRemove: () => locationControlContainer.remove()
+    };
+
+    const ensureLocationLayers = () => {
+      if (!map.isStyleLoaded()) return;
+      if (!map.getSource('user-location-accuracy')) {
+        map.addSource('user-location-accuracy', { type: 'geojson', data: emptyFeatureCollection() });
+      }
+      if (!map.getLayer('user-location-accuracy-fill')) map.addLayer({
+        id: 'user-location-accuracy-fill', type: 'fill', source: 'user-location-accuracy',
+        paint: { 'fill-color': '#3B84DF', 'fill-opacity': 0.4 }
+      });
+      if (!map.getLayer('user-location-accuracy-line')) map.addLayer({
+        id: 'user-location-accuracy-line', type: 'line', source: 'user-location-accuracy',
+        paint: { 'line-color': '#3B84DF', 'line-opacity': 0.8, 'line-width': 1 }
+      });
+    };
+
+    const clearLocationDisplay = () => {
+      locationMarker?.remove();
+      locationMarker = null;
+      map.getSource('user-location-accuracy')?.setData(emptyFeatureCollection());
+    };
+
+    const showLatestPosition = () => {
+      if (!latestPosition || locationMode === 0 || document.hidden) return;
+      const { lng, lat, accuracy } = latestPosition;
+      ensureLocationLayers();
+      if (accuracy < 100) {
+        map.getSource('user-location-accuracy')?.setData(emptyFeatureCollection());
+        if (!locationMarker) {
+          const markerElement = document.createElement('div');
+          markerElement.className = 'maplibre-user-location-marker';
+          markerElement.innerHTML = '<span></span>';
+          locationMarker = new maplibregl.Marker({ element: markerElement }).setLngLat([lng, lat]).addTo(map);
+        } else {
+          locationMarker.setLngLat([lng, lat]);
+        }
+      } else {
+        locationMarker?.remove();
+        locationMarker = null;
+        map.getSource('user-location-accuracy')?.setData({
+          type: 'FeatureCollection',
+          features: [accuracyCircleFeature(lng, lat, accuracy)]
+        });
+      }
+    };
+
+    const panToLatestPosition = () => {
+      if (latestPosition?.accuracy <= 100) {
+        map.easeTo({ center: [latestPosition.lng, latestPosition.lat], duration: 500 });
+      }
+    };
+
+    const stopPositionWatcher = () => {
+      if (positionWatcher !== null) navigator.geolocation.clearWatch(positionWatcher);
+      positionWatcher = null;
+    };
+
+    const updateLocationButton = () => {
+      locationButton.classList.toggle('active', locationMode > 0);
+      locationButton.classList.toggle('follow', locationMode === 2);
+      locationButton.setAttribute('aria-label', locationMode === 0
+        ? 'Näytä oma sijainti'
+        : locationMode === 1 ? 'Seuraa omaa sijaintia' : 'Poista paikannus käytöstä');
+    };
+
+    function setLocationMode(nextMode) {
+      locationMode = nextMode;
+      updateLocationButton();
+      if (locationMode === 0) {
+        stopPositionWatcher();
+        latestPosition = null;
+        clearLocationDisplay();
+      } else {
+        startPositionWatcher();
+        showLatestPosition();
+        if (locationMode === 2) panToLatestPosition();
+      }
+    }
+
+    const onPositionError = error => {
+      setLocationMode(0);
+      console.error('Location error', error);
+      window.alert(error.message);
+    };
+
+    function startPositionWatcher() {
+      stopPositionWatcher();
+      if (locationMode === 0 || document.hidden) return;
+      positionWatcher = navigator.geolocation.watchPosition(position => {
+        const firstPosition = latestPosition === null;
+        latestPosition = {
+          lng: position.coords.longitude,
+          lat: position.coords.latitude,
+          accuracy: position.coords.accuracy
+        };
+        showLatestPosition();
+        if (firstPosition || locationMode === 2) panToLatestPosition();
+      }, onPositionError, { timeout: 10000, enableHighAccuracy: true });
+    }
+
+    const stopLocationTracking = () => {
+      if (locationMode === 2) setLocationMode(1);
+    };
+    stopLocationTrackingRef.current = stopLocationTracking;
+    const onLocationButtonClick = () => setLocationMode((locationMode + 1) % 3);
+    const onLocationVisibilityChange = () => {
+      if (document.hidden) {
+        stopPositionWatcher();
+        clearLocationDisplay();
+      } else if (locationMode > 0) {
+        startPositionWatcher();
+        showLatestPosition();
+      }
+    };
+    if (navigator.geolocation) {
+      updateLocationButton();
+      locationButton.addEventListener('click', onLocationButtonClick);
+      map.addControl(locationControl, 'bottom-right');
+      map.on('dragstart', stopLocationTracking);
+      document.addEventListener('visibilitychange', onLocationVisibilityChange);
+    }
     const collapseAttribution = () => {
       const attribution = map.getContainer().querySelector('.maplibregl-ctrl-attrib.maplibregl-compact-show');
       if (!attribution) return;
@@ -537,6 +688,8 @@ function MapLibrePrototype({ data, geojson, dispatch, embedded = false, layers, 
       collapseAttribution();
       updateMapDebug();
       updateResetVisibility();
+      ensureLocationLayers();
+      showLatestPosition();
       setStatus('Kartta valmis');
       if (embedded) dispatch({ type: 'PHASE_CHANGED', payload: phases.NORMAL_USE });
     });
@@ -552,6 +705,13 @@ function MapLibrePrototype({ data, geojson, dispatch, embedded = false, layers, 
       document.removeEventListener('visibilitychange', resizeWhenVisible);
       window.screen?.orientation?.removeEventListener?.('change', resizeMap);
       map.off('moveend', onMoveEnd);
+      map.off('dragstart', stopLocationTracking);
+      locationButton.removeEventListener('click', onLocationButtonClick);
+      document.removeEventListener('visibilitychange', onLocationVisibilityChange);
+      stopPositionWatcher();
+      clearLocationDisplay();
+      if (navigator.geolocation && locationControlContainer.parentNode) map.removeControl(locationControl);
+      stopLocationTrackingRef.current = () => {};
       unregisterMapNavigation();
       unregisterMapView();
       map.remove();
@@ -868,10 +1028,12 @@ function MapLibrePrototype({ data, geojson, dispatch, embedded = false, layers, 
           if (container.clientWidth >= 768) {
             const panelEdge = 450;
             if (event.point.x < panelEdge) {
+              stopLocationTrackingRef.current();
               const targetX = 400 + (container.clientWidth - 400) / 3;
               map.panBy([event.point.x - targetX, 0], { duration: 350 });
             }
           } else if (event.point.y > container.clientHeight * 0.8) {
+            stopLocationTrackingRef.current();
             map.panBy([0, container.clientHeight * 0.2], { duration: 350 });
           }
         });
@@ -1049,7 +1211,10 @@ function MapLibrePrototype({ data, geojson, dispatch, embedded = false, layers, 
       type="button"
       className="reset-button map-reset-button"
       aria-label="Palauta kartta Saaristomerelle"
-      onClick={() => mapRef.current?.fitBounds(RESET_BOUNDS, { padding: 35, duration: 600 })}
+      onClick={() => {
+        stopLocationTrackingRef.current();
+        mapRef.current?.fitBounds(RESET_BOUNDS, { padding: 35, duration: 600 });
+      }}
     />
   );
 

@@ -2,6 +2,18 @@
 .map-prototype__canvas { position: absolute; inset: 0; }
 .maplibre-embedded { position: absolute; inset: 0; width: 100%; height: 100%; }
 .map-reset-button { position: absolute; z-index: 4; bottom: 10px; left: 50%; margin: 0 0 0 -30px; }
+.maplibregl-ctrl-bottom-right .maplibre-location-control { margin: 0 10px 10px 0; overflow: hidden; background: transparent; border: 0; border-radius: 6px; box-shadow: 0 0 0 2px rgba(0,0,0,.1); }
+.maplibre-location-control .maplibre-location-button { position: relative; display: block; width: 29px; height: 29px; margin: 0; padding: 0; background-color: #fff !important; }
+.maplibre-location-control .maplibre-location-button:hover,
+.maplibre-location-control .maplibre-location-button:focus-visible { background-color: #f0f0f0 !important; }
+.maplibre-location-control .maplibre-location-button.active:hover,
+.maplibre-location-control .maplibre-location-button.active:focus-visible { background-color: #e4effc !important; }
+.maplibre-location-control .maplibre-location-button.active.follow { background-color: #aed1fc !important; }
+.maplibre-location-control .maplibre-location-button.active.follow:hover,
+.maplibre-location-control .maplibre-location-button.active.follow:focus-visible { background-color: #aed1fc !important; }
+.maplibre-location-control .maplibre-location-button:before { display: flex; top: 0; right: 0; bottom: 0; left: 0; align-items: center; justify-content: center; font-size: 22px; }
+.maplibre-user-location-marker { width: 20px; height: 20px; box-sizing: border-box; border-radius: 50%; background: rgba(255,255,255,.7); }
+.maplibre-user-location-marker span { position: absolute; inset: 4px; border-radius: 50%; background: rgba(59,132,223,.9); }
 .map-prototype__header { position: absolute; z-index: 2; top: 16px; left: 16px; right: 16px; display: flex; align-items: flex-start; justify-content: space-between; pointer-events: none; }
 .map-prototype__brand, .map-prototype__status, .map-prototype__legend { background: rgba(255,255,255,.94); box-shadow: 0 8px 30px rgba(28,54,47,.16); border: 1px solid rgba(47,94,81,.12); backdrop-filter: blur(10px); }
 .map-prototype__brand { display: flex; align-items: center; gap: 10px; padding: 7px 14px 7px 8px; border-radius: 12px; }
