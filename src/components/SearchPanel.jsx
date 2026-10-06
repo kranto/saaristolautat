@@ -33,7 +33,7 @@ class SearchPanel extends Component {
   }
 
   routeStyle(route) {
-    const routeStyle = objectIndex[route.id].style;
+    const routeStyle = objectIndex[route.id]?.style;
     return routeStyle ?
       {
         borderBottomWidth: routeStyle.weight + "px ",
@@ -90,4 +90,3 @@ const mapStateToProps = (state) => {
 };
 
 export default connect(mapStateToProps)(SearchPanel);
-
