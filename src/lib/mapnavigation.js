@@ -1,4 +1,5 @@
 let navigateToObjectHandler = null;
+let getMapViewHandler = null;
 let pendingObjectId = null;
 
 function flushPendingNavigation() {
@@ -14,6 +15,13 @@ export function registerMapNavigation(handler) {
   };
 }
 
+export function registerMapView(handler) {
+  getMapViewHandler = handler;
+  return () => {
+    if (getMapViewHandler === handler) getMapViewHandler = null;
+  };
+}
+
 export function mapDataReady() {
   flushPendingNavigation();
 }
@@ -22,4 +30,8 @@ export function panToMapObject(id) {
   if (!id) return;
   pendingObjectId = id;
   flushPendingNavigation();
+}
+
+export function getMapView() {
+  return getMapViewHandler?.() || null;
 }

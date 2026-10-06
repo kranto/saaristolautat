@@ -1,6 +1,6 @@
 import store from '../store';
 import { unselectAll } from './ferries';
-import { panToMapObject } from './mapnavigation';
+import { getMapView, panToMapObject } from './mapnavigation';
 import { hideMenuAndSettings } from './uicontrol';
 import { lauttaRoutes } from './routes';
 import { shortName, description } from './datautils';
@@ -121,6 +121,8 @@ function navigateTo(state, panTo) {
 }
 
 export function showLivePage() {
-  var liveMapUri = "live.html?lng=" + map.getCenter().lng() + "&lat=" + map.getCenter().lat() + "&zoom=" + map.getZoom();
+  const view = getMapView();
+  if (!view) return;
+  var liveMapUri = "live.html?lng=" + view.lng + "&lat=" + view.lat + "&zoom=" + view.googleZoom;
   window.open(liveMapUri, "livemap");
 }

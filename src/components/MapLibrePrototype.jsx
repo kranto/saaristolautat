@@ -4,7 +4,7 @@ import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import './MapLibrePrototype.css';
 import { phases } from '../lib/constants';
-import { mapDataReady, registerMapNavigation } from '../lib/mapnavigation';
+import { mapDataReady, registerMapNavigation, registerMapView } from '../lib/mapnavigation';
 
 const OPENFREEMAP_STYLE = 'https://tiles.openfreemap.org/styles/liberty';
 const RASTER_BASE_LAYERS = {
@@ -12,7 +12,10 @@ const RASTER_BASE_LAYERS = {
 };
 const SHOW_MAP_DEBUG = typeof window !== 'undefined' && ['localhost', '127.0.0.1', '::1'].includes(window.location.hostname);
 const googleZoomToMapLibre = zoom => Number(zoom) - 1;
+const mapLibreZoomToGoogle = zoom => Number(zoom) + 1;
 const legacyEmSize = em => ['interpolate', ['linear'], ['zoom'], 4, em * 6, 18, em * 20];
+const RESET_BOUNDS = [[19.5, 60], [22.5, 60.5]];
+const ARCHIPELAGO_BOUNDS = { south: 59.72, west: 19, north: 60.54, east: 23 };
 
 function customizeBaseMap(map) {
   map.getStyle().layers.forEach(layer => {
@@ -432,6 +435,7 @@ function MapLibrePrototype({ data, geojson, dispatch, embedded = false, layers, 
   const [status, setStatus] = useState('Ladataan karttaa…');
   const [selection, setSelection] = useState(null);
   const [mapDebug, setMapDebug] = useState(null);
+  const [showReset, setShowReset] = useState(false);
 
   useEffect(() => {
     if (!mapContainer.current || mapRef.current) return undefined;
@@ -473,6 +477,10 @@ function MapLibrePrototype({ data, geojson, dispatch, embedded = false, layers, 
       });
       return true;
     });
+    const unregisterMapView = registerMapView(() => {
+      const center = map.getCenter();
+      return { lng: center.lng, lat: center.lat, googleZoom: mapLibreZoomToGoogle(map.getZoom()) };
+    });
     map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'bottom-right');
     map.addControl(new maplibregl.ScaleControl({ maxWidth: 120, unit: 'metric' }), 'bottom-left');
     map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-left');
@@ -491,7 +499,19 @@ function MapLibrePrototype({ data, geojson, dispatch, embedded = false, layers, 
         east: bounds.getEast(), north: bounds.getNorth(), zoom: map.getZoom()
       });
     };
-    map.on('moveend', updateMapDebug);
+    const updateResetVisibility = () => {
+      const bounds = map.getBounds();
+      const intersectsArchipelago = bounds.getEast() >= ARCHIPELAGO_BOUNDS.west &&
+        bounds.getWest() <= ARCHIPELAGO_BOUNDS.east &&
+        bounds.getNorth() >= ARCHIPELAGO_BOUNDS.south &&
+        bounds.getSouth() <= ARCHIPELAGO_BOUNDS.north;
+      setShowReset(!intersectsArchipelago);
+    };
+    const onMoveEnd = () => {
+      updateMapDebug();
+      updateResetVisibility();
+    };
+    map.on('moveend', onMoveEnd);
     let resizeFrame;
     const resizeMap = () => {
       if (resizeFrame) window.cancelAnimationFrame(resizeFrame);
@@ -516,6 +536,7 @@ function MapLibrePrototype({ data, geojson, dispatch, embedded = false, layers, 
       setBaseMap(map, mapTypeRef.current);
       collapseAttribution();
       updateMapDebug();
+      updateResetVisibility();
       setStatus('Kartta valmis');
       if (embedded) dispatch({ type: 'PHASE_CHANGED', payload: phases.NORMAL_USE });
     });
@@ -530,8 +551,9 @@ function MapLibrePrototype({ data, geojson, dispatch, embedded = false, layers, 
       window.removeEventListener('pageshow', resizeMap);
       document.removeEventListener('visibilitychange', resizeWhenVisible);
       window.screen?.orientation?.removeEventListener?.('change', resizeMap);
-      map.off('moveend', updateMapDebug);
+      map.off('moveend', onMoveEnd);
       unregisterMapNavigation();
+      unregisterMapView();
       map.remove();
       mapRef.current = null;
     };
@@ -842,6 +864,16 @@ function MapLibrePrototype({ data, geojson, dispatch, embedded = false, layers, 
             window.history.pushState({ route: refs[0], timetable: null }, null, null);
             dispatch({ type: 'INFOCONTENT_SELECTED', payload: refs[0] });
           }
+          const container = map.getContainer();
+          if (container.clientWidth >= 768) {
+            const panelEdge = 450;
+            if (event.point.x < panelEdge) {
+              const targetX = 400 + (container.clientWidth - 400) / 3;
+              map.panBy([event.point.x - targetX, 0], { duration: 350 });
+            }
+          } else if (event.point.y > container.clientHeight * 0.8) {
+            map.panBy([0, container.clientHeight * 0.2], { duration: 350 });
+          }
         });
       });
 
@@ -1012,9 +1044,19 @@ function MapLibrePrototype({ data, geojson, dispatch, embedded = false, layers, 
     </output>
   );
 
+  const resetButton = showReset && (
+    <button
+      type="button"
+      className="reset-button map-reset-button"
+      aria-label="Palauta kartta Saaristomerelle"
+      onClick={() => mapRef.current?.fitBounds(RESET_BOUNDS, { padding: 35, duration: 600 })}
+    />
+  );
+
   if (embedded) return (
     <>
       <div ref={mapContainer} id="map" className="map maplibre-embedded" aria-label="Saaristolauttojen kartta" />
+      {resetButton}
       {debugElement}
     </>
   );
@@ -1022,6 +1064,7 @@ function MapLibrePrototype({ data, geojson, dispatch, embedded = false, layers, 
   return (
     <main className="map-prototype">
       <div ref={mapContainer} className="map-prototype__canvas" aria-label="Saaristolauttojen kartta" />
+      {resetButton}
       <header className="map-prototype__header">
         <div className="map-prototype__brand">
           <img src="/mstile-70x70.png" alt="" />
