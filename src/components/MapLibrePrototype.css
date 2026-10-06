@@ -1,7 +1,17 @@
 .map-prototype { position: fixed; inset: 0; overflow: hidden; background: #f1fafb; font-family: 'Lato', sans-serif; color: #24342f; }
 .map-prototype__canvas { position: absolute; inset: 0; }
 .maplibre-embedded { position: absolute; inset: 0; width: 100%; height: 100%; }
-.map-reset-button { position: absolute; z-index: 4; bottom: 10px; left: 50%; margin: 0 0 0 -30px; }
+.reset-button.map-reset-button { position: absolute; z-index: 4; bottom: 10px; left: 50%; width: 29px; height: 29px; margin: 0; padding: 0; transform: translateX(-50%); color: #3b84df; background: #fff !important; border: 0; border-radius: 6px; box-shadow: 0 0 0 2px rgba(0,0,0,.1); animation: map-reset-attention 800ms ease-out 2; }
+.reset-button.map-reset-button:before { display: flex; top: 0; right: 0; bottom: 0; left: 0; align-items: center; justify-content: center; font-size: 18px; }
+.reset-button.map-reset-button:hover,
+.reset-button.map-reset-button:focus-visible { background: #f0f0f0 !important; }
+@keyframes map-reset-attention {
+  from { box-shadow: 0 0 0 2px rgba(0,0,0,.1), 0 0 0 0 rgba(59,132,223,.45); }
+  to { box-shadow: 0 0 0 2px rgba(0,0,0,.1), 0 0 0 10px rgba(59,132,223,0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .map-reset-button { animation: none; }
+}
 .maplibregl-ctrl-bottom-right .maplibre-location-control { margin: 0 10px 10px 0; overflow: hidden; background: transparent; border: 0; border-radius: 6px; box-shadow: 0 0 0 2px rgba(0,0,0,.1); }
 .maplibre-location-control .maplibre-location-button { position: relative; display: block; width: 29px; height: 29px; margin: 0; padding: 0; background-color: #fff !important; }
 .maplibre-location-control .maplibre-location-button:hover,

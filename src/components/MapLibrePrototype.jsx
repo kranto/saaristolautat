@@ -1211,6 +1211,7 @@ function MapLibrePrototype({ data, geojson, dispatch, embedded = false, layers, 
       type="button"
       className="reset-button map-reset-button"
       aria-label="Palauta kartta Saaristomerelle"
+      title="Palauta kartta Saaristomerelle"
       onClick={() => {
         stopLocationTrackingRef.current();
         mapRef.current?.fitBounds(RESET_BOUNDS, { padding: 35, duration: 600 });
