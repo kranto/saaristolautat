@@ -216,6 +216,46 @@ function addLiveVesselImages(map) {
 
 const emptyFeatureCollection = () => ({ type: 'FeatureCollection', features: [] });
 
+function archipelagoTargetFeature() {
+  const center = [21.35, 60.2];
+  const longitudeRadius = 2.45;
+  const latitudeRadius = 0.72;
+  const coordinates = Array.from({ length: 97 }, (_, index) => {
+    const angle = index / 96 * Math.PI * 2;
+    return [
+      center[0] + Math.cos(angle) * longitudeRadius,
+      center[1] + Math.sin(angle) * latitudeRadius
+    ];
+  });
+  return {
+    type: 'Feature', properties: {},
+    geometry: { type: 'Polygon', coordinates: [coordinates] }
+  };
+}
+
+function addArchipelagoTarget(map) {
+  if (!map.getSource('archipelago-target')) map.addSource('archipelago-target', {
+    type: 'geojson',
+    data: archipelagoTargetFeature()
+  });
+  if (!map.getLayer('archipelago-target-fill')) map.addLayer({
+    id: 'archipelago-target-fill', type: 'fill', source: 'archipelago-target', maxzoom: googleZoomToMapLibre(8),
+    paint: {
+      'fill-color': '#279594',
+      'fill-opacity': ['interpolate', ['linear'], ['zoom'], 4, 0.12, 6, 0.065, 7, 0]
+    }
+  });
+  if (!map.getLayer('archipelago-target-line')) map.addLayer({
+    id: 'archipelago-target-line', type: 'line', source: 'archipelago-target', maxzoom: googleZoomToMapLibre(8),
+    paint: {
+      'line-color': '#147c7c',
+      'line-opacity': ['interpolate', ['linear'], ['zoom'], 4, 0.8, 6, 0.5, 7, 0],
+      'line-width': ['interpolate', ['linear'], ['zoom'], 4, 2, 7, 1],
+      'line-dasharray': [3, 3]
+    }
+  });
+}
+
 function accuracyCircleFeature(lng, lat, radius) {
   const latitudeRadius = radius / 111320;
   const longitudeRadius = radius / (111320 * Math.cos(lat * Math.PI / 180));
@@ -685,6 +725,7 @@ function MapLibrePrototype({ data, geojson, dispatch, embedded = false, layers, 
       customizeBaseMap(map);
       addRasterBaseMaps(map);
       setBaseMap(map, mapTypeRef.current);
+      addArchipelagoTarget(map);
       collapseAttribution();
       updateMapDebug();
       updateResetVisibility();
