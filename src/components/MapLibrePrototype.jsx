@@ -53,6 +53,12 @@ function customizeBaseMap(map) {
           : ['interpolate', ['linear'], ['zoom'], 9, 0.35, 12, 0.8, 15, 1.8]);
       map.setPaintProperty(layer.id, 'line-opacity', isMainRoad || isCasing ? 0.9 : 0.72);
     }
+
+    if (layer.type === 'symbol' && layer.layout?.['text-field'] && !layer.layout?.['icon-image']) {
+      map.setPaintProperty(layer.id, 'text-halo-color', 'rgba(255,255,255,0.95)');
+      map.setPaintProperty(layer.id, 'text-halo-width', 1.7);
+      map.setPaintProperty(layer.id, 'text-halo-blur', 0.25);
+    }
   });
 
 }
@@ -980,7 +986,7 @@ function MapLibrePrototype({ data, geojson, dispatch, embedded = false, layers, 
             'text-justify': 'left',
             'text-allow-overlap': true, 'text-ignore-placement': true
           },
-          paint: { 'text-color': '#002080', 'text-opacity': 0.9, 'text-halo-color': 'rgba(255,255,255,0.5)', 'text-halo-width': 1 }
+          paint: { 'text-color': '#002080', 'text-opacity': 0.9, 'text-halo-color': 'rgba(255,255,255,0.95)', 'text-halo-width': 1.8, 'text-halo-blur': 0.2 }
         }));
       });
 
@@ -1001,7 +1007,7 @@ function MapLibrePrototype({ data, geojson, dispatch, embedded = false, layers, 
               'text-offset': ['array', 'number', 2, ['get', 'labelOffset']], 'text-anchor': ['get', 'labelTextAnchor'], 'text-optional': true,
               'text-justify': 'left',
               'text-allow-overlap': true, 'text-ignore-placement': true },
-            paint: { 'text-color': placeStyle.color, 'text-opacity': placeStyle.opacity, 'text-halo-color': 'rgba(255,255,255,0.5)', 'text-halo-width': 1 }
+            paint: { 'text-color': placeStyle.color, 'text-opacity': placeStyle.opacity, 'text-halo-color': 'rgba(255,255,255,0.95)', 'text-halo-width': 1.8, 'text-halo-blur': 0.2 }
           });
         });
       });
@@ -1143,7 +1149,7 @@ function MapLibrePrototype({ data, geojson, dispatch, embedded = false, layers, 
         layout: {
           'text-field': ['get', 'name'],
           'text-font': ['Noto Sans Bold'],
-          'text-size': ['case', ['>', ['get', 'sog'], 0.1], 12, 8],
+          'text-size': ['case', ['>', ['get', 'sog'], 0.1], 12, 9],
           'text-offset': ['case', ['>', ['get', 'sog'], 0.1], ['literal', [-0.35, -0.35]], ['literal', [-0.2, -0.2]]],
           'text-anchor': 'bottom-right',
           'text-allow-overlap': true, 'text-ignore-placement': true
