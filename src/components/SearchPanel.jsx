@@ -3,7 +3,8 @@ import ReactDOM from 'react-dom';
 import { connect } from 'react-redux';
 import { L2 } from '../lib/localizer';
 import { selectRoute } from '../lib/navigation';
-import { objectIndex, showPierTooltip } from '../lib/objects';
+import { objectIndex } from '../lib/objects';
+import { panToMapObject } from '../lib/mapnavigation';
 import { hideMenuAndSettings } from '../lib/uicontrol';
 import store from '../store';
 
@@ -29,7 +30,7 @@ class SearchPanel extends Component {
   onResultClicked(item) {
     hideMenuAndSettings();
     selectRoute(item.route.id, true);
-    if (item.pier) setTimeout(() => {showPierTooltip(item.pier.id, false);}, 500);
+    if (item.pier) panToMapObject(item.pier.id);
   }
 
   routeStyle(route) {

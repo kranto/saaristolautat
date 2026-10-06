@@ -1,6 +1,6 @@
 import store from '../store';
-import { map, panToObject, unselectAll } from './ferries';
-import { showPierTooltip } from './objects';
+import { unselectAll } from './ferries';
+import { panToMapObject } from './mapnavigation';
 import { hideMenuAndSettings } from './uicontrol';
 import { lauttaRoutes } from './routes';
 import { shortName, description } from './datautils';
@@ -27,8 +27,7 @@ window.onhashchange = () => {
     history.replaceState(newState, null, window.location.pathname);
     navigateTo(newState, true);
   } else if (data.piers[hash]) {
-    //history.go(-1);
-    showPierTooltip(hash, true);
+    panToMapObject(hash);
   }
 }
 
@@ -97,7 +96,7 @@ function navigateTo(state, panTo) {
   if (state && state.route) {
     if (typeof state.route === 'string') {
       store.dispatch({ type: "INFOCONTENT_SELECTED", payload: state.route });
-      if (panTo) panToObject(state.route);
+      if (panTo) panToMapObject(state.route);
     } else if (Array.isArray(state.route)) {
       const data = store.getState().data.data;
       const routes = lauttaRoutes.length ? lauttaRoutes.filter(r => state.route.indexOf(r.id) >= 0) :

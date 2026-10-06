@@ -4,6 +4,7 @@ import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import './MapLibrePrototype.css';
 import { phases } from '../lib/constants';
+import { mapDataReady, registerMapNavigation } from '../lib/mapnavigation';
 
 const OPENFREEMAP_STYLE = 'https://tiles.openfreemap.org/styles/liberty';
 const RASTER_BASE_LAYERS = {
@@ -424,6 +425,7 @@ function MapLibrePrototype({ data, geojson, dispatch, embedded = false, layers, 
   const hoverPopupRef = useRef(null);
   const hasSelectionRef = useRef(false);
   const liveFeaturesRef = useRef([]);
+  const sourceDataRef = useRef(null);
   const mapTypeRef = useRef(mapTypeId);
   const layersRef = useRef(layers);
   layersRef.current = layers;
@@ -443,6 +445,34 @@ function MapLibrePrototype({ data, geojson, dispatch, embedded = false, layers, 
       attributionControl: false
     });
     mapRef.current = map;
+    const unregisterMapNavigation = registerMapNavigation(id => {
+      const sourceData = sourceDataRef.current;
+      if (!sourceData) return false;
+      const features = sourceData.features.filter(feature => feature.properties?.ref === id);
+      if (!features.length) return false;
+
+      const bounds = new maplibregl.LngLatBounds();
+      const extendCoordinates = coordinates => {
+        if (!Array.isArray(coordinates)) return;
+        if (coordinates.length >= 2 && Number.isFinite(coordinates[0]) && Number.isFinite(coordinates[1])) {
+          bounds.extend(coordinates);
+          return;
+        }
+        coordinates.forEach(extendCoordinates);
+      };
+      features.forEach(feature => extendCoordinates(feature.geometry?.coordinates));
+      if (bounds.isEmpty()) return false;
+
+      const desktop = map.getContainer().clientWidth >= 768;
+      map.fitBounds(bounds, {
+        padding: desktop
+          ? { top: 70, right: 70, bottom: 70, left: 470 }
+          : { top: 70, right: 35, bottom: 260, left: 35 },
+        maxZoom: googleZoomToMapLibre(11),
+        duration: 500
+      });
+      return true;
+    });
     map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'bottom-right');
     map.addControl(new maplibregl.ScaleControl({ maxWidth: 120, unit: 'metric' }), 'bottom-left');
     map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-left');
@@ -501,6 +531,7 @@ function MapLibrePrototype({ data, geojson, dispatch, embedded = false, layers, 
       document.removeEventListener('visibilitychange', resizeWhenVisible);
       window.screen?.orientation?.removeEventListener?.('change', resizeMap);
       map.off('moveend', updateMapDebug);
+      unregisterMapNavigation();
       map.remove();
       mapRef.current = null;
     };
@@ -510,6 +541,8 @@ function MapLibrePrototype({ data, geojson, dispatch, embedded = false, layers, 
     const map = mapRef.current;
     if (!map || !data?.piers || !geojson?.length) return undefined;
     const sourceData = flattenMapData(geojson, data, locale);
+    sourceDataRef.current = sourceData;
+    mapDataReady();
 
     function addLayers() {
       if (map.getSource('saaristolautat')) {
