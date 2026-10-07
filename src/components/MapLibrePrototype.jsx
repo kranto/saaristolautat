@@ -4,7 +4,7 @@ import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import './MapLibrePrototype.css';
 import { phases } from '../lib/constants';
-import { mapDataReady, registerMapNavigation, registerMapView } from '../lib/mapnavigation';
+import { mapDataReady, registerMapNavigation, registerMapPierTooltip, registerMapView } from '../lib/mapnavigation';
 
 const OPENFREEMAP_STYLE = 'https://tiles.openfreemap.org/styles/liberty';
 const RASTER_BASE_LAYERS = {
@@ -485,6 +485,8 @@ function MapLibrePrototype({ data, geojson, dispatch, embedded = false, layers, 
   const mapContainer = useRef(null);
   const mapRef = useRef(null);
   const hoverPopupRef = useRef(null);
+  const pierPopupRef = useRef(null);
+  const pierPopupIdRef = useRef(null);
   const hasSelectionRef = useRef(false);
   const liveFeaturesRef = useRef([]);
   const sourceDataRef = useRef(null);
@@ -541,6 +543,30 @@ function MapLibrePrototype({ data, geojson, dispatch, embedded = false, layers, 
     const unregisterMapView = registerMapView(() => {
       const center = map.getCenter();
       return { lng: center.lng, lat: center.lat, googleZoom: mapLibreZoomToGoogle(map.getZoom()) };
+    });
+    const unregisterMapPierTooltip = registerMapPierTooltip((id, panTo) => {
+      const feature = sourceDataRef.current?.features.find(item =>
+        item.properties?.kind === 'pier' && item.properties?.ref === id
+      );
+      if (!feature) return;
+      const coordinates = feature.geometry.coordinates;
+      pierPopupRef.current?.remove();
+      pierPopupIdRef.current = id;
+      pierPopupRef.current = new maplibregl.Popup({
+        closeButton: false,
+        closeOnClick: false,
+        className: 'pier-info-popup',
+        offset: 12
+      })
+        .setLngLat(coordinates)
+        .setText(feature.properties.longName || feature.properties.name || '')
+        .addTo(map);
+      if (panTo) map.easeTo({ center: coordinates, duration: 400 });
+    }, id => {
+      if (pierPopupIdRef.current !== id) return;
+      pierPopupRef.current?.remove();
+      pierPopupRef.current = null;
+      pierPopupIdRef.current = null;
     });
     map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'bottom-right');
     map.addControl(new maplibregl.ScaleControl({ maxWidth: 120, unit: 'metric' }), 'bottom-left');
@@ -757,9 +783,13 @@ function MapLibrePrototype({ data, geojson, dispatch, embedded = false, layers, 
       document.removeEventListener('visibilitychange', onLocationVisibilityChange);
       stopPositionWatcher();
       clearLocationDisplay();
+      pierPopupRef.current?.remove();
+      pierPopupRef.current = null;
+      pierPopupIdRef.current = null;
       if (navigator.geolocation && locationControlContainer.parentNode) map.removeControl(locationControl);
       stopLocationTrackingRef.current = () => {};
       unregisterMapNavigation();
+      unregisterMapPierTooltip();
       unregisterMapView();
       map.remove();
       mapRef.current = null;

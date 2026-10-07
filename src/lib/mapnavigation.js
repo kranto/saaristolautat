@@ -1,5 +1,7 @@
 let navigateToObjectHandler = null;
 let getMapViewHandler = null;
+let showPierTooltipHandler = null;
+let closePierTooltipHandler = null;
 let pendingObjectId = null;
 
 function flushPendingNavigation() {
@@ -20,6 +22,23 @@ export function registerMapView(handler) {
   return () => {
     if (getMapViewHandler === handler) getMapViewHandler = null;
   };
+}
+
+export function registerMapPierTooltip(showHandler, closeHandler) {
+  showPierTooltipHandler = showHandler;
+  closePierTooltipHandler = closeHandler;
+  return () => {
+    if (showPierTooltipHandler === showHandler) showPierTooltipHandler = null;
+    if (closePierTooltipHandler === closeHandler) closePierTooltipHandler = null;
+  };
+}
+
+export function showMapPierTooltip(id, panTo) {
+  showPierTooltipHandler?.(id, panTo);
+}
+
+export function closeMapPierTooltip(id) {
+  closePierTooltipHandler?.(id);
 }
 
 export function mapDataReady() {

@@ -3,6 +3,7 @@ import { select } from './ferries';
 import styles from './styles';
 import store from '../store';
 import { LP } from './localizer';
+import { closeMapPierTooltip, showMapPierTooltip } from './mapnavigation';
 
 export const objects = [];
 export const objectIndex = {};
@@ -10,11 +11,13 @@ export const objectIndex = {};
 let tooltip;
 let lastTooltipId = null;
 export function showPierTooltip(id, panTo=true) {
+  showMapPierTooltip(id, panTo);
   objects.filter(o => o.id === id).forEach(o => o.showTooltip(panTo));
   lastTooltipId = id;
 }
 
 export function closePierTooltip(id) {
+  closeMapPierTooltip(id);
   if (tooltip && id === lastTooltipId) {
     tooltip.close();
     lastTooltipId = null;
