@@ -41,7 +41,7 @@ function onStateChanged() {
   const tmp = newState.selection.infoContent2 ? newState.selection.infoContent2.map(l => l.id).join("-") : null;
   if (tmp !== selectedLauttaLegs) {
     selectedLauttaLegs = tmp;
-    if (selectedLauttaLegs) showSelected(newState.selection.infoContent2);
+    if (map && selectedLauttaLegs) showSelected(newState.selection.infoContent2);
   }
 }
 setTimeout(() => store.subscribe(onStateChanged), 100);

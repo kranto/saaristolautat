@@ -5,6 +5,7 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 import './MapLibrePrototype.css';
 import { phases } from '../lib/constants';
 import { mapDataReady, registerMapNavigation, registerMapPierTooltip, registerMapView } from '../lib/mapnavigation';
+import { hideMenuAndSettings } from '../lib/uicontrol';
 
 const OPENFREEMAP_STYLE = 'https://tiles.openfreemap.org/styles/liberty';
 const RASTER_BASE_LAYERS = {
@@ -506,7 +507,7 @@ function MapLibrePrototype({ data, geojson, dispatch, embedded = false, layers, 
       style: OPENFREEMAP_STYLE,
       center: [21.4, 60.18],
       zoom: 8.2,
-      minZoom: 5,
+      minZoom: 4,
       maxZoom: 17,
       attributionControl: false
     });
@@ -753,6 +754,39 @@ function MapLibrePrototype({ data, geojson, dispatch, embedded = false, layers, 
     window.addEventListener('pageshow', resizeMap);
     document.addEventListener('visibilitychange', resizeWhenVisible);
     window.screen?.orientation?.addEventListener?.('change', resizeMap);
+    let startupTimer;
+    let introductionTimer;
+    let bannerElement;
+    let onBannerHidden;
+    const startIntroduction = () => {
+      dispatch({ type: 'PHASE_CHANGED', payload: phases.INTRODUCTION });
+      introductionTimer = window.setTimeout(() => {
+        dispatch({ type: 'PHASE_CHANGED', payload: phases.NORMAL_USE });
+      }, 12000);
+    };
+    const finishStartup = () => {
+      dispatch({ type: 'PHASE_CHANGED', payload: phases.LOADER_CLOSED });
+      const jquery = window.$;
+      const currentBannerVersion = Number(jquery?.('#dont-show-again-cb').attr('version')) || 0;
+      const hiddenBannerVersion = Number(window.localStorage.getItem('dontShowAgainVersion')) || 0;
+      const shouldShowBanner = currentBannerVersion > hiddenBannerVersion &&
+        !window.location.hash && !hasSelectionRef.current;
+      bannerElement = jquery?.('#bannerModal');
+      if (shouldShowBanner && bannerElement?.modal) {
+        onBannerHidden = () => {
+          bannerElement.off('hidden.bs.modal', onBannerHidden);
+          if (jquery('#dont-show-again-cb').is(':checked')) {
+            window.localStorage.setItem('dontShowAgainVersion', currentBannerVersion);
+          }
+          startIntroduction();
+        };
+        bannerElement.on('hidden.bs.modal', onBannerHidden);
+        bannerElement.modal({});
+        dispatch({ type: 'PHASE_CHANGED', payload: phases.BANNER_OPEN });
+      } else {
+        startupTimer = window.setTimeout(startIntroduction, 500);
+      }
+    };
     map.on('load', () => {
       customizeBaseMap(map);
       addRasterBaseMaps(map);
@@ -764,7 +798,7 @@ function MapLibrePrototype({ data, geojson, dispatch, embedded = false, layers, 
       ensureLocationLayers();
       showLatestPosition();
       setStatus('Kartta valmis');
-      if (embedded) dispatch({ type: 'PHASE_CHANGED', payload: phases.NORMAL_USE });
+      if (embedded) finishStartup();
     });
     map.on('error', event => {
       console.error('MapLibre error', event.error);
@@ -777,6 +811,9 @@ function MapLibrePrototype({ data, geojson, dispatch, embedded = false, layers, 
       window.removeEventListener('pageshow', resizeMap);
       document.removeEventListener('visibilitychange', resizeWhenVisible);
       window.screen?.orientation?.removeEventListener?.('change', resizeMap);
+      window.clearTimeout(startupTimer);
+      window.clearTimeout(introductionTimer);
+      if (bannerElement && onBannerHidden) bannerElement.off('hidden.bs.modal', onBannerHidden);
       map.off('moveend', onMoveEnd);
       map.off('dragstart', stopLocationTracking);
       locationButton.removeEventListener('click', onLocationButtonClick);
@@ -1079,6 +1116,7 @@ function MapLibrePrototype({ data, geojson, dispatch, embedded = false, layers, 
             : [feature];
           const refs = [...new Set(clickedFeatures.map(item => item.properties.ref))];
           const names = [...new Set(clickedFeatures.map(item => item.properties.name).filter(Boolean))];
+          hideMenuAndSettings();
           map.setFilter('route-selected-highlight', ['all', ['==', ['get', 'kind'], 'route'], ['in', ['get', 'ref'], ['literal', refs]]]);
           map.setFilter('cable-ferry-selected-highlight', ['all', ['==', ['get', 'kind'], 'cable-ferry-highlight'], ['in', ['get', 'ref'], ['literal', refs]]]);
           const selectedName = names.join(' / ');
@@ -1117,6 +1155,7 @@ function MapLibrePrototype({ data, geojson, dispatch, embedded = false, layers, 
       });
 
       map.on('click', event => {
+        if (hideMenuAndSettings()) return;
         if (!hasSelectionRef.current) return;
         if (map.queryRenderedFeatures(event.point, { layers: routeLayers }).length) return;
         window.history.pushState({ route: null, timetable: null }, null, null);
