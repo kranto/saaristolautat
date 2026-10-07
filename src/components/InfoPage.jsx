@@ -267,7 +267,7 @@ class InfoPage extends Component {
               </p>
 
               <div style={{ marginTop: "10px" }}></div>
-              {L2("infopage.mapdata")} © <a href="http://www.google.com/">Google</a>,  <a href="http://www.openstreetmap.org/copyright" rel="noopener noreferrer" target="_blank">OpenStreetMap</a> contributors, <a href="http://www.maanmittauslaitos.fi/" rel="noopener noreferrer" target="_blank">Maanmittauslaitos</a>.
+              {L2("infopage.mapdata")} © <a href="https://openfreemap.org/" rel="noopener noreferrer" target="_blank">OpenFreeMap</a>, <a href="https://www.openstreetmap.org/copyright" rel="noopener noreferrer" target="_blank">OpenStreetMap</a> contributors, <a href="https://www.maanmittauslaitos.fi/" rel="noopener noreferrer" target="_blank">Maanmittauslaitos</a>.
               <br />
               {L2("infopage.icons")} Font Awesome, <a href="http://creativecommons.org/licenses/by/4.0/" rel="noopener noreferrer" target="license">CC 4.0 BY</a>
               <br />

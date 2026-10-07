@@ -9,13 +9,13 @@ geometriaa ei tarvitse enää kopioida tai muuntaa käsin.
 
 ## Zoom-arvot
 
-Manifestissa käytetään vanhan Google-kartan zoom-arvoja, aivan kuten nykyisessä
+Manifestissa käytetään vanhan 256 px tiilikartan zoom-arvoja, aivan kuten nykyisessä
 `roads.json`:issa:
 
 - `minZ`: ensimmäinen zoom, jolla tie piirretään
 - `maxZ`: viimeinen zoom, jolla oma tie piirretään
 
-MapLibre-koodi tekee automaattisesti muunnoksen `MapLibre = Google - 1`.
+MapLibre-koodi tekee automaattisesti muunnoksen `MapLibre = vanha zoom - 1`.
 Esimerkiksi `minZ: 8, maxZ: 10` vastaa MapLibren näkyvyysaluetta alkaen
 zoomista 7 ja päättyen ennen zoomia 10. Yläraja on käyttäjän kannalta vanhan
 kartan tapaan inklusiivinen.

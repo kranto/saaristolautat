@@ -12,8 +12,8 @@ const RASTER_BASE_LAYERS = {
   OSM: 'base-osm'
 };
 const SHOW_MAP_DEBUG = typeof window !== 'undefined' && ['localhost', '127.0.0.1', '::1'].includes(window.location.hostname);
-const googleZoomToMapLibre = zoom => Number(zoom) - 1;
-const mapLibreZoomToGoogle = zoom => Number(zoom) + 1;
+const legacyZoomToMapLibre = zoom => Number(zoom) - 1;
+const mapLibreZoomToExternal = zoom => Number(zoom) + 1;
 const legacyEmSize = em => ['interpolate', ['linear'], ['zoom'], 4, em * 6, 18, em * 20];
 const RESET_BOUNDS = [[19.5, 60], [22.5, 60.5]];
 const ARCHIPELAGO_BOUNDS = { south: 59.72, west: 19, north: 60.54, east: 23 };
@@ -246,14 +246,14 @@ function addArchipelagoTarget(map) {
     data: archipelagoTargetFeature()
   });
   if (!map.getLayer('archipelago-target-fill')) map.addLayer({
-    id: 'archipelago-target-fill', type: 'fill', source: 'archipelago-target', maxzoom: googleZoomToMapLibre(8),
+    id: 'archipelago-target-fill', type: 'fill', source: 'archipelago-target', maxzoom: legacyZoomToMapLibre(8),
     paint: {
       'fill-color': '#279594',
       'fill-opacity': ['interpolate', ['linear'], ['zoom'], 4, 0.12, 6, 0.065, 7, 0]
     }
   });
   if (!map.getLayer('archipelago-target-line')) map.addLayer({
-    id: 'archipelago-target-line', type: 'line', source: 'archipelago-target', maxzoom: googleZoomToMapLibre(8),
+    id: 'archipelago-target-line', type: 'line', source: 'archipelago-target', maxzoom: legacyZoomToMapLibre(8),
     paint: {
       'line-color': '#147c7c',
       'line-opacity': ['interpolate', ['linear'], ['zoom'], 4, 0.8, 6, 0.5, 7, 0],
@@ -283,7 +283,7 @@ function updateLiveIndicator(map, features, dispatch) {
     dispatch({ type: 'UPDATE_INDICATOR_MSG', payload: ['live.notavailable'] });
     return;
   }
-  if (map.getZoom() < googleZoomToMapLibre(8)) {
+  if (map.getZoom() < legacyZoomToMapLibre(8)) {
     dispatch({ type: 'UPDATE_INDICATOR_MSG', payload: ['live.zoomin'] });
     return;
   }
@@ -392,12 +392,12 @@ function flattenMapData(collections, data, locale) {
         subtype,
         layerTarget,
         color: properties.color || inherited.color || '',
-        markerMinZoom: googleZoomToMapLibre(properties.markerVisibleFrom ?? pierDefaults[subtype]?.marker ?? 30),
-        labelMinZoom: googleZoomToMapLibre(properties.labelVisibleFrom ?? pierDefaults[subtype]?.label ?? placeDefaults[subtype]?.from ?? 30),
-        labelMaxZoom: googleZoomToMapLibre(properties.labelVisibleTo ?? placeDefaults[subtype]?.to ?? 30),
-        longNameMinZoom: googleZoomToMapLibre(properties.longNameFrom ?? 9),
-        objectMinZoom: googleZoomToMapLibre(properties.minZ ?? properties.visibleFrom ?? (isRoute ? (subtype === 'cableferry' || subtype === 'conn5' || subtype === 'conn50' ? 9 : 8) : properties.stype === 'road' ? 8 : properties.stype === 'box' || properties.stype === 'pin' ? 11 : 1)),
-        objectMaxZoom: googleZoomToMapLibre(properties.maxZ ?? properties.visibleTo ?? (properties.stype === 'road' ? 8 : properties.stype === 'box' ? 15 : 30)),
+        markerMinZoom: legacyZoomToMapLibre(properties.markerVisibleFrom ?? pierDefaults[subtype]?.marker ?? 30),
+        labelMinZoom: legacyZoomToMapLibre(properties.labelVisibleFrom ?? pierDefaults[subtype]?.label ?? placeDefaults[subtype]?.from ?? 30),
+        labelMaxZoom: legacyZoomToMapLibre(properties.labelVisibleTo ?? placeDefaults[subtype]?.to ?? 30),
+        longNameMinZoom: legacyZoomToMapLibre(properties.longNameFrom ?? 9),
+        objectMinZoom: legacyZoomToMapLibre(properties.minZ ?? properties.visibleFrom ?? (isRoute ? (subtype === 'cableferry' || subtype === 'conn5' || subtype === 'conn50' ? 9 : 8) : properties.stype === 'road' ? 8 : properties.stype === 'box' || properties.stype === 'pin' ? 11 : 1)),
+        objectMaxZoom: legacyZoomToMapLibre(properties.maxZ ?? properties.visibleTo ?? (properties.stype === 'road' ? 8 : properties.stype === 'box' ? 15 : 30)),
         ...placement
       }
     };
@@ -536,14 +536,14 @@ function MapLibrePrototype({ data, geojson, dispatch, embedded = false, layers, 
         padding: desktop
           ? { top: 70, right: 70, bottom: 70, left: 470 }
           : { top: 70, right: 35, bottom: 260, left: 35 },
-        maxZoom: googleZoomToMapLibre(11),
+        maxZoom: legacyZoomToMapLibre(11),
         duration: 500
       });
       return true;
     });
     const unregisterMapView = registerMapView(() => {
       const center = map.getCenter();
-      return { lng: center.lng, lat: center.lat, googleZoom: mapLibreZoomToGoogle(map.getZoom()) };
+      return { lng: center.lng, lat: center.lat, externalZoom: mapLibreZoomToExternal(map.getZoom()) };
     });
     const unregisterMapPierTooltip = registerMapPierTooltip((id, panTo) => {
       const feature = sourceDataRef.current?.features.find(item =>
@@ -1068,7 +1068,7 @@ function MapLibrePrototype({ data, geojson, dispatch, embedded = false, layers, 
         ranges.forEach(range => {
           const [from, to, longNameFrom] = range.split(',').map(Number);
           if (to < from) return;
-          map.addLayer({ id: `place-labels-${placeStyle.type}-${range.replaceAll(',', '-')}`, type: 'symbol', source: 'saaristolautat', minzoom: from, ...(to < googleZoomToMapLibre(30) ? { maxzoom: to + 1 } : {}),
+          map.addLayer({ id: `place-labels-${placeStyle.type}-${range.replaceAll(',', '-')}`, type: 'symbol', source: 'saaristolautat', minzoom: from, ...(to < legacyZoomToMapLibre(30) ? { maxzoom: to + 1 } : {}),
             filter: ['all', ['==', ['get', 'kind'], 'place'], ['==', ['get', 'subtype'], placeStyle.type], ['==', ['get', 'labelMinZoom'], from], ['==', ['get', 'labelMaxZoom'], to], ['==', ['get', 'longNameMinZoom'], longNameFrom]],
             layout: { 'text-field': ['step', ['zoom'], ['get', 'name'], longNameFrom, ['get', 'longName']], 'text-font': [placeStyle.font], 'text-size': legacyEmSize(placeStyle.em),
               'text-offset': ['array', 'number', 2, ['get', 'labelOffset']], 'text-anchor': ['get', 'labelTextAnchor'], 'text-optional': true,
@@ -1197,11 +1197,11 @@ function MapLibrePrototype({ data, geojson, dispatch, embedded = false, layers, 
       if (!map.getSource('live-history')) map.addSource('live-history', { type: 'geojson', data: emptyFeatureCollection() });
       if (!map.getSource('live-vessels')) map.addSource('live-vessels', { type: 'geojson', data: emptyFeatureCollection() });
       if (!map.getLayer('live-history')) map.addLayer({
-        id: 'live-history', type: 'line', source: 'live-history', minzoom: googleZoomToMapLibre(8),
+        id: 'live-history', type: 'line', source: 'live-history', minzoom: legacyZoomToMapLibre(8),
         paint: { 'line-color': '#a0a0a0', 'line-width': 0.5, 'line-opacity': 0.7 }
       });
       if (!map.getLayer('live-vessels')) map.addLayer({
-        id: 'live-vessels', type: 'symbol', source: 'live-vessels', minzoom: googleZoomToMapLibre(8),
+        id: 'live-vessels', type: 'symbol', source: 'live-vessels', minzoom: legacyZoomToMapLibre(8),
         layout: {
           'icon-image': ['case', ['>', ['get', 'sog'], 0.1], 'live-vessel-moving', 'live-vessel-stopped'],
           'icon-size': ['interpolate', ['linear'], ['zoom'],
@@ -1214,7 +1214,7 @@ function MapLibrePrototype({ data, geojson, dispatch, embedded = false, layers, 
         paint: { 'icon-opacity': ['get', 'opacity'] }
       });
       if (!map.getLayer('live-vessel-labels')) map.addLayer({
-        id: 'live-vessel-labels', type: 'symbol', source: 'live-vessels', minzoom: googleZoomToMapLibre(9),
+        id: 'live-vessel-labels', type: 'symbol', source: 'live-vessels', minzoom: legacyZoomToMapLibre(9),
         layout: {
           'text-field': ['get', 'name'],
           'text-font': ['Noto Sans Bold'],

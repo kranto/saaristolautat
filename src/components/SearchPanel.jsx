@@ -3,8 +3,8 @@ import ReactDOM from 'react-dom';
 import { connect } from 'react-redux';
 import { L2 } from '../lib/localizer';
 import { selectRoute } from '../lib/navigation';
-import { objectIndex } from '../lib/objects';
 import { panToMapObject } from '../lib/mapnavigation';
+import { getRouteStyle } from '../lib/routestyle';
 import { hideMenuAndSettings } from '../lib/uicontrol';
 import store from '../store';
 
@@ -34,7 +34,7 @@ class SearchPanel extends Component {
   }
 
   routeStyle(route) {
-    const routeStyle = objectIndex[route.id]?.style;
+    const routeStyle = getRouteStyle(this.props.geojson, route.id);
     return routeStyle ?
       {
         borderBottomWidth: routeStyle.weight + "px ",
@@ -86,6 +86,7 @@ const mapStateToProps = (state) => {
     locale: state.settings.locale,
     searchPhrase: state.search.phrase,
     searchResults: state.search.results,
+    geojson: state.data.geojson,
     uiState: state.uiState
   };
 };

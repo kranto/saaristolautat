@@ -21,8 +21,7 @@ if (locales.indexOf(initialSettings.locale) < 0) {
 
 initialSettings = {...initialSettings, isFullScreen: false};
 
-// Google and the old raster map types are not available in the MapLibre view.
-// Migrate existing saved settings to the currently supported base map.
+// Migrate saved settings for retired map types to the default base map.
 if (!["openfreemap", "OSM"].includes(initialSettings.mapTypeId)) {
   initialSettings.mapTypeId = 'openfreemap';
 }

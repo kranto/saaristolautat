@@ -274,193 +274,6 @@ div#infopagecontent {
   color: #822928;
 }
 
-.map div {
-  text-shadow:
-  -2px -2px 1px rgba(255, 255, 255, 0.7),
-  2px -2px 1px rgba(255, 255, 255, 0.7),
-  -2px 2px 1px rgba(255, 255, 255, 0.7),
-  2px 2px 1px rgba(255, 255, 255, 0.7),
-  -2px 0px 1px rgba(255, 255, 255, 0.7),
-  2px 0px 1px rgba(255, 255, 255, 0.7),
-  0px -2px 1px rgba(255, 255, 255, 0.7),
-  0px 2px 1px rgba(255, 255, 255, 0.7);
-}
-
-.map.satellite div {
-  text-shadow:
-  -1px -1px 0px rgba(0, 0, 0, 0.3),
-  1px -1px 0px rgba(0, 0, 0, 0.3),
-  -1px 1px 0px rgba(0, 0, 0, 0.3),
-  1px 1px 0px rgba(0, 0, 0, 0.3),
-  -1px 0px 0px rgba(0, 0, 0, 0.3),
-  1px 0px 0px rgba(0, 0, 0, 0.3),
-  0px -1px 0px rgba(0, 0, 0, 0.3),
-  0px 1px 0px rgba(0, 0, 0, 0.3);
-}
-
-#map.hide {
-  opacity: 0;
-}
-
-#map .gm-iv-address div {
-  text-shadow: none;
-}
-#map .gm-style-cc div {
-  text-shadow: none;
-}
-#map .gm-style-iw div {
-  text-shadow: none;
-}
-
-.map .txtol {
-  position: absolute;
-  white-space: nowrap;
-  font-style: normal;
-  font-family: 'Roboto', sans-serif;
-  line-height: 1;
-  user-select: none;
-  -webkit-touch-callout: none;
-  -webkit-user-select: none; 
-  -moz-user-select: none;
-}
-
-.map .area {
-  color: #202030;
-  opacity: 0.6;
-}
-
-.map.satellite .area {
-  color: #ffffff;
-}
-
-.map .area.bg {
-  background-color: rgba(255, 255, 255, 0.5);
-}
-
-.map.satellite .area.bg {
-  background-color: transparent;
-}
-
-.map .area.province {
-  font-weight: bold;
-  font-size: 2em;
-}
-
-.map .area.mun1 {
-  font-weight: bold;
-  font-size: 1.8em;
-}
-
-.map .area.mun2 {
-  font-weight: bold;
-  font-size: 1.4em;
-}
-
-.map .area.island1 {
-  font-weight: normal;
-  font-size: 1em;
-  font-family: 'Trebuchet MS';
-  color: #101010;
-  opacity: 0.8;
-}
-
-.map.satellite .area.island1 {
-  color: #ddd;
-}
-
-.map .pier {
-  color: #002080;
-  opacity: 0.9;
-  cursor: pointer;
-}
-
-.map.satellite .pier {
-  color: #6ac1fc;
-}
-.map .pier-1 {
-  font-size: 1.2em;
-  font-weight: 600;
-}
-
-.map .pier-2 {
-  font-size: 1.1em;
-  font-weight: 600;
-}
-
-.map .pier-3 {
-  font-size: 1.1em;
-  font-weight: 500;
-}
-
-.map .pier-4 {
-  font-size: 1em;
-}
-
-.map .vessel {
-  color: #800080;
-  font-size: 1.1em;
-  font-weight: 400;
-  background-color: rgba(255,255,255,0.2);
-  padding: 1px;
-  z-index: 11;
-}
-
-.map.satellite .vessel {
-  color: #80b0a0;
-  background-color: initial;
-}
-
-.map .vessel.stopped {
-  font-size: 0.7em;
-  font-weight: 600;
-  z-index: 10;
-}
-
-.map .vessel.old{
-  opacity: 0.4;
-  z-index: 9;
-}
-
-.map .distancebox {
-  visibility: hidden;
-  background-color:rgba(0, 101, 189, 0.7);
-  border-radius: 3px;
-  border: 2.5px solid white;
-  position: absolute;
-  padding: 4px;
-  font-style: normal;
-  font-family: 'Roboto', sans-serif;
-  white-space: nowrap;
-  font-size: 0.9em;
-  line-height: 1.1;
-  color: #ffffff;
-  text-shadow: none;
-  user-select: none;
-  -webkit-touch-callout: none; 
-  -webkit-user-select: none; 
-  -moz-user-select: none; 
-}
-
-.map .connectionlabelbox {
-  border: 3px solid rgba(7, 5, 165, 0.6);
-  border-radius: 4px;
-  padding: 3px;
-  background: rgba(240, 250, 255, 0.7);
-  z-index: 20;
-  max-width: 250px;
-  white-space: normal;
-}
-
-.map .connectionlabelbox .connectionname {
-  font-size: 1.4em;
-  padding: 3px;
-}
-
-.map .connectionlabelbox .connectionspecifier {
-  font-size: 1.1em;
-  padding: 0px 3px;
-}
-
 .map {
   height: 100%;
   width: 100%; 
@@ -1505,4 +1318,27 @@ h4 {
 #loader.loader-exit.loader-exit-active {
   opacity: 0;
   transition: opacity 700ms linear;
+}
+@font-face {
+  font-family: 'Lato';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../node_modules/lato-font/fonts/lato-normal/lato-normal.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Lato';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('../node_modules/lato-font/fonts/lato-semibold/lato-semibold.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Lato';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('../node_modules/lato-font/fonts/lato-bold/lato-bold.woff2') format('woff2');
 }

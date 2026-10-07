@@ -17,7 +17,15 @@ class Banner extends Component {
                 <span aria-hidden="true">&times;</span>
               </button>
             </div>
-            <div className="modal-body" style={{ backgroundImage: "url('img/mapsample.png')" }}>
+            <div
+              className="modal-body"
+              style={{
+                backgroundImage: "url('img/banner-map.png')",
+                backgroundPosition: "center",
+                backgroundRepeat: "no-repeat",
+                backgroundSize: "cover"
+              }}
+            >
               <h5>{L2("banner.clickRoute")}</h5>
               <i style={{ position: "fixed", top: "50%", right: "20%", fontSize: "30px", color: "#304070" }} className="fa fa-mouse-pointer faa-tada animated" aria-hidden="true"></i>
               <ul style={{ position: "relative", left: "30px" }}>

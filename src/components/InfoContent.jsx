@@ -1,10 +1,9 @@
 import React, { Component } from 'react';
 import { L2 as L } from '../lib/localizer';
-import { unselectAll } from '../lib/ferries';
 import { routeInfo } from '../lib/datarenderer';
-import { onTimetableButtonClicked } from '../lib/navigation';
+import { onTimetableButtonClicked, unselectAll } from '../lib/navigation';
 import PierLink from './PierLink';
-import { objectIndex } from '../lib/objects';
+import { getRouteStyle } from '../lib/routestyle';
 
 export default class InfoContent extends Component {
 
@@ -19,7 +18,7 @@ export default class InfoContent extends Component {
       return <div />;
     }
 
-    const routeStyle = objectIndex[route]?.style;
+    const routeStyle = getRouteStyle(this.props.geojson, route);
     const infoTitleStyle = routeStyle ?
       {
         borderBottomWidth: routeStyle.weight + "px ",

@@ -1,8 +1,6 @@
 import store from '../store';
-import { unselectAll } from './ferries';
 import { getMapView, panToMapObject } from './mapnavigation';
 import { hideMenuAndSettings } from './uicontrol';
-import { lauttaRoutes } from './routes';
 import { shortName, description } from './datautils';
 
 const { history, location, $ } = window;
@@ -85,6 +83,13 @@ export function selectRoute(route, panTo=true) {
   navigateTo(history.state, panTo);
 }
 
+export function unselectAll(pushState = true) {
+  const selection = store.getState().selection;
+  if (!selection.infoContent && !selection.infoContent2) return;
+  if (pushState) history.pushState({ route: null, timetable: null }, null, null);
+  store.dispatch({ type: 'INFOCONTENT_UNSELECTED', payload: null });
+}
+
 function navigateTo(state, panTo) {
   // console.log('navigateTo', state, history, new Error().stack);
   if (!state || !state.timetable) {
@@ -99,8 +104,7 @@ function navigateTo(state, panTo) {
       if (panTo) panToMapObject(state.route);
     } else if (Array.isArray(state.route)) {
       const data = store.getState().data.data;
-      const routes = lauttaRoutes.length ? lauttaRoutes.filter(r => state.route.indexOf(r.id) >= 0) :
-        (data.lauttaRoutes || []).filter(route => state.route.indexOf(route.id) >= 0).map(route => ({
+      const routes = (data.lauttaRoutes || []).filter(route => state.route.indexOf(route.id) >= 0).map(route => ({
           id: route.id,
           name: shortName(route),
           details: description(route),
@@ -123,6 +127,6 @@ function navigateTo(state, panTo) {
 export function showLivePage() {
   const view = getMapView();
   if (!view) return;
-  var liveMapUri = "live.html?lng=" + view.lng + "&lat=" + view.lat + "&zoom=" + view.googleZoom;
+  var liveMapUri = "live.html?lng=" + view.lng + "&lat=" + view.lat + "&zoom=" + view.externalZoom;
   window.open(liveMapUri, "livemap");
 }

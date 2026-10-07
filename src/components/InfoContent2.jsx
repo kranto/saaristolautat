@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import {unselectAll} from '../lib/ferries';
+import { unselectAll } from '../lib/navigation';
 import { onlyUnique } from '../lib/datautils';
 
 export default class InfoContent2 extends Component {

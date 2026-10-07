@@ -40,7 +40,7 @@ class InfoContainer extends Component {
         <TransitionGroup component={null}>
           <CSSTransition key={`route-${this.props.routeid || 'none'}`} classNames="infocontent" timeout={500}>
             <InfoContent isHidden={this.state.hidden} setHidden={this.setHidden.bind(this)}
-              locale={this.props.locale} routeid={this.props.routeid} data={this.props.data} />
+              locale={this.props.locale} routeid={this.props.routeid} data={this.props.data} geojson={this.props.geojson} />
           </CSSTransition>
           <CSSTransition key={`targets-${this.props.infoContent2key || 'none'}`} classNames="infocontent" timeout={500}>
             <InfoContent2 locale={this.props.locale} targets={this.props.targets} />
@@ -58,7 +58,8 @@ const mapStateToProps = (state) => {
     routeid: state.selection.infoContent,
     targets: state.selection.infoContent2,
     infoContent2key: state.selection.infoContent2 === null ? null : state.selection.infoContent2.map(r=>r.id).join("-"),
-    data: state.data.data
+    data: state.data.data,
+    geojson: state.data.geojson
   };
 };
 

@@ -107,13 +107,7 @@ const messagesRaw = { // FI SV EN
     },
     mapTypes: {
         openfreemap: ["OpenFreeMap", "OpenFreeMap", "OpenFreeMap"],
-        roadmap: ["Google tiekartta", "Google vägkarta", "Google Roadmap"],
-        satellite: ["Google satelliitti", "Google satellit", "Google Satellite"],
-        hybrid: ["Google hybridi", "Google hybrid", "Google Hybrid"],
-        terrain: ["Google maasto", "Google terräng", "Google Terrain"],
         OSM: ["OpenStreetMap", "OpenStreetMap", "OpenStreetMap"],
-        MMLTAUSTA: ["MML taustakartta", "LMV bakgrundskarta", "NLS Background Map"],
-        MMLMAASTO: ["MML maastokartta", "LMV terrängkarta", "NLS Terrain Map"],
     },
     mapLayers: {
         title: ["Karttatasot", "Kartanivåerna", "Map Layers"],

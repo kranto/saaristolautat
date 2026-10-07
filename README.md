@@ -17,8 +17,7 @@ Käynnistä paikallinen Vite-kehityspalvelin:
 npm start
 ```
 
-Sovellus avautuu oletuksena osoitteessa <http://localhost:5173>. Käytä kehityksessä
-`localhost`-nimeä, koska paikallinen Google Maps -avain on rajattu sille.
+Sovellus avautuu oletuksena osoitteessa <http://localhost:5173>.
 
 ## Tuotantokäännös
 

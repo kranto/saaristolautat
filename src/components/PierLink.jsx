@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { showPierTooltip, closePierTooltip } from '../lib/objects';
+import { closeMapPierTooltip, showMapPierTooltip } from '../lib/mapnavigation';
 
 let isTouch = false;
 
@@ -7,12 +7,12 @@ export default class PierLink extends Component {
 
   onMouseEnter() {
     if (!isTouch && !this.props.panelIsHidden) {
-      showPierTooltip(this.props.pier.id, false);
+      showMapPierTooltip(this.props.pier.id, false);
     }
   }
 
   onMouseLeave() {
-    if (!this.props.panelIsHidden) closePierTooltip(this.props.pier.id);
+    if (!this.props.panelIsHidden) closeMapPierTooltip(this.props.pier.id);
   }
 
   onMouseDown() {
@@ -25,7 +25,7 @@ export default class PierLink extends Component {
 
   onTouchStart() {
     isTouch = true;
-    showPierTooltip(this.props.pier.id, true);
+    showMapPierTooltip(this.props.pier.id, true);
     this.props.setHidden(true);
   }
 
@@ -34,7 +34,7 @@ export default class PierLink extends Component {
   }
 
   componentWillUnmount() {
-    closePierTooltip(this.props.pier.id);
+    closeMapPierTooltip(this.props.pier.id);
   }
 
   render() {
