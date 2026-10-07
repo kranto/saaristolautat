@@ -223,6 +223,12 @@ function addLiveVesselImages(map) {
 
 const emptyFeatureCollection = () => ({ type: 'FeatureCollection', features: [] });
 
+function raiseLiveLayers(map) {
+  ['live-history', 'live-vessels', 'live-vessel-labels'].forEach(id => {
+    if (map.getLayer(id)) map.moveLayer(id);
+  });
+}
+
 function archipelagoTargetFeature() {
   const center = [21.35, 60.2];
   const longitudeRadius = 2.45;
@@ -844,6 +850,7 @@ function MapLibrePrototype({ data, geojson, dispatch, embedded = false, layers, 
       if (map.getSource('saaristolautat')) {
         map.getSource('saaristolautat').setData(sourceData);
         applyLayerSettings(map, layersRef.current);
+        raiseLiveLayers(map);
         return;
       }
       map.addSource('saaristolautat', { type: 'geojson', data: sourceData, generateId: true });
@@ -1167,6 +1174,7 @@ function MapLibrePrototype({ data, geojson, dispatch, embedded = false, layers, 
       const placeCount = sourceData.features.filter(feature => feature.properties.kind === 'place').length;
       setStatus(`${routeCount} reittiosuutta · ${pierCount} laituria · ${placeCount} paikannimeä`);
       applyLayerSettings(map, layersRef.current);
+      raiseLiveLayers(map);
     }
 
     if (map.loaded()) addLayers();
@@ -1225,6 +1233,7 @@ function MapLibrePrototype({ data, geojson, dispatch, embedded = false, layers, 
         },
         paint: { 'text-color': '#880078', 'text-halo-color': 'rgba(255,255,255,0.9)', 'text-halo-width': 1 }
       });
+      raiseLiveLayers(map);
       return true;
     };
 
