@@ -70,7 +70,7 @@
     {
       "id": "tie192",
       "name": "Tie 192 Raisio - Kivimaa",
-      "minZ": 8,
+      "minZ": 7,
       "maxZ": 9,
       "source": {
         "type": "osrm",
