@@ -1,10 +1,10 @@
 # Saaristolautat development notes
 
-## MapLibre prototype
+## MapLibre map
 
 - The application uses MapLibre GL JS with OpenFreeMap's Liberty style.
-- The main implementation is in `src/components/MapLibrePrototype.jsx` and `src/components/MapLibrePrototype.css`.
-- The MapLibre component is embedded in the legacy application through `src/components/MapContainer.jsx`; its standalone prototype chrome is disabled in embedded mode.
+- The main implementation is in `src/components/MapLibreMap.jsx` and `src/components/MapLibreMap.css`.
+- The MapLibre component is embedded in the application through `src/components/MapContainer.jsx`; its standalone chrome is disabled in embedded mode.
 - Keep `src/lib/localizer.js` independent of the Redux store. The store updates the active locale after initialization, avoiding an ESM circular-initialization failure.
 - Preserve the object-specific styling and legacy visibility values encoded in the MapLibre renderer and the GeoJSON-like data files.
 - The data files retain the original 256 px tile zoom convention, while MapLibre vector tiles use 512 px tiles. Convert data zooms with `MapLibre zoom = legacy zoom - 1`.

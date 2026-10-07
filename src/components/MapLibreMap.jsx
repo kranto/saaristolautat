@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { connect } from 'react-redux';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
-import './MapLibrePrototype.css';
+import './MapLibreMap.css';
 import { phases } from '../lib/constants';
 import { mapDataReady, registerMapNavigation, registerMapPierTooltip, registerMapView } from '../lib/mapnavigation';
 import { hideMenuAndSettings } from '../lib/uicontrol';
@@ -488,7 +488,7 @@ function applyLayerSettings(map, layers = {}) {
   });
 }
 
-function MapLibrePrototype({ data, geojson, dispatch, embedded = false, layers, locale, mapTypeId, infoContent, infoContent2 }) {
+function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale, mapTypeId, infoContent, infoContent2 }) {
   const mapContainer = useRef(null);
   const mapRef = useRef(null);
   const hoverPopupRef = useRef(null);
@@ -1353,17 +1353,17 @@ function MapLibrePrototype({ data, geojson, dispatch, embedded = false, layers, 
   );
 
   return (
-    <main className="map-prototype">
-      <div ref={mapContainer} className="map-prototype__canvas" aria-label="Saaristolauttojen kartta" />
+    <main className="map-view">
+      <div ref={mapContainer} className="map-view__canvas" aria-label="Saaristolauttojen kartta" />
       {resetButton}
-      <header className="map-prototype__header">
-        <div className="map-prototype__brand">
+      <header className="map-view__header">
+        <div className="map-view__brand">
           <img src="/mstile-70x70.png" alt="" />
-          <div><strong>Saaristolautat</strong><span>MapLibre + OpenFreeMap -kokeilu</span></div>
+          <div><strong>Saaristolautat</strong><span>MapLibre + OpenFreeMap</span></div>
         </div>
-        <div className="map-prototype__status"><i />{status}</div>
+        <div className="map-view__status"><i />{status}</div>
       </header>
-      <aside className="map-prototype__legend">
+      <aside className="map-view__legend">
         <strong>Karttatasot</strong>
         <span><i className="legend-route" /> Lauttareitit</span>
         <span><i className="legend-cruise" /> Risteilyreitit</span>
@@ -1385,4 +1385,4 @@ const mapStateToProps = state => ({
   infoContent: state.selection.infoContent,
   infoContent2: state.selection.infoContent2
 });
-export default connect(mapStateToProps)(MapLibrePrototype);
+export default connect(mapStateToProps)(MapLibreMap);

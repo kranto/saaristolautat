@@ -1,10 +1,10 @@
 import React from 'react';
-import MapLibrePrototype from './MapLibrePrototype';
+import MapLibreMap from './MapLibreMap';
 
 export default function MapContainer() {
   return (
     <div id="mapcontainer">
-      <MapLibrePrototype embedded />
+      <MapLibreMap embedded />
     </div>
   );
 }
