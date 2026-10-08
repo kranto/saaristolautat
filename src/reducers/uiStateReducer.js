@@ -4,7 +4,7 @@ export default function reducer(state = {
   menuOpen: false,
   settingsOpen: false,
   searchOpen: false,
-  phase: phases.INIT
+  phase: phases.LOADER_OPEN
 }, action) {
   switch (action.type) {
     case "MENU_TOGGLED":

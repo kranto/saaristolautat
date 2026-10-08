@@ -543,6 +543,7 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
   const [selection, setSelection] = useState(null);
   const [mapDebug, setMapDebug] = useState(null);
   const [showReset, setShowReset] = useState(false);
+  const [mapReady, setMapReady] = useState(false);
 
   useEffect(() => {
     if (!mapContainer.current || mapRef.current) return undefined;
@@ -806,6 +807,8 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
     window.screen?.orientation?.addEventListener?.('change', resizeMap);
     let startupTimer;
     let introductionTimer;
+    let revealFrame;
+    let revealMap;
     let bannerElement;
     let onBannerHidden;
     const startIntroduction = () => {
@@ -848,7 +851,14 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
       ensureLocationLayers();
       showLatestPosition();
       setStatus('Kartta valmis');
-      if (embedded) finishStartup();
+      revealMap = () => {
+        revealFrame = window.requestAnimationFrame(() => {
+          setMapReady(true);
+          if (embedded) finishStartup();
+        });
+      };
+      map.once('idle', revealMap);
+      map.triggerRepaint();
     });
     map.on('error', event => {
       console.error('MapLibre error', event.error);
@@ -863,6 +873,8 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
       window.screen?.orientation?.removeEventListener?.('change', resizeMap);
       window.clearTimeout(startupTimer);
       window.clearTimeout(introductionTimer);
+      if (revealFrame) window.cancelAnimationFrame(revealFrame);
+      if (revealMap) map.off('idle', revealMap);
       if (bannerElement && onBannerHidden) bannerElement.off('hidden.bs.modal', onBannerHidden);
       map.off('moveend', onMoveEnd);
       map.off('dragstart', stopLocationTracking);
@@ -1384,7 +1396,7 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
 
   if (embedded) return (
     <>
-      <div ref={mapContainer} id="map" className="map maplibre-embedded" aria-label="Saaristolauttojen kartta" />
+      <div ref={mapContainer} id="map" className={`map maplibre-embedded ${mapReady ? 'maplibre-map-ready' : 'maplibre-map-loading'}`} aria-label="Saaristolauttojen kartta" />
       {resetButton}
       {debugElement}
     </>
@@ -1392,7 +1404,7 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
 
   return (
     <main className="map-view">
-      <div ref={mapContainer} className="map-view__canvas" aria-label="Saaristolauttojen kartta" />
+      <div ref={mapContainer} className={`map-view__canvas ${mapReady ? 'maplibre-map-ready' : 'maplibre-map-loading'}`} aria-label="Saaristolauttojen kartta" />
       {resetButton}
       <header className="map-view__header">
         <div className="map-view__brand">
