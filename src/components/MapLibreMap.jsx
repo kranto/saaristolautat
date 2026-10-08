@@ -15,8 +15,45 @@ const SHOW_MAP_DEBUG = typeof window !== 'undefined' && ['localhost', '127.0.0.1
 const legacyZoomToMapLibre = zoom => Number(zoom) - 1;
 const mapLibreZoomToExternal = zoom => Number(zoom) + 1;
 const legacyEmSize = em => ['interpolate', ['linear'], ['zoom'], 4, em * 6, 18, em * 20];
-const RESET_BOUNDS = [[19.5, 60], [22.5, 60.5]];
+const ROUTE_AREA_BOUNDS = [[19.45, 59.72], [23.05, 60.58]];
+const MIN_ROUTE_RENDER_ZOOM = 7;
+const HIITTINEN = [22.69, 59.88];
 const ARCHIPELAGO_BOUNDS = { south: 59.72, west: 19, north: 60.54, east: 23 };
+const noRouteFilter = kind => ['all', ['==', ['get', 'kind'], kind], ['==', ['get', 'ref'], '__no-route__']];
+
+function clearRouteHover(map, hoverPopupRef) {
+  map.getCanvas().style.cursor = '';
+  if (map.getLayer('route-hover-highlight')) map.setFilter('route-hover-highlight', noRouteFilter('route'));
+  if (map.getLayer('cable-ferry-hover-highlight')) map.setFilter('cable-ferry-hover-highlight', noRouteFilter('cable-ferry-highlight'));
+  hoverPopupRef.current?.remove();
+  hoverPopupRef.current = null;
+}
+
+function fitRouteArea(map, options = {}) {
+  const padding = options.padding ?? 28;
+  const camera = map.cameraForBounds(ROUTE_AREA_BOUNDS, { padding });
+  if (!camera) return;
+
+  if (camera.zoom >= MIN_ROUTE_RENDER_ZOOM) {
+    map.easeTo({ ...camera, duration: options.duration ?? 0 });
+    return;
+  }
+
+  const containerWidth = map.getContainer().clientWidth;
+  const rightEdge = containerWidth - padding;
+  const worldSize = 512 * (2 ** MIN_ROUTE_RENDER_ZOOM);
+  const routeCenter = maplibregl.MercatorCoordinate.fromLngLat(camera.center);
+  const hiittinen = maplibregl.MercatorCoordinate.fromLngLat(HIITTINEN);
+  const finalCenter = new maplibregl.MercatorCoordinate(
+    hiittinen.x - (rightEdge - containerWidth / 2) / worldSize,
+    routeCenter.y
+  ).toLngLat();
+  map.easeTo({
+    center: finalCenter,
+    zoom: MIN_ROUTE_RENDER_ZOOM,
+    duration: options.duration ?? 0
+  });
+}
 
 function customizeBaseMap(map) {
   map.getStyle().layers.forEach(layer => {
@@ -511,13 +548,14 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
     const map = new maplibregl.Map({
       container: mapContainer.current,
       style: OPENFREEMAP_STYLE,
-      center: [21.4, 60.18],
-      zoom: 8.2,
+      center: [21.25, 60.15],
+      zoom: MIN_ROUTE_RENDER_ZOOM,
       minZoom: 4,
       maxZoom: 17,
       attributionControl: false
     });
     mapRef.current = map;
+    fitRouteArea(map);
     const unregisterMapNavigation = registerMapNavigation(id => {
       const sourceData = sourceDataRef.current;
       if (!sourceData) return false;
@@ -1107,27 +1145,23 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
             .addTo(map);
         });
         map.on('mousemove', layer, event => hoverPopupRef.current?.setLngLat(event.lngLat));
-        map.on('mouseleave', layer, () => {
-          map.getCanvas().style.cursor = '';
-          map.setFilter('route-hover-highlight', ['all', ['==', ['get', 'kind'], 'route'], ['==', ['get', 'ref'], '__no-route__']]);
-          map.setFilter('cable-ferry-hover-highlight', ['all', ['==', ['get', 'kind'], 'cable-ferry-highlight'], ['==', ['get', 'ref'], '__no-route__']]);
-          hoverPopupRef.current?.remove();
-          hoverPopupRef.current = null;
-        });
-        map.on('click', layer, event => {
-          const allClickedFeatures = map.queryRenderedFeatures(event.point, { layers: routeLayers });
-          const feature = allClickedFeatures[0];
-          if (!feature) return;
+        map.on('mouseleave', layer, () => clearRouteHover(map, hoverPopupRef));
+      });
+
+      map.on('click', event => {
+        const allClickedFeatures = map.queryRenderedFeatures(event.point, { layers: routeLayers });
+        const feature = allClickedFeatures[0];
+        if (feature) {
           const clickedFeatures = feature.properties.subtype === 'longdistance'
             ? allClickedFeatures.filter(item => item.properties.subtype === 'longdistance')
             : [feature];
           const refs = [...new Set(clickedFeatures.map(item => item.properties.ref))];
           const names = [...new Set(clickedFeatures.map(item => item.properties.name).filter(Boolean))];
           hideMenuAndSettings();
+          clearRouteHover(map, hoverPopupRef);
           map.setFilter('route-selected-highlight', ['all', ['==', ['get', 'kind'], 'route'], ['in', ['get', 'ref'], ['literal', refs]]]);
           map.setFilter('cable-ferry-selected-highlight', ['all', ['==', ['get', 'kind'], 'cable-ferry-highlight'], ['in', ['get', 'ref'], ['literal', refs]]]);
-          const selectedName = names.join(' / ');
-          setSelection({ name: selectedName });
+          setSelection({ name: names.join(' / ') });
           if (feature.properties.subtype === 'longdistance') {
             const routeIds = refs.map(ref => Number(ref.replace('longdistance-route-', ''))).filter(Number.isFinite);
             const targets = routeIds.map(id => data.lauttaRoutes?.find(route => route.id === id)).filter(Boolean).map(route => {
@@ -1158,13 +1192,10 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
             stopLocationTrackingRef.current();
             map.panBy([0, container.clientHeight * 0.2], { duration: 350 });
           }
-        });
-      });
-
-      map.on('click', event => {
+          return;
+        }
         if (hideMenuAndSettings()) return;
         if (!hasSelectionRef.current) return;
-        if (map.queryRenderedFeatures(event.point, { layers: routeLayers }).length) return;
         window.history.pushState({ route: null, timetable: null }, null, null);
         dispatch({ type: 'INFOCONTENT_UNSELECTED', payload: null });
       });
@@ -1314,6 +1345,7 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
     const refs = infoContent
       ? [infoContent]
       : (infoContent2 || []).map(route => `longdistance-route-${route.id}`);
+    if (refs.length) clearRouteHover(map, hoverPopupRef);
     map.setFilter('route-selected-highlight', refs.length
       ? ['all', ['==', ['get', 'kind'], 'route'], ['in', ['get', 'ref'], ['literal', refs]]]
       : ['all', ['==', ['get', 'kind'], 'route'], ['==', ['get', 'ref'], '__no-route__']]);
@@ -1339,7 +1371,7 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
       title="Palauta kartta Saaristomerelle"
       onClick={() => {
         stopLocationTrackingRef.current();
-        mapRef.current?.fitBounds(RESET_BOUNDS, { padding: 35, duration: 600 });
+        if (mapRef.current) fitRouteArea(mapRef.current, { padding: 35, duration: 600 });
       }}
     />
   );

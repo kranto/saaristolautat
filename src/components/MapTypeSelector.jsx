@@ -11,6 +11,12 @@ class MapTypeSelector extends Component {
 
     mapTypes = ["openfreemap", "OSM"];
 
+    componentDidUpdate(previousProps) {
+        if (previousProps.settingsOpen && !this.props.settingsOpen && this.state.open) {
+            this.setState({ open: false });
+        }
+    }
+
     onClick(event) {
         if (this.state.open) {
             const clicked = event.target.getAttribute("data-target");
@@ -26,7 +32,6 @@ class MapTypeSelector extends Component {
 
     render() {
         if (!this.props.settingsOpen) {
-            if (this.state.open) this.setState({ open: false });
             return "";
         }
 
