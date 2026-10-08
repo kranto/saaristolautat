@@ -251,27 +251,20 @@ div#infopagecontent {
 }
 
 .scrollIndicator {
-  height: 25px;
+  height: 64px;
   width: 100%;
   display: none;
   z-index: 130;
-  background-color: #ecececad;
+  background: linear-gradient(to bottom, rgba(251, 252, 253, 0), rgba(251, 252, 253, 0.72) 60%, #fbfcfd 100%);
   position: fixed;
   bottom: 0px;
-  padding-left: 50%;
   pointer-events: none;
 }
 
-.scrollIndicator.can-scroll {
-  display: block;
-}
-
-.scrollIndicator i {
-  position: relative;
-  font-size: 40px;
-  left: -20px;
-  top: -6px;
-  color: #822928;
+@media screen and (max-width: 767px) {
+  .scrollIndicator.can-scroll {
+    display: block;
+  }
 }
 
 .map {

@@ -32,7 +32,7 @@ let previous = undefined
 class Wrapper extends Component {
   constructor(props) {
     super(props);
-    this.state = { pointerOnInfoPanel: false };
+    this.state = { pointerOnInfoPanel: false, canScrollInfo: false };
   }
 
   componentDidMount() {
@@ -57,15 +57,24 @@ class Wrapper extends Component {
     this.setState({ pointerOnInfoPanel: false });
   }
 
-  componentDidUpdate() {
+  componentDidUpdate(prevProps) {
     previous = this.props.routeid;
+    const infoOpen = Boolean((this.props.routeid || this.props.infoContent2) && !this.props.infoPage);
+    const infoWasOpen = Boolean((prevProps.routeid || prevProps.infoContent2) && !prevProps.infoPage);
+    if (!infoOpen) {
+      if (this.state.canScrollInfo) this.setState({ canScrollInfo: false });
+    } else if (!infoWasOpen || this.props.routeid !== prevProps.routeid || this.props.infoContent2 !== prevProps.infoContent2) {
+      window.requestAnimationFrame(() => this.onScroll());
+    }
   }
 
   onScroll() {
     var elem = $("#wrapper2");
     if (!elem || !elem[0]) return false;
     var isBottom = (elem[0].scrollHeight - elem.scrollTop() - scrollLimit <= elem.outerHeight());
-    $('.scrollIndicator').toggleClass('can-scroll', !isBottom);
+    const infoOpen = Boolean((this.props.routeid || this.props.infoContent2) && !this.props.infoPage);
+    const canScrollInfo = infoOpen && !isBottom;
+    if (canScrollInfo !== this.state.canScrollInfo) this.setState({ canScrollInfo });
 
     var height = $(".mapoverlay").outerHeight();
     $(".closeInfoButton").toggleClass('fix', elem.scrollTop() > height);
@@ -106,7 +115,7 @@ class Wrapper extends Component {
         <Timetables />
         <InfoPage />
 
-        <ScrollIndicator />
+        <ScrollIndicator visible={infoOpen && this.state.canScrollInfo} />
       </div >
     );
   }
