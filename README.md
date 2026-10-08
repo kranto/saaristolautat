@@ -44,3 +44,6 @@ npm run copyprod
 Ohjeet pohjakartan liian myöhään näyttämien tieosuuksien hakemiseen ja
 lisäämiseen löytyvät tiedostosta [`docs/roads.md`](docs/roads.md). Työkalu tukee
 OSM-pohjaista reititystä sekä valmiita GeoJSON- ja GPX-tiedostoja.
+
+Vaikeasti toistettavat havainnot kirjataan tiedostoon
+[`docs/known-issues.md`](docs/known-issues.md).
