@@ -82,7 +82,8 @@ class Wrapper extends Component {
 
   render() {
     const infoOpen = (this.props.routeid || this.props.infoContent2) && !this.props.infoPage;
-    const touchFocusInInfo = infoOpen && (this.state.pointerOnInfoPanel || (isIOS && this.props.routeid !== previous))
+    const isSmallScreen = window.matchMedia('(max-width: 767px)').matches;
+    const touchFocusInInfo = infoOpen && (isSmallScreen || this.state.pointerOnInfoPanel || (isIOS && this.props.routeid !== previous))
     const pointerEvents = touchFocusInInfo ? "auto" : "none"
     return (
       <div id="wrapper" className={infoOpen ? "info-open" : ""}>

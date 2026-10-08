@@ -251,7 +251,7 @@ div#infopagecontent {
 }
 
 .scrollIndicator {
-  height: 64px;
+  height: 48px;
   width: 100%;
   display: none;
   z-index: 130;
