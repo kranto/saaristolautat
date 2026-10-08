@@ -24,3 +24,14 @@ Jos ongelma toistuu, ota ennen uudelleenlatausta talteen mahdollisuuksien mukaan
 3. Mitä tehtiin juuri ennen kerrosten katoamista, esimerkiksi karttapohjan tai
    tasojen vaihto, sovelluksen palaaminen taustalta tai näytön koon muuttuminen.
 4. Näkyykö pohjakartta normaalisti ja toimivatko zoomaus sekä panorointi.
+
+## Asetukset useassa välilehdessä
+
+Sovelluksen asetukset tallennetaan selaimeen silloin, kun käyttäjä muuttaa
+asetusta. Pelkkä välilehden lataaminen, käyttäminen tai sulkeminen ei kirjoita
+sen muistissa olevaa asetustilaa uudelleen.
+
+Jos sovellus on auki useassa välilehdessä, seuraavalla käynnistyskerralla
+käytetään siksi viimeksi **muutettuja**, ei välttämättä viimeksi suljetun
+välilehden asetuksia. Eri välilehdissä voi myös näkyä toisistaan poikkeava tila,
+kunnes asetusta muutetaan tai välilehti ladataan uudelleen.
