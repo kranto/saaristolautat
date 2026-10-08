@@ -34,7 +34,8 @@ function fitRouteArea(map, options = {}) {
   const camera = map.cameraForBounds(ROUTE_AREA_BOUNDS, { padding });
   if (!camera) return;
 
-  if (camera.zoom >= MIN_ROUTE_RENDER_ZOOM) {
+  const isSmallViewport = map.getContainer().clientWidth < 768;
+  if (!isSmallViewport || camera.zoom >= MIN_ROUTE_RENDER_ZOOM) {
     map.easeTo({ ...camera, duration: options.duration ?? 0 });
     return;
   }
@@ -555,7 +556,12 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
       attributionControl: false
     });
     mapRef.current = map;
-    fitRouteArea(map);
+    map.once('load', () => {
+      window.requestAnimationFrame(() => {
+        map.resize();
+        fitRouteArea(map);
+      });
+    });
     const unregisterMapNavigation = registerMapNavigation(id => {
       const sourceData = sourceDataRef.current;
       if (!sourceData) return false;
