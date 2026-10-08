@@ -86,7 +86,11 @@ export default class InfoContent extends Component {
       <div className="infocontent">
 
         <div className="infotitle" style={infoTitleStyle}>
-          <button type="button" className="btn btn-secondary closeInfoButton fix1" onClick={unselectAll}><i className="fa fa-times" aria-hidden="true"></i></button>
+          <button type="button" className="btn btn-secondary closeInfoButton fix1"
+            aria-label={L('banner.close')}
+            onTouchStart={event => { event.preventDefault(); event.stopPropagation(); }}
+            onTouchEnd={event => { event.preventDefault(); event.stopPropagation(); unselectAll(); }}
+            onClick={unselectAll}><i className="fa fa-times" aria-hidden="true"></i></button>
           <div className="closeInfoButtonPlaceHolder"></div>
           {titleLine}
         </div>

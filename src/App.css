@@ -1017,9 +1017,14 @@ h4 {
 }
 
 @media screen and (max-width: 767px) {
+  #wrapper2.info-open {
+    pointer-events: auto;
+  }
+
   #wrapper2.info-open .mapoverlay {
     display: block;
     pointer-events: auto;
+    touch-action: none;
   }
 
   .spaceabove {

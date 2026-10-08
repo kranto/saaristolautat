@@ -16,49 +16,102 @@ import SearchPanel from './SearchPanel';
 
 const $ = window.$;
 
-function getAllEvents(element) {
-  const result = [];
-  for (let key in element) {
-    if (key.indexOf('on') === 0) result.push(key.slice(2));
-  }
-  return result.join(' ');
+const scrollLimit = 22;
+const forwardedMapEventTypes = [
+  "touchstart", "touchmove", "touchend", "touchcancel",
+  "mousedown", "mousemove", "mouseup", "mouseover", "mouseout",
+  "click", "dblclick", "wheel", "contextmenu"
+];
+
+function copyTouch(touch, target) {
+  return new Touch({
+    identifier: touch.identifier,
+    target,
+    clientX: touch.clientX,
+    clientY: touch.clientY,
+    screenX: touch.screenX,
+    screenY: touch.screenY,
+    pageX: touch.pageX,
+    pageY: touch.pageY,
+    radiusX: touch.radiusX,
+    radiusY: touch.radiusY,
+    rotationAngle: touch.rotationAngle,
+    force: touch.force
+  });
 }
 
-const scrollLimit = 22;
+function forwardMapEvent(event) {
+  const target = document.querySelector("#mapcontainer .maplibregl-canvas-container");
+  if (!target) return;
 
-const isIOS = /(iPhone|iPad|iPod)/.test(window.navigator.userAgent);
-let previous = undefined
+  let forwarded;
+  if (event.type.startsWith("touch")) {
+    const copyTouches = touches => Array.from(touches, touch => copyTouch(touch, target));
+    forwarded = new TouchEvent(event.type, {
+      bubbles: true,
+      cancelable: true,
+      composed: true,
+      touches: copyTouches(event.touches),
+      targetTouches: copyTouches(event.targetTouches),
+      changedTouches: copyTouches(event.changedTouches)
+    });
+  } else if (event.type === "wheel") {
+    forwarded = new WheelEvent(event.type, {
+      bubbles: true,
+      cancelable: true,
+      clientX: event.clientX,
+      clientY: event.clientY,
+      deltaX: event.deltaX,
+      deltaY: event.deltaY,
+      deltaMode: event.deltaMode,
+      ctrlKey: event.ctrlKey,
+      shiftKey: event.shiftKey,
+      altKey: event.altKey,
+      metaKey: event.metaKey
+    });
+  } else {
+    forwarded = new MouseEvent(event.type, {
+      bubbles: true,
+      cancelable: true,
+      composed: true,
+      clientX: event.clientX,
+      clientY: event.clientY,
+      screenX: event.screenX,
+      screenY: event.screenY,
+      button: event.button,
+      buttons: event.buttons,
+      ctrlKey: event.ctrlKey,
+      shiftKey: event.shiftKey,
+      altKey: event.altKey,
+      metaKey: event.metaKey
+    });
+  }
+
+  target.dispatchEvent(forwarded);
+  if (forwarded.defaultPrevented && event.cancelable) event.preventDefault();
+}
 
 class Wrapper extends Component {
   constructor(props) {
     super(props);
-    this.state = { pointerOnInfoPanel: false, canScrollInfo: false };
+    this.state = { canScrollInfo: false };
   }
 
   componentDidMount() {
     window.addEventListener("resize", this.onScroll.bind(this));
-    this.initMapOverlayEvents();
-  }
-
-  initMapOverlayEvents() {
-    var el = $(".mapoverlay");
-    el.bind(getAllEvents(el[0]), e => {
-      this.setState({ pointerOnInfoPanel: false });
-      $("#mapcontainer").trigger(e.type, e);
+    this.mapOverlay = document.querySelector(".mapoverlay");
+    forwardedMapEventTypes.forEach(type => {
+      this.mapOverlay?.addEventListener(type, forwardMapEvent, type === "touchmove" || type === "wheel" ? { passive: false } : undefined);
     });
   }
 
-  onMouseEnterInfo(event) {
-    this.setState({ pointerOnInfoPanel: true });
-    $("#wrapper2").trigger(event.type, event);
-  }
-
-  onMouseLeaveInfo(event) {
-    this.setState({ pointerOnInfoPanel: false });
+  componentWillUnmount() {
+    forwardedMapEventTypes.forEach(type => {
+      this.mapOverlay?.removeEventListener(type, forwardMapEvent, type === "touchmove" || type === "wheel" ? { passive: false } : undefined);
+    });
   }
 
   componentDidUpdate(prevProps) {
-    previous = this.props.routeid;
     const infoOpen = Boolean((this.props.routeid || this.props.infoContent2) && !this.props.infoPage);
     const infoWasOpen = Boolean((prevProps.routeid || prevProps.infoContent2) && !prevProps.infoPage);
     if (!infoOpen) {
@@ -82,22 +135,16 @@ class Wrapper extends Component {
 
   render() {
     const infoOpen = (this.props.routeid || this.props.infoContent2) && !this.props.infoPage;
-    const isSmallScreen = window.matchMedia('(max-width: 767px)').matches;
-    const touchFocusInInfo = infoOpen && (isSmallScreen || this.state.pointerOnInfoPanel || (isIOS && this.props.routeid !== previous))
-    const pointerEvents = touchFocusInInfo ? "auto" : "none"
     return (
       <div id="wrapper" className={infoOpen ? "info-open" : ""}>
-        <div id="wrapper2" className={infoOpen ? "info-open" : ""} onScroll={this.onScroll.bind(this)}
-          style={{ pointerEvents }}>
+        <div id="wrapper2" className={infoOpen ? "info-open" : ""} onScroll={this.onScroll.bind(this)}>
 
-          <div className="mapoverlay" style={{ pointerEvents }}></div>
+          <div className="mapoverlay"></div>
 
           <TransitionGroup component={null}>
             {infoOpen ?
               <CSSTransition key="info" classNames="info" timeout={200}>
-                <InfoContainer
-                  onMouseEnter={this.onMouseEnterInfo.bind(this)}
-                  onMouseLeave={this.onMouseLeaveInfo.bind(this)} />
+                <InfoContainer />
               </CSSTransition>
               : null}
           </TransitionGroup>

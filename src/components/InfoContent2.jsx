@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { L2 as L } from '../lib/localizer';
 import { unselectAll } from '../lib/navigation';
 import { onlyUnique } from '../lib/datautils';
 
@@ -43,7 +44,11 @@ export default class InfoContent2 extends Component {
     return (
       <div className="infocontent">
 
-        <button type="button" className="btn btn-secondary closeInfoButton" onClick={unselectAll}><i className="fa fa-times" aria-hidden="true"></i></button>
+        <button type="button" className="btn btn-secondary closeInfoButton"
+          aria-label={L('banner.close')}
+          onTouchStart={event => { event.preventDefault(); event.stopPropagation(); }}
+          onTouchEnd={event => { event.preventDefault(); event.stopPropagation(); unselectAll(); }}
+          onClick={unselectAll}><i className="fa fa-times" aria-hidden="true"></i></button>
 
         <div className="headerbox" style={headerboxStyle}>{nameItems}</div>
         <div className="contentsbox">{contentItems}</div>

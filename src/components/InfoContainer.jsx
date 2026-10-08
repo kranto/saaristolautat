@@ -32,11 +32,7 @@ class InfoContainer extends Component {
 
   render() {
     return (
-      <div id="infoholder" className={"info" + (this.state.hidden ? " hidden" : "")}
-        onMouseLeave={this.props.onMouseLeave}
-        onMouseEnter={this.props.onMouseEnter}
-        onMouseDown={this.props.onMouseEnter}
-        onTouchStart={this.props.onMouseEnter}>
+      <div id="infoholder" className={"info" + (this.state.hidden ? " hidden" : "")}>
         <TransitionGroup component={null}>
           <CSSTransition key={`route-${this.props.routeid || 'none'}`} classNames="infocontent" timeout={500}>
             <InfoContent isHidden={this.state.hidden} setHidden={this.setHidden.bind(this)}
