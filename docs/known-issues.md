@@ -1,14 +1,21 @@
 # Tunnetut vaikeasti toistettavat ongelmat
 
-## Kartan datakerrokset voivat kadota
+## Kartan datakerrokset saattoivat kadota (korjattu)
 
-- **Havaittu:** 8.10.2026 Safarissa.
+- **Havaittu:** 8.10.2026 Safarissa ja Chromessa toistuvien uudelleenlatausten
+  yhteydessä.
 - **Oire:** Asetuksissa reittityypit olivat valittuina, mutta kartalla ei näkynyt
   reittejä, laitureita eikä sovelluksen omia paikannimilabeleita. Tasojen
   kytkeminen pois ja takaisin päälle ei auttanut.
-- **Palautuminen:** Sivun lataaminen uudelleen palautti kerrokset.
-- **Toistettavuus:** Ei tiedossa. Ei vielä varmuutta siitä, liittyykö ongelma
-  Safariin.
+- **Palautuminen:** Sivun lataaminen uudelleen tai kielen vaihtaminen palautti
+  kerrokset. Kielenvaihto suoritti datakerrosten alustusefektin uudelleen.
+- **Toistettavuus:** Satunnainen ajoituskilpa, joka ei liittynyt Safariin.
+- **Syy:** Karttatyylin ja sovellusdatan rinnakkaisessa latauksessa oli
+  ajoituskilpa. Datakerrosten alustus saattoi jäädä odottamaan jo tapahtunutta
+  kertaluonteista `load`-tapahtumaa.
+- **Korjaus:** Alustus tarkistaa `map.isStyleLoaded()`-tilan ja varmistaa puuttuvat
+  kerrokset uudelleen sekä `styledata`- että `idle`-tapahtumissa. Latausnäkymää
+  ei suljeta ennen kuin `saaristolautat`-lähde on varmasti lisätty karttaan.
 
 Jos ongelma toistuu, ota ennen uudelleenlatausta talteen mahdollisuuksien mukaan:
 

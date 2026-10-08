@@ -852,6 +852,10 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
       showLatestPosition();
       setStatus('Kartta valmis');
       revealMap = () => {
+        if (!map.getSource('saaristolautat')) {
+          map.once('idle', revealMap);
+          return;
+        }
         revealFrame = window.requestAnimationFrame(() => {
           setMapReady(true);
           if (embedded) finishStartup();
@@ -1226,9 +1230,18 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
       raiseLiveLayers(map);
     }
 
-    if (map.loaded()) addLayers();
+    const ensureLayers = () => {
+      if (!map.getSource('saaristolautat') && map.isStyleLoaded()) addLayers();
+    };
+    map.on('styledata', ensureLayers);
+    map.on('idle', ensureLayers);
+    if (map.isStyleLoaded()) addLayers();
     else map.once('load', addLayers);
-    return undefined;
+    return () => {
+      map.off('styledata', ensureLayers);
+      map.off('idle', ensureLayers);
+      map.off('load', addLayers);
+    };
   }, [data, dispatch, geojson, locale]);
 
   useEffect(() => {

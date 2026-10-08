@@ -1,4 +1,7 @@
-let initialSettings = getFromLocalStorage("settings") ||
+const SETTINGS_STORAGE_KEY = "settings-v2";
+const savedSettings = getFromLocalStorage(SETTINGS_STORAGE_KEY);
+
+let initialSettings = savedSettings || getFromLocalStorage("settings") ||
 {
   layers: {
     ringroads: false,
@@ -26,12 +29,28 @@ if (!["openfreemap", "OSM"].includes(initialSettings.mapTypeId)) {
   initialSettings.mapTypeId = 'openfreemap';
 }
 
-setToLocalStorage("settings", initialSettings);
+// Write once when migrating from the legacy key. Normal reloads must not let a
+// stale tab overwrite settings that were changed in another tab.
+if (!savedSettings) setToLocalStorage(SETTINGS_STORAGE_KEY, initialSettings);
 
 export default function reducer(state = initialSettings, action) {
   const newState = handleAction(state, action);
-  setToLocalStorage("settings", newState);
+  persistSettingChange(action, newState);
   return newState;
+}
+
+function persistSettingChange(action, state) {
+  if (!["LOCALE_SET", "LAYER_SET", "MAP_TYPE_SELECTED"].includes(action.type)) return;
+  const saved = getFromLocalStorage(SETTINGS_STORAGE_KEY) || {};
+  let nextSettings = saved;
+  if (action.type === "LOCALE_SET") {
+    nextSettings = { ...saved, locale: state.locale };
+  } else if (action.type === "LAYER_SET") {
+    nextSettings = { ...saved, layers: { ...(saved.layers || state.layers), ...action.payload } };
+  } else if (action.type === "MAP_TYPE_SELECTED") {
+    nextSettings = { ...saved, mapTypeId: state.mapTypeId };
+  }
+  setToLocalStorage(SETTINGS_STORAGE_KEY, nextSettings);
 }
 
 function handleAction(state, action) {
