@@ -1,11 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { connect } from 'react-redux';
-import maplibregl from 'maplibre-gl';
+import * as maplibregl from 'maplibre-gl';
+import maplibreWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?url';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import './MapLibreMap.css';
 import { phases } from '../lib/constants';
 import { mapDataReady, registerMapNavigation, registerMapPierTooltip, registerMapView } from '../lib/mapnavigation';
 import { hideMenuAndSettings } from '../lib/uicontrol';
+
+maplibregl.setWorkerUrl(maplibreWorkerUrl);
 
 const OPENFREEMAP_STYLE = 'https://tiles.openfreemap.org/styles/liberty';
 const RASTER_BASE_LAYERS = {
