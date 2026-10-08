@@ -16,6 +16,19 @@ function renderDates(fromD, toD, lang) {
 
 class Timetables extends Component {
 
+  constructor(props) {
+    super(props);
+    this.state = { activeTab: 0 };
+  }
+
+  componentDidUpdate(previousProps) {
+    if (previousProps.timetableid !== this.props.timetableid ||
+        previousProps.routeid !== this.props.routeid ||
+        previousProps.locale !== this.props.locale) {
+      this.setState({ activeTab: 0 });
+    }
+  }
+
   onClose(event) {
     window.history.back();
   }
@@ -38,23 +51,33 @@ class Timetables extends Component {
   getBody() {
     if (!this.props.timetableid) return "";
     const timetable = { ...this.props.data.timetables[this.props.timetableid] };
-    const tables = filterTimetables(LP(timetable, "tables")).map((table, index) => {
+    const filteredTables = filterTimetables(LP(timetable, "tables"));
+    if (!filteredTables) return "";
+
+    const activeTab = this.state.activeTab < filteredTables.length ? this.state.activeTab : 0;
+    const tables = filteredTables.map((table, index) => {
       return {
         ...table,
-        active: "",
-        show: "",
+        active: index === activeTab,
         dates: renderDates(table.validFrom, table.validTo),
-        tabid: "tab" + index
+        tabid: "timetable-tab-" + index,
+        panelid: "timetable-panel-" + index,
       }
     });
-    if (!tables.length) return "";
-    tables[0] = { ...tables[0], active: "active", show: "show" };
 
-    const tabItems = tables.map(table =>
+    const tabItems = tables.map((table, index) =>
       <li key={table.tabid} className="nav-item">
-        <a className={"nav-link " + table.active} data-toggle="tab" href={"#" + table.tabid} role="tab">
+        <button
+          type="button"
+          id={table.tabid}
+          className={"nav-link" + (table.active ? " active" : "")}
+          role="tab"
+          aria-controls={table.panelid}
+          aria-selected={table.active}
+          onClick={() => this.setState({ activeTab: index })}
+        >
           {renderDates(table.validFrom, table.validTo)}
-        </a>
+        </button>
       </li>
     );
 
@@ -69,7 +92,13 @@ class Timetables extends Component {
         </div>
       );
       return (
-        <div className={"tab-pane fade " + table.show + " " + table.active} id={table.tabid} role="tabpanel" key={table.tabid}>
+        <div
+          className={"tab-pane fade" + (table.active ? " show active" : "")}
+          id={table.panelid}
+          role="tabpanel"
+          aria-labelledby={table.tabid}
+          key={table.panelid}
+        >
           {images}
           <div className="alert alert-info center">
             {L('openzoomable')}
