@@ -11,6 +11,7 @@ function renderDate(date, lang) {
 }
 
 function renderDates(fromD, toD, lang) {
+  if (fromD && fromD === toD) return renderDate(fromD, lang);
   return renderDate(fromD, lang) + " - " + renderDate(toD, lang);
 }
 
