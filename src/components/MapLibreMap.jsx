@@ -264,6 +264,35 @@ function addLiveVesselImages(map) {
 
 const emptyFeatureCollection = () => ({ type: 'FeatureCollection', features: [] });
 
+const routeTypePriority = subtype => {
+  if (subtype === 'cableferry') return 0;
+  if (['conn1', 'conn1b'].includes(subtype)) return 1;
+  if (['conn2', 'conn2m', 'conn2b'].includes(subtype)) return 2;
+  if (subtype === 'conn3') return 3;
+  if (subtype === 'conn4') return 4;
+  if (['conn5', 'conn50'].includes(subtype)) return 5;
+  if (subtype === 'longdistance') return 6;
+  return 3;
+};
+
+function lineLength(coordinates = []) {
+  return coordinates.slice(1).reduce((length, coordinate, index) => {
+    const previous = coordinates[index];
+    const latitude = (previous[1] + coordinate[1]) * Math.PI / 360;
+    const dx = (coordinate[0] - previous[0]) * Math.cos(latitude);
+    const dy = coordinate[1] - previous[1];
+    return length + Math.hypot(dx, dy);
+  }, 0);
+}
+
+function prioritizeRouteFeatures(features) {
+  return [...features].sort((a, b) => {
+    const typeDifference = routeTypePriority(a.properties.subtype) - routeTypePriority(b.properties.subtype);
+    if (typeDifference) return typeDifference;
+    return (Number(a.properties.routeLength) || Infinity) - (Number(b.properties.routeLength) || Infinity);
+  });
+}
+
 function raiseLiveLayers(map) {
   ['live-history', 'live-vessels', 'live-vessel-labels'].forEach(id => {
     if (map.getLayer(id)) map.moveLayer(id);
@@ -483,6 +512,13 @@ function flattenMapData(collections, data, locale) {
         }
       });
     });
+  });
+  const routeLengths = new Map();
+  features.filter(feature => feature.properties.kind === 'route').forEach(feature => {
+    routeLengths.set(feature.properties.ref, (routeLengths.get(feature.properties.ref) || 0) + lineLength(feature.geometry.coordinates));
+  });
+  features.filter(feature => feature.properties.kind === 'route').forEach(feature => {
+    feature.properties.routeLength = routeLengths.get(feature.properties.ref);
   });
   return { type: 'FeatureCollection', features };
 }
@@ -1152,7 +1188,7 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
 
       routeLayers.forEach(layer => {
         map.on('mouseenter', layer, event => {
-          const allHoveredFeatures = map.queryRenderedFeatures(event.point, { layers: routeLayers });
+          const allHoveredFeatures = prioritizeRouteFeatures(map.queryRenderedFeatures(event.point, { layers: routeLayers }));
           const feature = allHoveredFeatures[0];
           if (!feature) return;
           const hoveredFeatures = feature.properties.subtype === 'longdistance'
@@ -1174,7 +1210,7 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
       });
 
       map.on('click', event => {
-        const allClickedFeatures = map.queryRenderedFeatures(event.point, { layers: routeLayers });
+        const allClickedFeatures = prioritizeRouteFeatures(map.queryRenderedFeatures(event.point, { layers: routeLayers }));
         const feature = allClickedFeatures[0];
         if (feature) {
           const clickedFeatures = feature.properties.subtype === 'longdistance'
