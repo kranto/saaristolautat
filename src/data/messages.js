@@ -26,6 +26,7 @@ const messagesRaw = { // FI SV EN
     },
     booking: {
         cannot: ["ei voi varata", "kan inte bokas", "booking not possible"],
+        required: ["kaikki matkat varattava etukäteen", "alla resor måste bokas i förväg", "all trips must be booked in advance"],
     },
     order: {
         pieronly: ["{0} vain tilauksesta", "{0} bara på beställning", "{0} on demand only"],

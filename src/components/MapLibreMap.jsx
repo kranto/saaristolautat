@@ -1018,7 +1018,7 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
       });
       map.addLayer({
         id: 'ferry-routes', type: 'line', source: 'saaristolautat',
-        filter: roadFerryRouteFilter, minzoom: 7,
+        filter: roadFerryRouteFilter, minzoom: 6,
         paint: { 'line-color': routeColor, 'line-width': routeWidth, 'line-opacity': routeOpacity }
       });
       map.addLayer({
