@@ -1221,6 +1221,24 @@ h4 {
     box-shadow: 0 2px 2px 0 rgba(220, 220, 220, 0.5);
   }
 
+  .info-enter .closeInfoButton.fix1 {
+    left: -60px;
+  }
+
+  .info-enter.info-enter-active .closeInfoButton.fix1 {
+    left: 340px;
+    transition: left 200ms ease-out;
+  }
+
+  .info-exit .closeInfoButton.fix1 {
+    left: 340px;
+  }
+
+  .info-exit.info-exit-active .closeInfoButton.fix1 {
+    left: -60px;
+    transition: left 200ms ease-in;
+  }
+
   .info-open #searchpanel {
     left: 420px;
     transition: left 200ms ease-out;
