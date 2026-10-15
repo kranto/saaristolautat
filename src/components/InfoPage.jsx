@@ -202,9 +202,9 @@ class InfoPage extends Component {
           </p>
             <p>
               {getItem([
-                "Maantie- ja yhteysalusliikenteen järjestäjä on Varsinais-Suomen ELY-keskus. Useimpia maantielauttoja ja losseja operoi Finferries. Yhteysaluksilla on useita eri operaattoreita. Risteilyreitit ovat yksityisten yritysten järjestämiä. Kunkin linjan operaattorin näet linjan tiedoista.",
-                "NTM-centralen i Egentliga Finland ordnar landsvägsfärje- och förbindelsefartygstrafiken. Finferries trafikerar de flesta landsvägs- och vajerfärjorna. Förbindelsefartygen har flera olika operatörer, medan kryssningsrutterna ordnas av privata företag. Operatören framgår av informationen för respektive linje.",
-                "The ELY Centre for Southwest Finland organises road ferry and commuter ferry traffic. Finferries operates most road ferries and cable ferries. Commuter ferries have several different operators, while cruise routes are run by private companies. Each route's operator is shown in the route information."
+                "Maantie- ja yhteysalusliikenteen järjestäjä on Lounais-Suomen elinvoimakeskus. Useimpia maantielauttoja ja losseja operoi Finferries. Yhteysaluksilla on useita eri operaattoreita. Risteilyreitit ovat yksityisten yritysten järjestämiä. Kunkin linjan operaattorin näet linjan tiedoista.",
+                "Livskraftscentralen i Sydvästra Finland ordnar landsvägsfärje- och förbindelsefartygstrafiken. Finferries trafikerar de flesta landsvägs- och vajerfärjorna. Förbindelsefartygen har flera olika operatörer, medan kryssningsrutterna ordnas av privata företag. Operatören framgår av informationen för respektive linje.",
+                "The Economic Development Centre for Southwest Finland organises road ferry and commuter ferry traffic. Finferries operates most road ferries and cable ferries. Commuter ferries have several different operators, while cruise routes are run by private companies. Each route's operator is shown in the route information."
               ], lang)}
           </p>
           </div>
@@ -244,49 +244,49 @@ class InfoPage extends Component {
             <h2>{L2("menu.linksinfo")}</h2>
 
             <h3>{L2("infopage.ferries")}</h3>
-            {link(["https://www.ely-keskus.fi/saaristoliikenne", "https://www.ely-keskus.fi/sv/saaristoliikenne", "https://www.ely-keskus.fi/en/web/ely-en/transport"],
-              "ely",
-              ["Varsinais-Suomen ELY-keskus", "NTM-centralen i Egentliga Finland", "ELY Centre in Southwest Finland"],
+            {link(["https://elinvoimakeskus.fi/maantielautta-ja-yhteysalusliikenne", "https://elinvoimakeskus.fi/sv/maantielautta-ja-yhteysalusliikenne", "https://elinvoimakeskus.fi/maantielautta-ja-yhteysalusliikenne"],
+              "elinvoimakeskus",
+              ["Lounais-Suomen elinvoimakeskus", "Livskraftscentralen i Sydvästra Finland", "Economic Development Centre for Southwest Finland"],
               ["Manner-Suomen maantielautta- ja yhteysalusliikenteen järjestäjä",
-                "Fastlands-Finlands landsvägs- och förbindelsefartygstrafikens organisatör",
-                "Authority responsible for organizing ferry routes in Mainland Finland"
+                "Organisatör av landsvägsfärje- och förbindelsefartygstrafiken i Fastlandsfinland",
+                "Authority responsible for road ferry and commuter ferry traffic in mainland Finland (page in Finnish)"
               ], lang)}
             {link(["https://yhteysalus.fi/", "https://xn--frbindelsebt-3cb1u.fi/", "https://commuterferry.fi/"],
               "ely",
               ["Saariston yhteysalusliikenne", "Förbindelsebåtstrafiken i skärgården", "Commuter ferry traffic in the archipelago"],
-              ["ELY-keskuksen ylläpitämä yhteysalusliikenteen pääsivu",
-                "NTM-centralens huvudsidan för förbindelsebåtstrafiken",
-                "The main page of commuter ferry traffic by ELY Centre"
+              ["Elinvoimakeskuksen ylläpitämä yhteysalusliikenteen pääsivu",
+                "Livskraftscentralens huvudsida för förbindelsefartygstrafiken",
+                "The Economic Development Centre's main commuter ferry website"
               ], lang)}
-            {link(["http://www.finferries.fi/", "http://www.finferries.fi/sv/", "http://www.finferries.fi/en/"],
+            {link(["https://www.finferries.fi/", "https://www.finferries.fi/sv/", "https://www.finferries.fi/en/"],
               "finferries",
-              "FinFerries.fi",
+              "Finferries.fi",
               ["Manner-Suomen tärkein maantielauttaoperaattori",
                 "Fastlands-Finlands viktigaste landvägsfärjoperatör",
                 "The main operator of ferries in Mainland Finland"
               ], lang)}
-            {link("http://www.alandstrafiken.ax/",
+            {link("https://www.alandstrafiken.ax/",
               "alandstrafiken",
-              "Alandstrafiken.ax",
+              ["Ålandstrafiken.ax (ruotsiksi)", "Ålandstrafiken.ax", "Ålandstrafiken.ax (in Swedish)"],
               ["Ahvenanmaan lauttojen ja muun julkisen liikenteen järjestäjä. Aikataulut, varaukset, tiedotteet ym.",
-                "Ålands färj- och andra offentlig trafiks organisatör. Tidtabeller, bokning, meddelanden osv.",
-                "Organiser of ferries and other public transport in Åland. Timetables, bookings, announcements etc."
+                "Organisatör av Ålands färje- och övriga kollektivtrafik. Tidtabeller, bokning och trafikmeddelanden.",
+                "Organiser of ferries and other public transport in Åland. Timetables, bookings and traffic announcements."
               ], lang)}
 
             <h3>{L2("infopage.touristinfo")}</h3>
 
-            {link(["https://visitparainen.fi/saariston-rengastie/", "https://visitparainen.fi/sv/skargardens-ringvag/", "https://visitparainen.fi/en/archipelago-trail/"],
+            {link(["https://visitparainen.fi/saariston-rengastie/", "https://visitparainen.fi/skargardens-ringvag/", "https://visitparainen.fi/archipelago-trail/"],
               "rengastie",
-              ["Saarison rengastie", "Skärgårdens ringväg", "Saariston rengastie - The Archipelago Trail"],
-              ["Turun saariston matkailuneuvonta",
-              "Åbo skärgårdens turistinformation",
-              "Turku Archipelago Tourist Information Center"], lang)}
-            {link(["https://www.visitaland.com/fi/", "https://www.visitaland.com/", "https://www.visitaland.com/en/"],
+              ["Saariston rengastie", "Skärgårdens ringväg", "The Archipelago Trail"],
+              ["Saariston rengastien virallinen reitti- ja matkailusivu",
+              "Skärgårdens ringvägs officiella rutt- och turistsida",
+              "The official route and visitor information for the Archipelago Trail"], lang)}
+            {link(["https://visitaland.com/fi/", "https://visitaland.com/", "https://visitaland.com/en/"],
               "visitaland",
               "Visit Åland",
               ["Ahvenanmaan matkailuneuvonta",
                 "Ålands turistinformation",
-                "Åland Tourist information Center"
+                "Official tourist information for Åland"
               ], lang)}
             {link(["https://www.aland.travel/fi", "https://www.aland.travel/", "https://www.aland.travel/en"],
               "alandtravel",
@@ -297,17 +297,18 @@ class InfoPage extends Component {
               ], lang)}
               <h3>{L2("infopage.localinfo")}</h3>
               <ul>
-              <li>{linkSpan(["https://visitparainen.fi/fi/", "https://visitparainen.fi/sv/", "https://visitparainen.fi/en/"], "pargas", ["Visit Pargas: Parainen - Nauvo - Korppoo - Houtskari - Iniö", "Visit Pargas: Pargas - Nagu - Korpo - Houtskär - Iniö", "Visit Pargas: Pargas - Nagu - Korpo - Houtskär - Iniö"], lang) }</li>
-              <li>{linkSpan(["https://www.visitnaantali.com/", "https://www.visitnaantali.com/sv", "https://www.visitnaantali.com/en"], "naantali", ["Visit Naantali: Naantali - Rymättylä - Velkua", "Visit Naantali: Nådendal - Rimito - Velkua", "Visit Naantali: Naantali - Rymättylä - Velkua"], lang) }</li>
+              <li>{linkSpan(["https://visitparainen.fi/", "https://visitparainen.fi/sv/", "https://visitparainen.fi/en/"], "pargas", ["Visit Pargas: Parainen - Nauvo - Korppoo - Houtskari - Iniö", "Visit Pargas: Pargas - Nagu - Korpo - Houtskär - Iniö", "Visit Pargas: Pargas - Nagu - Korpo - Houtskär - Iniö"], lang) }</li>
+              <li>{linkSpan(["https://visitnaantali.com/", "https://visitnaantali.com/sv/", "https://visitnaantali.com/en/"], "naantali", ["Visit Naantali: Naantali - Rymättylä - Velkua", "Visit Naantali: Nådendal - Rimito - Velkua", "Visit Naantali: Naantali - Rymättylä - Velkua"], lang) }</li>
               <li>{linkSpan(["https://visitturku.fi/", "https://se.visitturku.fi/", "https://en.visitturku.fi/"], "turku", ["Visit Turku", "Visit Turku / Åbo", "Visit Turku"], lang) }</li>
               <li>{linkSpan(["https://www.visitkimitoon.fi/fi/", "https://www.visitkimitoon.fi/", "https://www.visitkimitoon.fi/en/"], "kemiö", ["Visit Kemiönsaari", "Visit Kimitoön", "Visit Kimitoön"], lang) }</li>
-              <li>{linkSpan(["https://tourism.hanko.fi/", "https://tourism.hanko.fi/sv/", "https://tourism.hanko.fi/en/"], "hanko", ["Hanko", "Hangö", "Hanko"], lang) }</li>
-              <li>{linkSpan(["https://kustavi.fi/", "https://kustavi.fi/sv", "https://kustavi.fi/en/"], "kustavi", ["Kustavi", "Gustavs", "Kustavi"], lang) }</li>
-              <li>{linkSpan(["http://www.brando.ax/suomi/", "http://www.brando.ax/", "http://www.brando.ax/english/"], "brändö", "Brändö", lang) }</li>
+              <li>{linkSpan(["https://visithanko.fi/", "https://visithanko.fi/sv/hango/", "https://visithanko.fi/en/"], "hanko", ["Visit Hanko", "Visit Hangö", "Visit Hanko"], lang) }</li>
+              <li>{linkSpan(["https://visitkustavi.fi/", "https://visitkustavi.fi/", "https://visitkustavi.fi/en/"], "kustavi", ["Visit Kustavi", "Visit Kustavi (på finska)", "Visit Kustavi"], lang) }</li>
+              <li>{linkSpan(["https://www.brando.ax/suomi/", "https://www.brando.ax/", "https://www.brando.ax/english/"], "brändö", "Brändö", lang) }</li>
               <li>{linkSpan(["https://www.kumlinge.ax/fi/tule-ja-tutustu", "https://www.kumlinge.ax/bo-besoka", "https://www.kumlinge.ax/en/stay-visit"], "kumlinge", "Kumlinge", lang) }</li>
               <li>{linkSpan(["https://www.kokar.ax/?lang=fi", "https://www.kokar.ax/", "https://www.kokar.ax/?lang=en"], "kökar", "Kökar", lang) }</li>
-              <li>{linkSpan("http://www.sottunga.ax/turism", "sottunga", "Sottunga", lang) }</li>
-              <li>{linkSpan("https://www.foglo.ax/se-och-gora", "föglö", "Föglö", lang) }</li>
+              <li>{linkSpan(["https://www.aland.travel/sottunga-fi", "https://www.aland.travel/sottunga", "https://www.aland.travel/sottunga-en"], "sottunga", "Sottunga", lang) }</li>
+              <li>{linkSpan("https://visitfoglo.ax/", "föglö", ["Visit Föglö (ruotsiksi)", "Visit Föglö", "Visit Föglö (in Swedish)"], lang) }</li>
+              <li>{linkSpan(["https://www.aland.travel/vardo-fi", "https://www.aland.travel/vardo", "https://www.aland.travel/vardo-en"], "vårdö", "Vårdö", lang) }</li>
             </ul>
 
           </div>
