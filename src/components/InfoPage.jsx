@@ -80,11 +80,11 @@ class InfoPage extends Component {
               "via S:t Karins till Pargas och vidare till Nagu och Korpo. I motsatt riktning kan man cykla via Nådendal till Teersalo i Velkua och fortsätta med färja till Hakkenpää i Tövsala.",
               "via Kaarina to Pargas and onwards to Nagu and Korpo. In the opposite direction, you can cycle via Naantali to Teersalo in Velkua and continue by ferry to Hakkenpää in Taivassalo."
             ], lang)}</p>
-            <p>{getItem(["Turusta pääsee Nauvoon myös", "Från Åbo kommer man också till Nagu längs", "You can also travel from Turku to Nagu along"], lang)} <a href="https://visitparainen.fi/pieni-rengastie/" rel="noopener noreferrer" target="_blank">{getItem(["Pientä Rengastietä", "Lilla ringvägen", "the Small Archipelago Trail"], lang)}</a> {getItem(["Naantalin ja Rymättylän kautta tai suoraan", "via Nådendal och Rimito eller direkt med", "via Naantali and Rymättylä, or directly by"], lang)} <a href="https://vitharun.fi/fi/aikataulut/turku-seili-nauvo/" rel="noopener noreferrer" target="_blank">{getItem(["risteilyaluksella Aurajoen rannasta", "kryssningsfartyg från Aura å", "cruise vessel from the River Aura"], lang)}</a>. {getItem(["Myös linja-autot kuljettavat pyöriä, jos tilaa on.", "Även bussarna tar med cyklar om det finns plats.", "Buses also carry bicycles when space is available."], lang)}</p>
+            <p>{getItem(["Turusta pääsee Nauvoon myös", "Från Åbo kommer man också till Nagu längs", "You can also travel from Turku to Nagu along"], lang)} <a href="https://visitparainen.fi/pieni-rengastie/" rel="noopener noreferrer" target="_blank">{getItem(["Pientä Rengastietä", "Lilla ringvägen", "the Small Archipelago Trail"], lang)}</a> {getItem(["Naantalin ja Rymättylän kautta tai suoraan", "via Nådendal och Rimito eller direkt med", "via Naantali and Rymättylä, or directly by"], lang)} <a href="https://vitharun.fi/fi/aikataulut/turku-seili-nauvo/" rel="noopener noreferrer" target="_blank">{getItem(["risteilyaluksella Aurajoen rannasta", "ett kryssningsfartyg från Aura ås strand", "cruise vessel from the Aura riverfront"], lang)}</a>. {getItem(["Myös linja-autot kuljettavat pyöriä, jos tilaa on.", "Även bussarna tar med cyklar om det finns plats.", "Buses also carry bicycles when space is available."], lang)}</p>
             <p>{getItem([
               "Korppoosta ja Kustavista on helppo siirtyä Ahvenanmaan lautoille ja jatkaa matkaa Brändöhön tai eteläisellä linjalla vaikkapa Kökariin ja Föglöhön. Ahvenanmaan matkan voi taittaa myös suoraan autolautalla Turusta, Helsingistä tai Naantalista. Ahvenanmaalta voi myös piipahtaa Ruotsin puolella Grisslehamnissa tai Kapellskärissä.",
               "Från Korpo och Gustavs är det lätt att fortsätta med Ålands färjor till Brändö eller längs södra linjen till exempelvis Kökar och Föglö. Man kan också resa direkt till Åland med bilfärja från Åbo, Helsingfors eller Nådendal. Från Åland kan man även göra en avstickare till Grisslehamn eller Kapellskär i Sverige.",
-              "From Korpo and Kustavi it is easy to continue on the Åland ferries to Brändö or, along the Southern line, to Kökar and Föglö. You can also travel directly to Åland by car ferry from Turku, Helsinki or Naantali. From Åland you can make a side trip to Grisslehamn or Kapellskär in Sweden."
+              "From Korpo and Kustavi it is easy to continue on Ålandstrafiken ferries to Brändö or, along the Southern line, to Kökar and Föglö. You can also travel directly to Åland by car ferry from Turku, Helsinki or Naantali. From Åland you can make a side trip to Grisslehamn or Kapellskär in Sweden."
             ], lang)}</p>
             <p>{getItem(["Toinen suosittu reitistö on Salon, Kemiönsaaren ja Hangon kautta kulkeva", "En annan populär cykelled är", "Another popular cycling route is"], lang)} <a href="https://www.bikeland.fi/rannikkoreitti" rel="noopener noreferrer" target="_blank">{getItem(["Rannikkoreitti", "Kustrutten", "the Coastal Route"], lang)}</a>{getItem([".", " via Salo, Kimitoön och Hangö.", " via Salo, Kimitoön and Hanko."], lang)}</p>
             <p>{getItem([
@@ -102,18 +102,18 @@ class InfoPage extends Component {
             <ul className="ferrieslist">
               <li><div className="infopageroute" style={{ borderColor: "#7a2736" }}></div><strong>{getItem(["Pohjoinen linja", "Norra linjen", "Northern line"], lang)}</strong> {getItem([
                 "yhdistää Manner-Suomen Kustavin Brändön kautta Ahvenanmantereen Vårdöhön.",
-                "förbinder Gustavs på fastlandet med Vårdö på fasta Åland via Brändö.",
-                "connects Kustavi in mainland Finland with Vårdö on the Åland mainland via Brändö."
+                "förbinder Gustavs i fasta Finland med Vårdö på fasta Åland via Brändö.",
+                "connects Kustavi in mainland Finland with Vårdö in mainland Åland via Brändö."
               ], lang)}</li>
               <li><div className="infopageroute" style={{ borderColor: "#3c854a" }}></div><strong>{getItem(["Eteläinen linja", "Södra linjen", "Southern line"], lang)}</strong> {getItem([
                 "yhdistää Manner-Suomen Korppoon Ahvenanmantereen Lumparlandiin.",
-                "förbinder Korpo på fastlandet med Lumparland på fasta Åland.",
-                "connects Korpo in mainland Finland with Lumparland on the Åland mainland."
+                "förbinder Korpo i fasta Finland med Lumparland på fasta Åland.",
+                "connects Korpo in mainland Finland with Lumparland in mainland Åland."
               ], lang)}</li>
               <li><div className="infopageroute" style={{ borderColor: "#34509f" }}></div> <strong>{getItem(["Föglön linja", "Föglölinjen", "Föglö line"], lang)}</strong> {getItem([
                 "yhdistää Föglön saaristokunnan Ahvenanmantereen Lumparlandiin.",
                 "förbinder skärgårdskommunen Föglö med Lumparland på fasta Åland.",
-                "connects the archipelago municipality of Föglö with Lumparland on the Åland mainland."
+                "connects the archipelago municipality of Föglö with Lumparland in mainland Åland."
               ], lang)}</li>
               <li><div className="infopageroute" style={{ borderColor: "#00a000", borderTopWidth: "5px", borderTopStyle: "dotted" }}></div> <strong>{getItem(["Vaijerilossit", "Vajerfärjor", "Cable ferries"], lang)}</strong> {getItem([
                 "kulkevat lyhyitä etappeja pääsääntöisesti ilman aikataulua.",
@@ -126,7 +126,7 @@ class InfoPage extends Component {
               {getItem([
                 "Ajoneuvojen kuljettaminen Ålandstrafikenin lautoilla on maksullista, mutta vaijerilossit ovat maksuttomia. Maksu peritään saaristoon saavuttaessa Hummelvikistä, Långnäsistä, Svinöstä, Vuosnaisista tai Galtbystä. Välisatamien väliset matkat ja saaristosta poistuminen ovat maksuttomia. Hinta kattaa meno-paluun tai jatkomatkan saaristossa yöpymisen jälkeen. Matkustajista ei peritä erillistä maksua.",
                 "Fordonstrafiken på Ålandstrafikens färjor är avgiftsbelagd, medan vajerfärjorna är avgiftsfria. Avgiften tas ut när man reser in i skärgården från Hummelvik, Långnäs, Svinö, Osnäs eller Galtby. Resor mellan mellanhamnar och ut ur skärgården är avgiftsfria. Priset omfattar tur och retur eller fortsatt resa efter övernattning i skärgården. Ingen separat avgift tas ut för passagerare.",
-                "Vehicles are charged on Ålandstrafiken ferries, while cable ferries are free. The fare is charged when entering the archipelago from Hummelvik, Långnäs, Svinö, Osnäs or Galtby. Travel between intermediate ports and out of the archipelago is free. The fare includes a return journey or onward travel after an overnight stay in the archipelago. Passengers are not charged separately."
+                "Ålandstrafiken charges for vehicles on its ferries, while cable ferries are free. The fare is charged when entering the archipelago from Hummelvik, Långnäs, Svinö, Osnäs or Galtby. Travel between intermediate ports and out of the archipelago is free. The fare includes a return journey or onward travel after an overnight stay in the archipelago. Passengers are not charged separately."
               ], lang)}
             </p>
             <p>
@@ -151,7 +151,7 @@ class InfoPage extends Component {
               {getItem([
                 "Ålandstrafiken myy myös 60 euron turistikorttia, joka kattaa henkilöauton matkat saaristoon yhdeksän päivän ajan ostohetkestä.",
                 "Ålandstrafiken säljer också ett turistkort för 60 euro som täcker resor med personbil till skärgården i nio dagar från köpet.",
-                "Ålandstrafiken also sells a tourist card for 60 € that covers journeys to the archipelago by passenger car for nine days from purchase."
+                "Ålandstrafiken also offers a tourist card for 60 € that covers car journeys into the archipelago for nine days from purchase."
               ], lang)}
             </p>
             <p>
@@ -160,8 +160,8 @@ class InfoPage extends Component {
             <p>
               {getItem([
                 "Useimmille lautoille voi varata paikan moottoriajoneuvolle, ja suosituimpina aikoina se on ehdottomasti suositeltavaa. Varauksen voi tehdä",
-                "På de flesta färjor kan man boka plats för motorfordon, vilket rekommenderas starkt under populära restider. Boka",
-                "Space for a motor vehicle can be booked on most ferries and is strongly recommended at popular travel times. Book"
+                "På de flesta färjor kan man boka plats för motorfordon, vilket rekommenderas starkt när efterfrågan är hög. Boka",
+                "Vehicle space can be booked on most ferries and is strongly recommended at busy times. Book"
               ], lang)} <a href="https://www.alandstrafiken.ax/" rel="noopener noreferrer" target="other">{getItem(["verkossa", "online", "online"], lang)}</a> {getItem(["tai", "eller per telefon", "or by phone"], lang)}<br /><i className="fa fa-phone" aria-hidden="true"></i>&nbsp;<a className="tel" href="tel:+3581825600">+358&nbsp;18&nbsp;25&nbsp;600</a>.
           </p>
           </div >
@@ -184,27 +184,27 @@ class InfoPage extends Component {
               ], lang)}</li>
               <li><div className="infopageroute" style={{ borderColor: "#ff7c0a" }}></div> <strong>{getItem(["Rengasreitit", "Ringrutter", "Circular routes"], lang)}</strong> {getItem([
                 "yhdistävät rengastiet kesäkaudella. Rengasreitit ovat maksullisia.",
-                "förbinder ringvägarna under sommarsäsongen. Ringrutterna är avgiftsbelagda.",
-                "connect the circular roads during the summer season. These routes charge a fare."
+                "sluter ringvägarna under sommarsäsongen. Ringrutterna är avgiftsbelagda.",
+                "complete the circular routes during the summer season. These routes charge a fare."
               ], lang)}</li>
               <li><div className="infopageroute" style={{ borderColor: "#ff7c0a", borderTopWidth: "3px", borderTopStyle: "dashed" }}></div> <strong>{getItem(["Risteilyalukset", "Kryssningsfartyg", "Cruise vessels"], lang)}</strong> {getItem([
                 "kuljettavat vain matkustajia ja mahdollisesti polkupyöriä. Ne ovat maksullisia.",
                 "transporterar endast passagerare och eventuellt cyklar. De är avgiftsbelagda.",
-                "carry passengers and sometimes bicycles, but not vehicles. They charge a fare."
+                "carry passengers and, in some cases, bicycles, but not vehicles. They charge a fare."
               ], lang)}</li>
             </ul>
             <p>
               {getItem([
                 "Manner-Suomen lautat ovat pääsääntöisesti maksuttomia. Vain oranssilla merkityillä rengasreiteillä ja risteilyaluksilla peritään maksu.",
-                "Färjorna på det finländska fastlandet är i regel avgiftsfria. Avgift tas endast ut på ringrutter och kryssningsfartyg som är markerade med orange.",
-                "Ferries in mainland Finland are generally free of charge. Fares are charged only on circular routes and cruise vessels marked in orange."
+                "Färjorna i Fastlandsfinland är i regel avgiftsfria. Avgift tas endast ut på ringrutter och kryssningsfartyg som är markerade med orange.",
+                "Ferry services in mainland Finland are generally free of charge. Fares are charged only on circular routes and cruise vessels marked in orange."
               ], lang)}
           </p>
             <p>
               {getItem([
                 "Maantielautat ja lossit liikennöivät enimmäkseen ilman tilausta, eikä niille voi varata paikkaa. Monet yhteysalusvuorot sen sijaan vaativat tilauksen etukäteen. Tarkista tilauksen tarve aikataulusta.",
                 "Landsvägsfärjorna och vajerfärjorna trafikerar oftast utan beställning och kan inte bokas. Många turer med förbindelsefartyg måste däremot beställas i förväg. Kontrollera behovet av beställning i tidtabellen.",
-                "Road ferries and cable ferries generally operate without advance notice and cannot be booked. Many commuter ferry departures, however, must be ordered in advance. Check the timetable for ordering requirements."
+                "Road ferries and cable ferries generally operate without advance notice and cannot be booked. Many commuter ferry departures, however, must be requested in advance. Check the timetable for request deadlines."
               ], lang)}
           </p>
             <p>
@@ -270,14 +270,14 @@ class InfoPage extends Component {
               "Finferries.fi",
               ["Manner-Suomen tärkein maantielauttaoperaattori",
                 "Fastlands-Finlands viktigaste landvägsfärjoperatör",
-                "The main operator of ferries in Mainland Finland"
+                "The main road ferry operator in mainland Finland"
               ], lang)}
             {link("https://www.alandstrafiken.ax/",
               "alandstrafiken",
               ["Ålandstrafiken.ax (ruotsiksi)", "Ålandstrafiken.ax", "Ålandstrafiken.ax (in Swedish)"],
               ["Ahvenanmaan lauttojen ja muun julkisen liikenteen järjestäjä. Aikataulut, varaukset, tiedotteet ym.",
                 "Organisatör av Ålands färje- och övriga kollektivtrafik. Tidtabeller, bokning och trafikmeddelanden.",
-                "Organiser of ferries and other public transport in Åland. Timetables, bookings and traffic announcements."
+                "Operator of ferries and other public transport in Åland. Timetables, bookings and traffic announcements."
               ], lang)}
 
             <h3>{L2("infopage.touristinfo")}</h3>
@@ -300,7 +300,7 @@ class InfoPage extends Component {
               "Åland.travel",
               ["Ahvenanmaan saaristokuntien matkailutietoa. Föglö, Sottunga, Kumlinge, Vårdö, Brändö, Kökar.",
                 "Ålands skärgårdkommunernas turistinformation. Föglö, Sottunga, Kumlinge, Vårdö, Brändö, Kökar.",
-                "Tourist information of the archipelago municipalities in Åland. Föglö, Sottunga, Kumlinge, Vårdö, Brändö, Kökar."
+                "Tourist information for the archipelago municipalities of Åland: Föglö, Sottunga, Kumlinge, Vårdö, Brändö and Kökar."
               ], lang)}
               <h3>{L2("infopage.localinfo")}</h3>
               <ul>
@@ -328,8 +328,8 @@ class InfoPage extends Component {
               <img src="/mstile-70x70.png" alt="logo" style={{ width: "40px", height: "40px", verticalAlign: "baseline", marginBottom: "-7px" }} />
               <strong>Saaristolautat.fi</strong> {getItem([
                 "on harrastuspohjalta tehty karttasovellus, jonka tiedot on koottu varsinaisten palveluntarjoajien verkkosivuilta. Sovelluksen tarkoitus on auttaa saaristoon suuntaavien matkojen suunnittelussa.",
-                "är en kartapplikation som har skapats som ett hobbyprojekt. Uppgifterna har sammanställts från de egentliga tjänsteleverantörernas webbplatser. Applikationen är avsedd att hjälpa till med planeringen av resor i skärgården.",
-                "is a map application created as a hobby project. Its information has been compiled from the actual service providers' websites. The application is intended to help plan trips to the archipelago."
+                "är en kartapp som har skapats som ett hobbyprojekt. Uppgifterna har sammanställts från tjänsteleverantörernas webbplatser. Appen är avsedd att hjälpa till med planeringen av resor i skärgården.",
+                "is a map app created as a hobby project. Its information has been compiled from service providers' websites. The app is intended to help plan trips to the archipelago."
               ], lang)}
             </p>
             <div className="alert alert-danger" role="alert" style={{ marginTop: "30px" }}>
@@ -340,7 +340,7 @@ class InfoPage extends Component {
               ], lang)}
             </div>
             <div id="followbox">
-              <h5>{getItem(["Seuraa Saaristolauttoja ja anna palautetta", "Följ Saaristolautat och ge respons", "Follow Saaristolautat and send feedback"], lang)}</h5>
+              <h5>{getItem(["Seuraa Saaristolauttoja ja anna palautetta", "Följ Saaristolautat och lämna respons", "Follow Saaristolautat and give feedback"], lang)}</h5>
               <ul>
                 <li><a href="https://www.facebook.com/saaristolautat/" rel="noopener noreferrer" target="facebook"><i className="fa fa-facebook-official fbcolor" aria-hidden="true"></i><span>@saaristolautat</span></a></li>
                 <li><a href="https://www.instagram.com/saaristolautat.fi/" rel="noopener noreferrer" target="instagram"><i className="fa fa-instagram instagramcolor" aria-hidden="true"></i><span>@saaristolautat.fi</span></a></li>
