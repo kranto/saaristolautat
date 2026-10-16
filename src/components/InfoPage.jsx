@@ -148,6 +148,13 @@ class InfoPage extends Component {
               </tbody>
             </table>
             <p>
+              {getItem([
+                "Ålandstrafiken myy myös 60 euron turistikorttia, joka kattaa henkilöauton matkat saaristoon yhdeksän päivän ajan ostohetkestä.",
+                "Ålandstrafiken säljer också ett turistkort för 60 euro som täcker resor med personbil till skärgården i nio dagar från köpet.",
+                "Ålandstrafiken also sells a tourist card for 60 € that covers journeys to the archipelago by passenger car for nine days from purchase."
+              ], lang)}
+            </p>
+            <p>
               {getItem(["Koko hinnasto löytyy", "Hela prislistan finns på", "The complete fare list is available on"], lang)} <a href="https://www.alandstrafiken.ax/farjetrafik/farjepriser" rel="noopener noreferrer" target="other">{getItem(["Ålandstrafikenin sivuilta", "Ålandstrafikens webbplats", "the Ålandstrafiken website"], lang)}</a>.
             </p>
             <p>
