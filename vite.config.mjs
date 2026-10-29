@@ -34,6 +34,14 @@ function localTimetablePage() {
 export default defineConfig({
   base: './',
   plugins: [react(), localTimetablePage()],
+  server: {
+    proxy: {
+      '/live': {
+        target: 'https://saaristolautat.fi',
+        changeOrigin: true,
+      },
+    },
+  },
   build: {
     outDir: 'build',
     rolldownOptions: {
