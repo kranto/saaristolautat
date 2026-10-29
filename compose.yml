@@ -1,0 +1,50 @@
+name: saaristolautat
+
+services:
+  production:
+    build:
+      context: .
+      args:
+        APP_ENV: production
+    image: saaristolautat-site:production
+    restart: unless-stopped
+    volumes:
+      - ${SAARISTODATA_PATH:-../saaristodata}:/srv/saaristodata:ro
+      - live-data:/srv/live:ro
+    networks:
+      - web
+
+  test:
+    build:
+      context: .
+      args:
+        APP_ENV: test
+    image: saaristolautat-site:test
+    restart: unless-stopped
+    volumes:
+      - ${SAARISTODATA_PATH:-../saaristodata}:/srv/saaristodata:ro
+      - live-data:/srv/live:ro
+    networks:
+      - web
+
+  liveupdate:
+    build:
+      context: .
+      dockerfile: docker/liveupdate.Dockerfile
+    image: saaristolautat-liveupdate:latest
+    restart: unless-stopped
+    environment:
+      LIVE_OUTPUT_DIR: /var/lib/saaristolautat/live
+      LIVE_DATABASE: /var/lib/saaristolautat/live/lauttalive.db
+      LIVE_POLL_SECONDS: ${LIVE_POLL_SECONDS:-30}
+    volumes:
+      - live-data:/var/lib/saaristolautat/live
+    networks:
+      - web
+
+volumes:
+  live-data:
+
+networks:
+  web:
+

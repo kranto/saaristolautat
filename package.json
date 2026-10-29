@@ -19,7 +19,7 @@
   },
   "scripts": {
     "start": "vite",
-    "build": "mv public/data .data.save; VITE_APP_VERSION=$(date +'%Y%m%d%H%M%S') vite build; status=$?; mv .data.save public/data; exit $status",
+    "build": "sh scripts/build.sh",
     "copytest": "scp -r build/* dh:test/",
     "copystaging": "scp -r build/* dh:prod/staging/",
     "copyprod": "scp -r build/* dh:prod/"

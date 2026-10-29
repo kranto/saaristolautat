@@ -1348,8 +1348,8 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
     const loadLiveData = async () => {
       try {
         const [vesselsResponse, historyResponse] = await Promise.all([
-          fetch('https://live.saaristolautat.fi/livedata.json'),
-          fetch('https://live.saaristolautat.fi/livehistory.json')
+          fetch('/live/livedata.json'),
+          fetch('/live/livehistory.json')
         ]);
         if (!vesselsResponse.ok || !historyResponse.ok) throw new Error('Live data request failed');
         const [vessels, history] = await Promise.all([vesselsResponse.json(), historyResponse.json()]);

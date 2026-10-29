@@ -1,0 +1,9 @@
+services:
+  production:
+    ports:
+      - "${PRODUCTION_PORT:-8080}:80"
+
+  test:
+    ports:
+      - "${TEST_PORT:-8081}:80"
+

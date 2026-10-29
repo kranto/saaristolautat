@@ -85,7 +85,7 @@ class Timetables extends Component {
     const tableItems = tables.map(table => {
       const images = LP(table, "images").map(image =>
         <div className="timetablelink" key={image}>
-          <a href={"timetable.php?t=" + image} target="timetable">
+          <a href={"timetable.html?t=" + encodeURIComponent(image)} target="timetable">
             <div>
               <img alt="timetable" className="timetable" src={"data/timetables_jpg/" + image} />
             </div>
