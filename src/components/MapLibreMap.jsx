@@ -24,6 +24,12 @@ const HIITTINEN = [22.69, 59.88];
 const ARCHIPELAGO_BOUNDS = { south: 59.72, west: 19, north: 60.54, east: 23 };
 const noRouteFilter = kind => ['all', ['==', ['get', 'kind'], kind], ['==', ['get', 'ref'], '__no-route__']];
 
+function knownVesselNamesByMmsi(data) {
+  return new Map(Object.values(data?.ferries || {})
+    .filter(vessel => vessel.mmsi && vessel.name)
+    .map(vessel => [Number(vessel.mmsi), vessel.shortname || vessel.name]));
+}
+
 function clearRouteHover(map, hoverPopupRef) {
   map.getCanvas().style.cursor = '';
   if (map.getLayer('route-hover-highlight')) map.setFilter('route-hover-highlight', noRouteFilter('route'));
@@ -1299,6 +1305,7 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
     let interval;
     let dimmingTimeout;
     let cancelled = false;
+    const knownVesselNames = knownVesselNamesByMmsi(data);
 
     const ensureLiveLayers = () => {
       if (!map.getStyle()?.layers?.length) return false;
@@ -1347,9 +1354,11 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
 
     const loadLiveData = async () => {
       try {
+        const cacheBust = Date.now();
+        const fetchOptions = { cache: 'no-store' };
         const [vesselsResponse, historyResponse] = await Promise.all([
-          fetch('/live/livedata.json'),
-          fetch('/live/livehistory.json')
+          fetch(`/live/livedata.json?t=${cacheBust}`, fetchOptions),
+          fetch(`/live/livehistory.json?t=${cacheBust}`, fetchOptions)
         ]);
         if (!vesselsResponse.ok || !historyResponse.ok) throw new Error('Live data request failed');
         const [vessels, history] = await Promise.all([vesselsResponse.json(), historyResponse.json()]);
@@ -1357,11 +1366,15 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
         const now = Date.now();
         const features = (vessels.features || []).map(feature => {
           const age = Math.max(0, now - Number(feature.properties?.timestampExternal || 0)) / 1000;
+          const liveVessel = feature.properties?.vessel || {};
+          const mmsi = Number(feature.properties?.mmsi ?? liveVessel.mmsi ?? feature.mmsi);
+          const name = knownVesselNames.get(mmsi) || liveVessel.name || '';
           return {
             ...feature,
             properties: {
               ...feature.properties,
-              name: feature.properties?.vessel?.name || '', age,
+              vessel: { ...liveVessel, name },
+              name, age,
               opacity: Math.max(0.3, 1 - 0.7 * Math.max(0, age - 180) / 600)
             }
           };
@@ -1406,7 +1419,7 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
       map.off('load', start);
       map.off('moveend', onMoveEnd);
     };
-  }, [dispatch, layers.live]);
+  }, [data, dispatch, layers.live]);
 
   useEffect(() => {
     const map = mapRef.current;

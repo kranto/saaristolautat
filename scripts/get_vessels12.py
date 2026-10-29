@@ -34,7 +34,7 @@ fromMs =  (int(datetime.utcnow().strftime("%s")) - 5*3600)*1000
 
 api_base_uri = "https://meri.digitraffic.fi/api/ais/v1"
 
-known_passanger_vessels = [230129940,230167360]
+known_passanger_vessels = [230129940,230167360,230181340]
 
 location_uri = "%s/locations?latitude=%s&longitude=%s&radius=%s&from=%d" % (api_base_uri, centerLat, centerLng, radius, fromMs)
 vessels_uri = "%s/vessels" % (api_base_uri)
