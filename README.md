@@ -98,6 +98,10 @@ WEB_NETWORK_NAME=public-web docker compose \
 Saaristolauttojen compose ei julkaise host-portteja ilman paikallista
 `compose.local.yml`-lisätiedostoa.
 
+Tuotanto- ja testiympäristön asennus, tavallinen julkaisutyönkulku sekä
+sovellus-, data- ja livepäivitysten erilliset ohjeet löytyvät tiedostosta
+[`docs/deployment.md`](docs/deployment.md).
+
 ## Kartan täydentävät tiet
 
 Ohjeet pohjakartan liian myöhään näyttämien tieosuuksien hakemiseen ja
