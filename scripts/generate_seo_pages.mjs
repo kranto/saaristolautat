@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 
 const projectRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const dataPath = resolve(projectRoot, '../saaristodata/data.json');
+const mapDataPath = resolve(projectRoot, '../saaristodata/saaristo.json');
 const publicRoot = resolve(projectRoot, 'public');
 const siteUrl = 'https://saaristolautat.fi';
 
@@ -18,6 +19,7 @@ const pages = {
     openMap: 'Avaa lauttakartta',
     routes: 'Lauttareitit',
     landings: 'Laiturit',
+    areas: 'Kunnat ja alueet',
     vessels: 'Alukset',
     noVessels: 'Alustietoa ei ole merkitty.',
     notice: 'Saaristolautat.fi on epävirallinen matkan suunnittelun apuväline. Tarkista reitit ja aikataulut aina liikennöitsijältä.',
@@ -34,6 +36,7 @@ const pages = {
     openMap: 'Öppna färjekartan',
     routes: 'Färjerutter',
     landings: 'Bryggor',
+    areas: 'Kommuner och områden',
     vessels: 'Fartyg',
     noVessels: 'Ingen fartygsinformation har angetts.',
     notice: 'Saaristolautat.fi är ett inofficiellt hjälpmedel för reseplanering. Kontrollera alltid rutter och tidtabeller hos trafikoperatören.',
@@ -50,6 +53,7 @@ const pages = {
     openMap: 'Open the ferry map',
     routes: 'Ferry routes',
     landings: 'Landings',
+    areas: 'Municipalities and areas',
     vessels: 'Vessels',
     noVessels: 'No vessel information is listed.',
     notice: 'Saaristolautat.fi is an unofficial trip-planning aid. Always confirm routes and timetables with the operator.',
@@ -65,33 +69,62 @@ const escapeHtml = value => String(value ?? '')
   .replaceAll('"', '&quot;')
   .replaceAll("'", '&#39;');
 
+const readJson = async path => JSON.parse((await readFile(path, 'utf8')).replace(/^\uFEFF/, ''));
+
 const localized = (object, property, lang) =>
   object?.[`${property}_${lang}`] || object?.[property] || '';
 
-function bilingualName(object) {
+const compactSlashes = value => String(value || '').replace(/\s*\/\s*/g, '/');
+
+function orderedDomesticNames(finnish, swedish, defaultName, lang) {
+  const names = lang === 'fi'
+    ? [finnish, swedish]
+    : lang === 'sv'
+      ? [swedish, finnish]
+      : [defaultName, finnish, swedish];
+  return [...new Set(names.filter(Boolean))];
+}
+
+function bilingualName(object, lang) {
   if (!object) return '';
   const defaultName = object.name || '';
   const finnish = object.name_fi || (object.name_sv ? defaultName : '') || defaultName;
   const swedish = object.name_sv || (object.name_fi ? defaultName : '') || defaultName;
-  return [...new Set([finnish, swedish].filter(Boolean))].join(' / ');
+  return orderedDomesticNames(finnish, swedish, defaultName, lang).join('/');
 }
 
-function bilingualPlace(pier) {
-  const place = bilingualName(pier);
-  const municipality = bilingualName(pier?.mun);
-  return municipality && municipality !== place ? `${place} (${municipality})` : place;
+function bilingualPlace(pier, lang) {
+  return bilingualName(pier, lang);
 }
 
-function routeCards(routes, lang, text) {
+const roadFerrySubtypes = new Set(['conn2', 'conn2m', 'cableferry']);
+
+function routeTitle(route, lang, routeMetadata) {
+  const localizedTitle = compactSlashes(localized(route, 'name', lang));
+  if (!roadFerrySubtypes.has(routeMetadata?.ssubtype)) return localizedTitle;
+
+  const finnishParts = (route.name_fi || route.name || '').split(/\s+-\s+/);
+  const swedishParts = (route.name_sv || route.name || '').split(/\s+-\s+/);
+  const defaultParts = (route.name || '').split(/\s+-\s+/);
+  if (finnishParts.length !== 2 || swedishParts.length !== 2 || defaultParts.length !== 2) return localizedTitle;
+
+  return finnishParts.map((part, index) =>
+    orderedDomesticNames(part, swedishParts[index], defaultParts[index], lang).join('/')
+  ).join(' – ');
+}
+
+function routeCards(routes, lang, text, routeMetadata) {
   return Object.entries(routes).map(([id, route]) => {
-    const name = localized(route, 'name', lang);
-    const piers = (route.piers || []).map(bilingualPlace).filter(Boolean);
+    const name = routeTitle(route, lang, routeMetadata.get(id));
+    const piers = (route.piers || []).map(pier => bilingualPlace(pier, lang)).filter(Boolean);
+    const areas = [...new Set((route.piers || []).map(pier => bilingualName(pier.mun, lang)).filter(Boolean))];
     const vessels = (route.vessels || []).map(vessel => localized(vessel, 'name', lang)).filter(Boolean);
     return `
       <article class="route" id="${escapeHtml(id)}">
         <h2>${escapeHtml(name)}</h2>
         <dl>
           <div><dt>${text.landings}</dt><dd>${escapeHtml(piers.join(' – '))}</dd></div>
+          <div><dt>${text.areas}</dt><dd>${escapeHtml(areas.join(', '))}</dd></div>
           <div><dt>${text.vessels}</dt><dd>${escapeHtml(vessels.join(', ') || text.noVessels)}</dd></div>
         </dl>
         <a class="map-link" href="/#${encodeURIComponent(id)}">${text.openMap}: ${escapeHtml(name)}</a>
@@ -106,7 +139,7 @@ function languageLinks(currentLang) {
   ).join('\n          ');
 }
 
-function structuredData(routes, lang, page) {
+function structuredData(routes, lang, page, routeMetadata) {
   return JSON.stringify({
     '@context': 'https://schema.org',
     '@type': 'ItemList',
@@ -116,15 +149,15 @@ function structuredData(routes, lang, page) {
     itemListElement: Object.entries(routes).map(([id, route], index) => ({
       '@type': 'ListItem',
       position: index + 1,
-      name: localized(route, 'name', lang),
+      name: routeTitle(route, lang, routeMetadata.get(id)),
       url: `${siteUrl}${page.path}#${encodeURIComponent(id)}`,
     })),
   }).replaceAll('<', '\\u003c');
 }
 
-function renderPage(routes, lang, page) {
+function renderPage(routes, lang, page, routeMetadata) {
   const canonical = `${siteUrl}${page.path}`;
-  const cards = routeCards(routes, lang, page);
+  const cards = routeCards(routes, lang, page, routeMetadata);
   const alternates = Object.entries(pages).map(([alternateLang, alternate]) =>
     `    <link rel="alternate" hreflang="${alternateLang}" href="${siteUrl}${alternate.path}" />`
   ).join('\n');
@@ -149,7 +182,7 @@ ${alternates}
     <meta name="twitter:card" content="summary_large_image" />
     <link rel="icon" href="/favicon.ico" />
     <link rel="stylesheet" href="/seo.css" />
-    <script type="application/ld+json">${structuredData(routes, lang, page)}</script>
+    <script type="application/ld+json">${structuredData(routes, lang, page, routeMetadata)}</script>
   </head>
   <body>
     <header>
@@ -178,11 +211,32 @@ ${alternates}
 `;
 }
 
-const data = JSON.parse(await readFile(dataPath, 'utf8'));
+const data = await readJson(dataPath);
+const mapData = await readJson(mapDataPath);
+const obsoleteRouteIds = new Set();
+const routeMetadata = new Map();
+(function collectObsoleteRoutes(node) {
+  if (!node || typeof node !== 'object') return;
+  if (Array.isArray(node)) {
+    node.forEach(collectObsoleteRoutes);
+    return;
+  }
+  if (node.properties?.stype === 'connection_obsolete' && node.properties.ref) {
+    obsoleteRouteIds.add(node.properties.ref);
+  }
+  if (node.properties?.stype?.startsWith('connection') && node.properties.ref) {
+    routeMetadata.set(node.properties.ref, node.properties);
+  }
+  if (Array.isArray(node.features)) node.features.forEach(collectObsoleteRoutes);
+})(mapData);
+
+const routes = Object.fromEntries(
+  Object.entries(data.routes).filter(([id, route]) => !route.obsolete && !obsoleteRouteIds.has(id))
+);
 for (const [lang, page] of Object.entries(pages)) {
   const outputPath = resolve(publicRoot, page.file);
   await mkdir(dirname(outputPath), { recursive: true });
-  await writeFile(outputPath, renderPage(data.routes, lang, page));
+  await writeFile(outputPath, renderPage(routes, lang, page, routeMetadata));
 }
 
 const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
@@ -195,4 +249,4 @@ ${['/', ...Object.values(pages).map(page => page.path)].map(path => `  <url>
 `;
 await writeFile(resolve(publicRoot, 'sitemap.xml'), sitemap);
 
-console.log(`Generated ${Object.keys(pages).length} SEO pages and sitemap from ${dataPath}`);
+console.log(`Generated ${Object.keys(pages).length} SEO pages with ${Object.keys(routes).length} current routes from ${dataPath}`);
