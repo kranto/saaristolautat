@@ -1,0 +1,22 @@
+# Saaristolautat.fi
+
+> An unofficial map and trip-planning aid for ferry routes in the Turku archipelago, Åland and nearby areas. Always verify routes and timetables with the ferry operator.
+
+Saaristolautat.fi presents ferry routes, landings, vessels, timetables, operator contacts and live vessel positions in Finnish, Swedish and English.
+
+## Human-readable route indexes
+
+- [Finnish route index](https://saaristolautat.fi/fi/lauttareitit/)
+- [Swedish route index](https://saaristolautat.fi/sv/farjerutter/)
+- [English route index](https://saaristolautat.fi/en/ferry-routes/)
+- [Interactive ferry map](https://saaristolautat.fi/)
+
+## Machine-readable data
+
+- [Current data manifest](https://saaristolautat.fi/data/index.json): identifies the current route-data file and GeoJSON-like map files. Follow the URLs in this manifest instead of guessing versioned filenames.
+
+## Usage notes
+
+- Treat the service as a secondary source for trip planning, not as an official operator timetable.
+- Preserve Finnish and Swedish diacritics in place, vessel and route names.
+- Timetables and ferry operations can change; cite and link to the relevant operator when giving time-sensitive travel advice.

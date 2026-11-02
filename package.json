@@ -20,6 +20,7 @@
   "scripts": {
     "start": "vite",
     "build": "sh scripts/build.sh",
+    "seo:update": "node scripts/generate_seo_pages.mjs",
     "copytest": "scp -r build/* dh:test/",
     "copystaging": "scp -r build/* dh:prod/staging/",
     "copyprod": "scp -r build/* dh:prod/"

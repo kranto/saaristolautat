@@ -29,6 +29,13 @@ Valmis sivusto kirjoitetaan `build`-hakemistoon. `public/data` on paikallinen
 symbolinen linkki erilliseen dataprojektiin, ja rakennuskomento jättää sen
 tarkoituksella tuotantopaketin ulkopuolelle.
 
+Hakukoneille tarkoitetut suomen-, ruotsin- ja englanninkieliset reittihakemistot
+generoidaan samasta dataprojektista. Päivitä ja versionoi ne reittidatan muuttuessa:
+
+```sh
+npm run seo:update
+```
+
 ## Julkaiseminen
 
 Olemassa olevat julkaisemiskomennot käyttävät `build`-hakemistoa:

@@ -31,9 +31,29 @@ function localTimetablePage() {
   };
 }
 
+function localSeoPages() {
+  const pages = new Map([
+    ['/fi/lauttareitit/', '/fi/lauttareitit/index.html'],
+    ['/sv/farjerutter/', '/sv/farjerutter/index.html'],
+    ['/en/ferry-routes/', '/en/ferry-routes/index.html'],
+  ]);
+
+  return {
+    name: 'local-seo-pages',
+    configureServer(server) {
+      server.middlewares.use((request, response, next) => {
+        const url = new URL(request.url, 'http://localhost');
+        const page = pages.get(url.pathname);
+        if (page) request.url = page + url.search;
+        next();
+      });
+    },
+  };
+}
+
 export default defineConfig({
   base: './',
-  plugins: [react(), localTimetablePage()],
+  plugins: [react(), localTimetablePage(), localSeoPages()],
   server: {
     proxy: {
       '/live': {
