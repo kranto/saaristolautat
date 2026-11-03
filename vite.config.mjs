@@ -32,19 +32,21 @@ function localTimetablePage() {
 }
 
 function localSeoPages() {
-  const pages = new Map([
-    ['/fi/lauttareitit/', '/fi/lauttareitit/index.html'],
-    ['/sv/farjerutter/', '/sv/farjerutter/index.html'],
-    ['/en/ferry-routes/', '/en/ferry-routes/index.html'],
-  ]);
+  const pagePrefixes = [
+    '/fi/lauttareitit/',
+    '/sv/farjerutter/',
+    '/en/ferry-routes/',
+  ];
 
   return {
     name: 'local-seo-pages',
     configureServer(server) {
       server.middlewares.use((request, response, next) => {
         const url = new URL(request.url, 'http://localhost');
-        const page = pages.get(url.pathname);
-        if (page) request.url = page + url.search;
+        const isSeoPage = pagePrefixes.some(prefix => url.pathname.startsWith(prefix));
+        if (isSeoPage && url.pathname.endsWith('/')) {
+          request.url = `${url.pathname}index.html${url.search}`;
+        }
         next();
       });
     },

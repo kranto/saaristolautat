@@ -30,7 +30,8 @@ symbolinen linkki erilliseen dataprojektiin, ja rakennuskomento jättää sen
 tarkoituksella tuotantopaketin ulkopuolelle.
 
 Hakukoneille tarkoitetut suomen-, ruotsin- ja englanninkieliset reittihakemistot
-generoidaan samasta dataprojektista. Päivitä ja versionoi ne reittidatan muuttuessa:
+ja reittikohtaiset sivut generoidaan samasta dataprojektista. Päivitä ja versionoi
+ne reittidatan muuttuessa:
 
 ```sh
 npm run seo:update

@@ -21,11 +21,25 @@ header nav { display: flex; flex-wrap: wrap; gap: 14px; }
 .section-title { margin-bottom: 20px; font-size: 1.75rem; }
 .route { margin-bottom: 14px; padding: 22px; background: white; border: 1px solid #dce4e7; border-radius: 12px; }
 .route h2 { margin: 0 0 12px; font-size: 1.25rem; }
+.route-title { color: inherit; text-decoration-color: #a9c3cc; text-underline-offset: .16em; }
 .route dl { margin: 0; }
 .route dl div { display: grid; grid-template-columns: minmax(90px, 130px) 1fr; gap: 10px; padding-block: 4px; }
 .route dt { font-weight: 700; }
 .route dd { margin: 0; }
 .map-link { display: inline-block; margin-top: 12px; }
+.route-actions { display: flex; flex-wrap: wrap; gap: 8px 20px; margin-top: 12px; }
+.route-actions .map-link { margin-top: 0; }
+.breadcrumb { margin: 18px 0; }
+.route-intro { margin-top: 0; }
+.route-detail { padding: clamp(22px, 4vw, 36px); }
+.info-section { margin-top: 28px; padding: clamp(22px, 4vw, 36px); background: white; border: 1px solid #dce4e7; border-radius: 12px; }
+.info-section > h2 { margin-top: 0; font-size: 1.35rem; }
+.feature-list { margin: 0; padding-left: 1.3rem; }
+.detail-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+.vessel-detail, .contact-detail { padding: 16px; background: #f4f7f8; border-radius: 9px; }
+.vessel-detail h3, .contact-detail h3 { margin: 0 0 8px; font-size: 1.05rem; }
+.vessel-detail ul, .contact-detail ul { margin: 0; padding-left: 1.2rem; }
+.notes, .note + .note { margin-top: 10px; }
 footer { margin-top: 36px; padding: 26px 0 50px; color: #52616b; border-top: 1px solid #cfdade; font-size: .9rem; }
 
 @media (max-width: 560px) {
