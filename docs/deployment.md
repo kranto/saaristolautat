@@ -97,6 +97,7 @@ Nykyiset hakemistot ovat:
 Saaristolauttojen `.env` sisältää vähintään:
 
 ```dotenv
+COMPOSE_FILE=compose.yml:compose.hetzner.yml
 SAARISTODATA_PATH=/home/islanti/services/saaristodata
 WEB_NETWORK_NAME=public-web
 LIVE_POLL_SECONDS=30
@@ -124,10 +125,7 @@ Koko Saaristolautat-kokonaisuus käynnistetään Hetznerillä näin:
 ```sh
 cd /home/islanti/services/saaristolautat
 
-docker compose \
-  -f compose.yml \
-  -f compose.hetzner.yml \
-  up --build -d
+docker compose up --build -d
 ```
 
 `compose.hetzner.yml` ei julkaise web-konttien portteja hostille. Julkinen
@@ -167,10 +165,7 @@ cd /home/islanti/services/saaristolautat
 git status --short
 git pull --ff-only
 
-docker compose \
-  -f compose.yml \
-  -f compose.hetzner.yml \
-  up --build -d test
+docker compose up --build -d test
 ```
 
 Jos `git status --short` näyttää palvelimella paikallisia muutoksia, älä aja
@@ -180,15 +175,9 @@ Tarkista osoite <https://test.saaristolautat.fi/> sekä tarvittaessa kontin tila
 ja loki:
 
 ```sh
-docker compose \
-  -f compose.yml \
-  -f compose.hetzner.yml \
-  ps test
+docker compose ps test
 
-docker compose \
-  -f compose.yml \
-  -f compose.hetzner.yml \
-  logs --tail=100 test
+docker compose logs --tail=100 test
 ```
 
 ### 3. Julkaisu tuotantoon
@@ -199,10 +188,7 @@ tuotantopalvelu:
 ```sh
 cd /home/islanti/services/saaristolautat
 
-docker compose \
-  -f compose.yml \
-  -f compose.hetzner.yml \
-  up --build -d production
+docker compose up --build -d production
 ```
 
 Tarkista julkaisun jälkeen:
@@ -261,19 +247,13 @@ Jos muutos koskee `scripts/liveupdate.py`:tä, sen riippuvuuksia tai
 cd /home/islanti/services/saaristolautat
 git pull --ff-only
 
-docker compose \
-  -f compose.yml \
-  -f compose.hetzner.yml \
-  up --build -d liveupdate
+docker compose up --build -d liveupdate
 ```
 
 Tarkista sen jälkeen loki ja julkaistu tiedosto:
 
 ```sh
-docker compose \
-  -f compose.yml \
-  -f compose.hetzner.yml \
-  logs --tail=100 liveupdate
+docker compose logs --tail=100 liveupdate
 
 curl --fail https://saaristolautat.fi/live/livedata.json
 ```
@@ -287,8 +267,8 @@ Saaristolauttojen kontit:
 
 ```sh
 cd /home/islanti/services/saaristolautat
-docker compose -f compose.yml -f compose.hetzner.yml ps
-docker compose -f compose.yml -f compose.hetzner.yml logs --tail=100
+docker compose ps
+docker compose logs --tail=100
 ```
 
 Julkinen edustanginx kuuluu Islanti-compose-projektiin. Sen tarkistus tehdään

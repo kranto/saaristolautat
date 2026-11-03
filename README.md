@@ -94,12 +94,25 @@ kuin nykyiselle `islanti.dy.fi`-palvelulle. Esimerkkikonfiguraatio on tiedostoss
 `deploy/hetzner/saaristolautat.conf.example`.
 
 Nykyisen Islanti-compose-projektin nginx ja tämän projektin palvelut täytyy
-liittää samaan ennalta luotuun verkkoon, esimerkiksi:
+liittää samaan ennalta luotuun verkkoon. Verkko luodaan palvelimelle vain
+kerran:
 
 ```sh
 docker network create public-web
-WEB_NETWORK_NAME=public-web docker compose \
-  -f compose.yml -f compose.hetzner.yml up --build -d
+```
+
+Palvelimen projektihakemiston `.env` valitsee Hetznerin Compose-tiedostot ja
+ulkoisen verkon:
+
+```dotenv
+COMPOSE_FILE=compose.yml:compose.hetzner.yml
+WEB_NETWORK_NAME=public-web
+```
+
+Tämän jälkeen koko palvelu käynnistetään projektihakemistossa lyhyesti:
+
+```sh
+docker compose up --build -d
 ```
 
 Saaristolauttojen compose ei julkaise host-portteja ilman paikallista
