@@ -4,6 +4,10 @@ Tässä dokumentissa kuvataan Saaristolautat-sovelluksen paikallinen
 konttiympäristö, Hetznerillä ajettavat testi- ja tuotantopalvelut sekä niiden
 päivittäminen.
 
+> **Tuotantoympäristö:** Sovellus julkaistaan ainoastaan Hetznerille SSH-
+> yhteydellä `ssh islanti@het1`. Domainhotellin vanhoja webhotelli- ja SCP-
+> kohteita ei käytetä; sinne jäävät vain domain ja nimipalvelu.
+
 ## Kokonaisuus
 
 Hetznerillä palvelu koostuu kolmesta tämän projektin kontista:

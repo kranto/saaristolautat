@@ -39,13 +39,25 @@ npm run seo:update
 
 ## Julkaiseminen
 
-Olemassa olevat julkaisemiskomennot käyttävät `build`-hakemistoa:
+Sovellus ajetaan kontitettuna Hetznerillä. Domainhotellin webhotellia tai
+vanhoja `dh:test`- ja `dh:prod`-SCP-kohteita ei enää käytetä sovelluksen
+julkaisemiseen; Domainhotellille jäävät vain domain ja nimipalvelu.
+
+Tavallinen julkaisu tehdään Gitin kautta nykyiseltä julkaisuhaaralta:
 
 ```sh
-npm run copytest
-npm run copystaging
-npm run copyprod
+git push origin contanerized-app
+ssh islanti@het1
+cd /home/islanti/services/saaristolautat
+git status --short
+git pull --ff-only
+docker compose up --build -d test
 ```
+
+Kun sama commit on tarkistettu osoitteessa <https://test.saaristolautat.fi/>,
+se julkaistaan tuotantoon komennolla `docker compose up --build -d production`.
+Yksityiskohtainen julkaisu- ja tarkistusohje on tiedostossa
+[`docs/deployment.md`](docs/deployment.md).
 
 ## Kontitettu paikallisympäristö
 
