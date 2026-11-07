@@ -268,6 +268,56 @@ function addLiveVesselImages(map) {
   addImage('live-vessel-stopped', false);
 }
 
+function vesselHullGeometry(feature) {
+  const properties = feature.properties || {};
+  const vessel = properties.vessel || {};
+  const dimensions = ['referencePointA', 'referencePointB', 'referencePointC', 'referencePointD']
+    .map(key => Number(vessel[key]));
+  const [bow, stern, port, starboard] = dimensions;
+  const coordinates = feature.geometry?.coordinates;
+  const heading = Number(properties.heading);
+  const course = Number(properties.cog);
+  const direction = heading >= 0 && heading < 360 ? heading : course >= 0 && course < 360 ? course : null;
+  if (!Array.isArray(coordinates) || coordinates.length < 2 ||
+      dimensions.some(value => !Number.isFinite(value) || value <= 0) || direction === null) return null;
+
+  const [longitude, latitude] = coordinates;
+  const radians = direction * Math.PI / 180;
+  const longitudeMetres = 111320 * Math.cos(latitude * Math.PI / 180);
+  const point = (forward, right) => [
+    longitude + (forward * Math.sin(radians) + right * Math.cos(radians)) / longitudeMetres,
+    latitude + (forward * Math.cos(radians) - right * Math.sin(radians)) / 111320
+  ];
+  const length = bow + stern;
+  const width = port + starboard;
+  const centreline = (starboard - port) / 2;
+  const shoulder = Math.max(-stern, bow - Math.min(length * 0.2, width * 1.5));
+
+  return {
+    polygon: [[
+      point(bow, centreline),
+      point(shoulder, starboard),
+      point(-stern, starboard),
+      point(-stern, -port),
+      point(shoulder, -port),
+      point(bow, centreline)
+    ]]
+  };
+}
+
+function vesselHullFeature(feature, hull) {
+  if (!hull) return null;
+  return {
+    type: 'Feature',
+    properties: {
+      mmsi: feature.properties.mmsi,
+      known: feature.properties.known,
+      opacity: feature.properties.opacity
+    },
+    geometry: { type: 'Polygon', coordinates: hull.polygon }
+  };
+}
+
 const emptyFeatureCollection = () => ({ type: 'FeatureCollection', features: [] });
 
 const routeTypePriority = subtype => {
@@ -300,7 +350,7 @@ function prioritizeRouteFeatures(features) {
 }
 
 function raiseLiveLayers(map) {
-  ['live-history', 'live-vessels', 'live-vessel-labels'].forEach(id => {
+  ['live-history', 'live-vessel-hulls', 'live-vessel-hull-outlines', 'live-vessels', 'live-vessel-labels'].forEach(id => {
     if (map.getLayer(id)) map.moveLayer(id);
   });
 }
@@ -1311,10 +1361,36 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
       if (!map.getStyle()?.layers?.length) return false;
       addLiveVesselImages(map);
       if (!map.getSource('live-history')) map.addSource('live-history', { type: 'geojson', data: emptyFeatureCollection() });
+      if (!map.getSource('live-vessel-hulls')) map.addSource('live-vessel-hulls', { type: 'geojson', data: emptyFeatureCollection() });
       if (!map.getSource('live-vessels')) map.addSource('live-vessels', { type: 'geojson', data: emptyFeatureCollection() });
       if (!map.getLayer('live-history')) map.addLayer({
         id: 'live-history', type: 'line', source: 'live-history', minzoom: legacyZoomToMapLibre(8),
         paint: { 'line-color': '#a0a0a0', 'line-width': 0.5, 'line-opacity': 0.7 }
+      });
+      if (!map.getLayer('live-vessel-hulls')) map.addLayer({
+        id: 'live-vessel-hulls', type: 'fill', source: 'live-vessel-hulls', minzoom: 12,
+        layout: { 'fill-sort-key': ['case', ['get', 'known'], 1, 0] },
+        paint: {
+          'fill-color': ['interpolate', ['linear'], ['zoom'], 14, '#a030ff', 17, '#e2c6ff'],
+          'fill-opacity': ['interpolate', ['linear'], ['zoom'],
+            12, 0,
+            14, ['*', ['get', 'opacity'], 0.7],
+            17, ['*', ['get', 'opacity'], 0.22]
+          ]
+        }
+      });
+      if (!map.getLayer('live-vessel-hull-outlines')) map.addLayer({
+        id: 'live-vessel-hull-outlines', type: 'line', source: 'live-vessel-hulls', minzoom: 12,
+        layout: { 'line-sort-key': ['case', ['get', 'known'], 1, 0] },
+        paint: {
+          'line-color': ['interpolate', ['linear'], ['zoom'], 14, '#a030ff', 17, '#c58cf7'],
+          'line-width': ['interpolate', ['linear'], ['zoom'], 12, 0.5, 16, 1.5],
+          'line-opacity': ['interpolate', ['linear'], ['zoom'],
+            12, 0,
+            14, ['*', ['get', 'opacity'], 0.9],
+            17, ['*', ['get', 'opacity'], 0.55]
+          ]
+        }
       });
       if (!map.getLayer('live-vessels')) map.addLayer({
         id: 'live-vessels', type: 'symbol', source: 'live-vessels', minzoom: legacyZoomToMapLibre(8),
@@ -1328,16 +1404,21 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
           'symbol-sort-key': ['case', ['get', 'known'], 1, 0],
           'icon-rotation-alignment': 'map', 'icon-allow-overlap': true, 'icon-ignore-placement': true
         },
-        paint: { 'icon-opacity': ['get', 'opacity'] }
+        paint: {
+          'icon-opacity': ['step', ['zoom'], ['get', 'opacity'], 14,
+            ['case', ['get', 'hasHull'], 0, ['get', 'opacity']]
+          ]
+        }
       });
       if (!map.getLayer('live-vessel-labels')) map.addLayer({
         id: 'live-vessel-labels', type: 'symbol', source: 'live-vessels', minzoom: legacyZoomToMapLibre(9),
         layout: {
           'text-field': ['get', 'name'],
           'text-font': ['Noto Sans Bold'],
-          'text-size': ['case',
-            ['get', 'known'], ['case', ['>', ['get', 'sog'], 0.1], 12, 9],
-            ['case', ['>', ['get', 'sog'], 0.1], 10, 8]
+          'text-size': ['interpolate', ['linear'], ['zoom'],
+            12, ['case', ['get', 'known'], ['case', ['>', ['get', 'sog'], 0.1], 12, 9], ['case', ['>', ['get', 'sog'], 0.1], 10, 8]],
+            14, ['case', ['get', 'known'], ['case', ['>', ['get', 'sog'], 0.1], 13, 10], ['case', ['>', ['get', 'sog'], 0.1], 11, 9]],
+            16, ['case', ['get', 'known'], ['case', ['>', ['get', 'sog'], 0.1], 15, 12], ['case', ['>', ['get', 'sog'], 0.1], 13, 11]]
           ],
           'text-offset': ['case', ['>', ['get', 'sog'], 0.1], ['literal', [-0.35, -0.35]], ['literal', [-0.2, -0.2]]],
           'text-anchor': 'bottom-right',
@@ -1352,6 +1433,7 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
 
     const clearLiveData = () => {
       map.getSource('live-vessels')?.setData(emptyFeatureCollection());
+      map.getSource('live-vessel-hulls')?.setData(emptyFeatureCollection());
       map.getSource('live-history')?.setData(emptyFeatureCollection());
       liveFeaturesRef.current = [];
       dispatch({ type: 'UPDATE_INDICATOR_MSG', payload: '' });
@@ -1385,10 +1467,19 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
             }
           };
         }).filter(feature => feature.properties.age < 600);
-        liveFeaturesRef.current = features;
-        map.getSource('live-vessels').setData({ type: 'FeatureCollection', features });
+        const rendered = features.map(feature => ({ feature, hull: vesselHullGeometry(feature) }));
+        const displayedFeatures = rendered.map(({ feature, hull }) => ({
+          ...feature,
+          properties: { ...feature.properties, hasHull: Boolean(hull) }
+        }));
+        liveFeaturesRef.current = displayedFeatures;
+        map.getSource('live-vessels').setData({ type: 'FeatureCollection', features: displayedFeatures });
+        map.getSource('live-vessel-hulls').setData({
+          type: 'FeatureCollection',
+          features: rendered.map(({ feature, hull }) => vesselHullFeature(feature, hull)).filter(Boolean)
+        });
         map.getSource('live-history').setData(history);
-        updateLiveIndicator(map, features, dispatch);
+        updateLiveIndicator(map, displayedFeatures, dispatch);
       } catch (error) {
         if (!cancelled) {
           console.error('Live data error', error);
