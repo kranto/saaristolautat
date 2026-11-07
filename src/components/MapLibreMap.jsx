@@ -1325,6 +1325,7 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
             12, ['case', ['>', ['get', 'sog'], 0.1], 1.3, 0.9]
           ],
           'icon-rotate': ['case', ['>', ['get', 'sog'], 0.1], ['get', 'cog'], 0],
+          'symbol-sort-key': ['case', ['get', 'known'], 1, 0],
           'icon-rotation-alignment': 'map', 'icon-allow-overlap': true, 'icon-ignore-placement': true
         },
         paint: { 'icon-opacity': ['get', 'opacity'] }
@@ -1334,9 +1335,13 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
         layout: {
           'text-field': ['get', 'name'],
           'text-font': ['Noto Sans Bold'],
-          'text-size': ['case', ['>', ['get', 'sog'], 0.1], 12, 9],
+          'text-size': ['case',
+            ['get', 'known'], ['case', ['>', ['get', 'sog'], 0.1], 12, 9],
+            ['case', ['>', ['get', 'sog'], 0.1], 10, 8]
+          ],
           'text-offset': ['case', ['>', ['get', 'sog'], 0.1], ['literal', [-0.35, -0.35]], ['literal', [-0.2, -0.2]]],
           'text-anchor': 'bottom-right',
+          'symbol-sort-key': ['case', ['get', 'known'], 1, 0],
           'text-allow-overlap': true, 'text-ignore-placement': true
         },
         paint: { 'text-color': '#880078', 'text-halo-color': 'rgba(255,255,255,0.9)', 'text-halo-width': 1 }
@@ -1368,13 +1373,14 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
           const age = Math.max(0, now - Number(feature.properties?.timestampExternal || 0)) / 1000;
           const liveVessel = feature.properties?.vessel || {};
           const mmsi = Number(feature.properties?.mmsi ?? liveVessel.mmsi ?? feature.mmsi);
+          const known = knownVesselNames.has(mmsi);
           const name = knownVesselNames.get(mmsi) || liveVessel.name || '';
           return {
             ...feature,
             properties: {
               ...feature.properties,
               vessel: { ...liveVessel, name },
-              name, age,
+              name, known, age,
               opacity: Math.max(0.3, 1 - 0.7 * Math.max(0, age - 180) / 600)
             }
           };
