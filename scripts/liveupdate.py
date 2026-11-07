@@ -18,7 +18,8 @@ API_BASE_URL = os.environ.get(
 )
 OUTPUT_DIR = Path(os.environ.get("LIVE_OUTPUT_DIR", "."))
 DATABASE = Path(os.environ.get("LIVE_DATABASE", OUTPUT_DIR / "lauttalive.db"))
-POLL_SECONDS = max(10, int(os.environ.get("LIVE_POLL_SECONDS", "30")))
+POLL_SECONDS = max(10, int(os.environ.get("LIVE_POLL_SECONDS", "20")))
+HISTORY_WRITE_SECONDS = 60
 HISTORY_SECONDS = 3 * 60 * 60
 LOCATION_LOOKBACK_SECONDS = 5 * 60 * 60
 KNOWN_PASSENGER_VESSELS = {
@@ -221,13 +222,15 @@ def main() -> None:
     DATABASE.parent.mkdir(parents=True, exist_ok=True)
     connection = sqlite3.connect(DATABASE)
     initialize_database(connection)
-    publish_history = True
+    next_history_write = time.monotonic()
 
     while True:
         started = time.monotonic()
+        write_history = started >= next_history_write
         try:
-            update(connection, publish_history)
-            publish_history = not publish_history
+            update(connection, write_history)
+            if write_history:
+                next_history_write = started + HISTORY_WRITE_SECONDS
         except Exception as error:
             print(f"Live update failed: {error!r}", flush=True)
         delay = max(1, POLL_SECONDS - (time.monotonic() - started))

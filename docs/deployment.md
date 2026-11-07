@@ -100,7 +100,7 @@ Saaristolauttojen `.env` sisältää vähintään:
 COMPOSE_FILE=compose.yml:compose.hetzner.yml
 SAARISTODATA_PATH=/home/islanti/services/saaristodata
 WEB_NETWORK_NAME=public-web
-LIVE_POLL_SECONDS=30
+LIVE_POLL_SECONDS=20
 ```
 
 Ulkoinen Docker-verkko luodaan palvelimelle vain kerran:

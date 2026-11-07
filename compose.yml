@@ -36,7 +36,7 @@ services:
     environment:
       LIVE_OUTPUT_DIR: /var/lib/saaristolautat/live
       LIVE_DATABASE: /var/lib/saaristolautat/live/lauttalive.db
-      LIVE_POLL_SECONDS: ${LIVE_POLL_SECONDS:-30}
+      LIVE_POLL_SECONDS: ${LIVE_POLL_SECONDS:-20}
     volumes:
       - live-data:/var/lib/saaristolautat/live
     networks:
