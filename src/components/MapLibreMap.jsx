@@ -106,13 +106,13 @@ function customizeBaseMap(map) {
       map.setPaintProperty(layer.id, 'background-color', [
         'interpolate', ['linear'], ['zoom'],
         LAND_DETAIL_ZOOM_START, '#b8dfc2',
-        LAND_DETAIL_ZOOM_END, '#fffcef'
+        LAND_DETAIL_ZOOM_END, '#e9e8cf'
       ]);
     } else if (sourceLayer === 'water' && layer.type === 'fill') {
       map.setPaintProperty(layer.id, 'fill-color', [
         'interpolate', ['linear'], ['zoom'],
         LAND_DETAIL_ZOOM_START, '#f3f7fd',
-        LAND_DETAIL_ZOOM_END, '#c7e7f6'
+        LAND_DETAIL_ZOOM_END, '#ffffff'
       ]);
       map.setPaintProperty(layer.id, 'fill-opacity', 1);
     } else if (sourceLayer === 'waterway' && layer.type === 'line') {
