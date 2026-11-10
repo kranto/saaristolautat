@@ -18,6 +18,9 @@ const SHOW_MAP_DEBUG = typeof window !== 'undefined' && ['localhost', '127.0.0.1
 const legacyZoomToMapLibre = zoom => Number(zoom) - 1;
 const mapLibreZoomToExternal = zoom => Number(zoom) + 1;
 const legacyEmSize = em => ['interpolate', ['linear'], ['zoom'], 4, em * 6, 18, em * 20];
+const DISTANCE_SIGN_TEXT_SIZE = 14.4;
+const LAND_DETAIL_ZOOM_START = 11;
+const LAND_DETAIL_ZOOM_END = 13;
 const ROUTE_AREA_BOUNDS = [[19.45, 59.72], [23.05, 60.58]];
 const MIN_ROUTE_RENDER_ZOOM = 7;
 const HIITTINEN = [22.69, 59.88];
@@ -66,6 +69,27 @@ function fitRouteArea(map, options = {}) {
 }
 
 function customizeBaseMap(map) {
+  const firstLandLayer = map.getLayer('park') ? 'park' : undefined;
+  const firstLanduseLayer = map.getLayer('landuse_residential') ? 'landuse_residential' : firstLandLayer;
+  if (!map.getLayer('landcover-farmland-detail')) map.addLayer({
+    id: 'landcover-farmland-detail', type: 'fill', source: 'openmaptiles', 'source-layer': 'landcover',
+    minzoom: LAND_DETAIL_ZOOM_START,
+    filter: ['==', ['get', 'class'], 'farmland'],
+    paint: { 'fill-color': '#fff1a3', 'fill-opacity': 0 }
+  }, firstLandLayer);
+  if (!map.getLayer('landcover-rock-detail')) map.addLayer({
+    id: 'landcover-rock-detail', type: 'fill', source: 'openmaptiles', 'source-layer': 'landcover',
+    minzoom: LAND_DETAIL_ZOOM_START,
+    filter: ['==', ['get', 'class'], 'rock'],
+    paint: { 'fill-color': '#eee8d7', 'fill-opacity': 0 }
+  }, firstLandLayer);
+  if (!map.getLayer('landuse-developed-detail')) map.addLayer({
+    id: 'landuse-developed-detail', type: 'fill', source: 'openmaptiles', 'source-layer': 'landuse',
+    minzoom: LAND_DETAIL_ZOOM_START,
+    filter: ['match', ['get', 'class'], ['commercial', 'industrial', 'retail'], true, false],
+    paint: { 'fill-color': '#e6c49d', 'fill-opacity': 0 }
+  }, firstLanduseLayer);
+
   map.getStyle().layers.forEach(layer => {
     const sourceLayer = layer['source-layer'];
     const layerId = layer.id.toLowerCase();
@@ -79,21 +103,114 @@ function customizeBaseMap(map) {
     } else if (layer.type === 'symbol' && layer.layout?.['text-field']) {
       map.setPaintProperty(layer.id, 'text-opacity', ['step', ['zoom'], 1, 7, 0, 12, 1]);
     } else if (layer.type === 'background') {
-      map.setPaintProperty(layer.id, 'background-color', '#b8dfc2');
+      map.setPaintProperty(layer.id, 'background-color', [
+        'interpolate', ['linear'], ['zoom'],
+        LAND_DETAIL_ZOOM_START, '#b8dfc2',
+        LAND_DETAIL_ZOOM_END, '#e9e8cf'
+      ]);
     } else if (sourceLayer === 'water' && layer.type === 'fill') {
-      map.setPaintProperty(layer.id, 'fill-color', '#f3f7fd');
+      map.setPaintProperty(layer.id, 'fill-color', [
+        'interpolate', ['linear'], ['zoom'],
+        LAND_DETAIL_ZOOM_START, '#f3f7fd',
+        LAND_DETAIL_ZOOM_END, '#ffffff'
+      ]);
       map.setPaintProperty(layer.id, 'fill-opacity', 1);
     } else if (sourceLayer === 'waterway' && layer.type === 'line') {
-      map.setPaintProperty(layer.id, 'line-color', '#dce7f3');
+      map.setPaintProperty(layer.id, 'line-color', [
+        'interpolate', ['linear'], ['zoom'],
+        LAND_DETAIL_ZOOM_START, '#dce7f3',
+        LAND_DETAIL_ZOOM_END, '#61bfe5'
+      ]);
+    } else if (sourceLayer === 'park' && layer.type === 'fill') {
+      map.setPaintProperty(layer.id, 'fill-color', [
+        'interpolate', ['linear'], ['zoom'],
+        LAND_DETAIL_ZOOM_START, '#d8e8c8',
+        LAND_DETAIL_ZOOM_END, '#b9e49b'
+      ]);
+      map.setPaintProperty(layer.id, 'fill-opacity', [
+        'interpolate', ['linear'], ['zoom'],
+        LAND_DETAIL_ZOOM_START, 0.7,
+        LAND_DETAIL_ZOOM_END, 0.85
+      ]);
+    } else if (sourceLayer === 'park' && layer.type === 'line') {
+      map.setPaintProperty(layer.id, 'line-color', [
+        'interpolate', ['linear'], ['zoom'],
+        LAND_DETAIL_ZOOM_START, 'rgba(228,241,215,1)',
+        LAND_DETAIL_ZOOM_END, '#62b94f'
+      ]);
     } else if (sourceLayer === 'landcover' && layer.type === 'fill') {
-      map.setPaintProperty(layer.id, 'fill-color', '#addbb9');
+      map.setPaintProperty(layer.id, 'fill-color', [
+        'interpolate', ['linear'], ['zoom'],
+        LAND_DETAIL_ZOOM_START, '#addbb9',
+        LAND_DETAIL_ZOOM_END,
+        ['match', ['get', 'class'],
+          'wood', '#d1ecae',
+          'grass', '#e7efae',
+          'farmland', '#fff09b',
+          'rock', '#eee8d7',
+          'ice', '#e7f0f2',
+          'sand', '#ecd8a1',
+          '#addbb9']
+      ]);
+      map.setPaintProperty(layer.id, 'fill-opacity', [
+        'interpolate', ['linear'], ['zoom'],
+        LAND_DETAIL_ZOOM_START, layer.paint?.['fill-opacity'] ?? 1,
+        LAND_DETAIL_ZOOM_END,
+        ['match', ['get', 'class'],
+          'wood', 0.9,
+          'grass', 0.82,
+          'farmland', 0.88,
+          'rock', 0.78,
+          'ice', 0.9,
+          'sand', 0.85,
+          'wetland', 0.8,
+          0.55]
+      ]);
     } else if (sourceLayer === 'landuse' && layer.type === 'fill') {
-      map.setPaintProperty(layer.id, 'fill-color', '#b9ddbf');
+      map.setLayerZoomRange(layer.id, layer.minzoom ?? 0, 24);
+      map.setPaintProperty(layer.id, 'fill-color', [
+        'interpolate', ['linear'], ['zoom'],
+        LAND_DETAIL_ZOOM_START, '#b9ddbf',
+        LAND_DETAIL_ZOOM_END,
+        ['match', ['get', 'class'],
+          'residential', '#e8b17b',
+          'commercial', '#e7c59e',
+          'industrial', '#d8d4ce',
+          'retail', '#e3a97b',
+          'pitch', '#b8dda0',
+          'track', '#e2d2a1',
+          'cemetery', '#c7dfa9',
+          'hospital', '#ecd4dc',
+          'school', '#eee4b4',
+          '#b9ddbf']
+      ]);
+      map.setPaintProperty(layer.id, 'fill-opacity', [
+        'interpolate', ['linear'], ['zoom'],
+        LAND_DETAIL_ZOOM_START, layer.paint?.['fill-opacity'] ?? 1,
+        LAND_DETAIL_ZOOM_END, 0.88
+      ]);
+    } else if (sourceLayer === 'building' && layer.type === 'fill') {
+      map.setPaintProperty(layer.id, 'fill-color', '#74736f');
+      map.setPaintProperty(layer.id, 'fill-outline-color', '#f7f2e7');
+    } else if (sourceLayer === 'building' && layer.type === 'fill-extrusion') {
+      map.setPaintProperty(layer.id, 'fill-extrusion-color', '#74736f');
+      map.setPaintProperty(layer.id, 'fill-extrusion-opacity', 0.88);
     } else if (sourceLayer === 'transportation' && layer.type === 'line') {
       map.setLayerZoomRange(layer.id, Math.min(layer.minzoom ?? 0, 7), layer.maxzoom ?? 24);
       const isCasing = layerId.includes('casing');
       const isMainRoad = ['motorway', 'trunk', 'primary', 'secondary'].some(roadClass => layerId.includes(roadClass));
-      map.setPaintProperty(layer.id, 'line-color', isCasing ? '#8b918e' : isMainRoad ? '#9da3a0' : '#b1b6b3');
+      const isRail = layerId.includes('rail');
+      const isPath = ['path', 'pedestrian', 'track'].some(roadClass => layerId.includes(roadClass));
+      const overviewColor = isCasing ? '#8b918e' : isMainRoad ? '#9da3a0' : '#b1b6b3';
+      const detailColor = isRail ? '#747474'
+        : isCasing ? (isMainRoad ? '#b34f38' : '#c7c3b9')
+          : isMainRoad ? '#ed7250'
+            : isPath ? '#85857f' : '#fffdf5';
+      map.setPaintProperty(layer.id, 'line-color', [
+        'interpolate', ['linear'], ['zoom'],
+        LAND_DETAIL_ZOOM_START, overviewColor,
+        LAND_DETAIL_ZOOM_END, detailColor
+      ]);
       map.setPaintProperty(layer.id, 'line-width', isCasing
         ? ['interpolate', ['linear'], ['zoom'], 7, 0.8, 11, 1.8, 15, 4]
         : isMainRoad
@@ -268,6 +385,56 @@ function addLiveVesselImages(map) {
   addImage('live-vessel-stopped', false);
 }
 
+function vesselHullGeometry(feature) {
+  const properties = feature.properties || {};
+  const vessel = properties.vessel || {};
+  const dimensions = ['referencePointA', 'referencePointB', 'referencePointC', 'referencePointD']
+    .map(key => Number(vessel[key]));
+  const [bow, stern, port, starboard] = dimensions;
+  const coordinates = feature.geometry?.coordinates;
+  const heading = Number(properties.heading);
+  const course = Number(properties.cog);
+  const direction = heading >= 0 && heading < 360 ? heading : course >= 0 && course < 360 ? course : null;
+  if (!Array.isArray(coordinates) || coordinates.length < 2 ||
+      dimensions.some(value => !Number.isFinite(value) || value <= 0) || direction === null) return null;
+
+  const [longitude, latitude] = coordinates;
+  const radians = direction * Math.PI / 180;
+  const longitudeMetres = 111320 * Math.cos(latitude * Math.PI / 180);
+  const point = (forward, right) => [
+    longitude + (forward * Math.sin(radians) + right * Math.cos(radians)) / longitudeMetres,
+    latitude + (forward * Math.cos(radians) - right * Math.sin(radians)) / 111320
+  ];
+  const length = bow + stern;
+  const width = port + starboard;
+  const centreline = (starboard - port) / 2;
+  const shoulder = Math.max(-stern, bow - Math.min(length * 0.2, width * 1.5));
+
+  return {
+    polygon: [[
+      point(bow, centreline),
+      point(shoulder, starboard),
+      point(-stern, starboard),
+      point(-stern, -port),
+      point(shoulder, -port),
+      point(bow, centreline)
+    ]]
+  };
+}
+
+function vesselHullFeature(feature, hull) {
+  if (!hull) return null;
+  return {
+    type: 'Feature',
+    properties: {
+      mmsi: feature.properties.mmsi,
+      known: feature.properties.known,
+      opacity: feature.properties.opacity
+    },
+    geometry: { type: 'Polygon', coordinates: hull.polygon }
+  };
+}
+
 const emptyFeatureCollection = () => ({ type: 'FeatureCollection', features: [] });
 
 const routeTypePriority = subtype => {
@@ -300,7 +467,7 @@ function prioritizeRouteFeatures(features) {
 }
 
 function raiseLiveLayers(map) {
-  ['live-history', 'live-vessels', 'live-vessel-labels'].forEach(id => {
+  ['live-history', 'live-vessel-hulls', 'live-vessel-hull-outlines', 'live-vessels', 'live-vessel-labels'].forEach(id => {
     if (map.getLayer(id)) map.moveLayer(id);
   });
 }
@@ -1128,9 +1295,10 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
           id: `distance-boxes-${range}`, type: 'symbol', source: 'saaristolautat', minzoom: from, maxzoom: to + 1,
           filter: ['all', ['==', ['get', 'kind'], 'box'], ['==', ['get', 'objectMinZoom'], from], ['==', ['get', 'objectMaxZoom'], to]],
           layout: {
-            'text-field': ['get', 'description'], 'text-font': ['Noto Sans Bold'], 'text-size': legacyEmSize(0.9),
+            'text-field': ['get', 'description'], 'text-font': ['Noto Sans Bold'], 'text-size': DISTANCE_SIGN_TEXT_SIZE,
             'text-line-height': 1.1, 'text-max-width': 100,
             'text-offset': ['array', 'number', 2, ['get', 'labelOffset']], 'text-anchor': ['get', 'labelTextAnchor'], 'text-optional': true,
+            'text-justify': 'center',
             'text-allow-overlap': true, 'text-ignore-placement': true,
             'icon-image': 'distance-sign', 'icon-text-fit': 'both', 'icon-text-fit-padding': [4, 6, 4, 6],
             'icon-allow-overlap': true, 'icon-ignore-placement': true
@@ -1311,10 +1479,36 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
       if (!map.getStyle()?.layers?.length) return false;
       addLiveVesselImages(map);
       if (!map.getSource('live-history')) map.addSource('live-history', { type: 'geojson', data: emptyFeatureCollection() });
+      if (!map.getSource('live-vessel-hulls')) map.addSource('live-vessel-hulls', { type: 'geojson', data: emptyFeatureCollection() });
       if (!map.getSource('live-vessels')) map.addSource('live-vessels', { type: 'geojson', data: emptyFeatureCollection() });
       if (!map.getLayer('live-history')) map.addLayer({
         id: 'live-history', type: 'line', source: 'live-history', minzoom: legacyZoomToMapLibre(8),
         paint: { 'line-color': '#a0a0a0', 'line-width': 0.5, 'line-opacity': 0.7 }
+      });
+      if (!map.getLayer('live-vessel-hulls')) map.addLayer({
+        id: 'live-vessel-hulls', type: 'fill', source: 'live-vessel-hulls', minzoom: 12,
+        layout: { 'fill-sort-key': ['case', ['get', 'known'], 1, 0] },
+        paint: {
+          'fill-color': ['interpolate', ['linear'], ['zoom'], 14, '#a030ff', 17, '#e2c6ff'],
+          'fill-opacity': ['interpolate', ['linear'], ['zoom'],
+            12, 0,
+            14, ['*', ['get', 'opacity'], 0.7],
+            17, ['*', ['get', 'opacity'], 0.22]
+          ]
+        }
+      });
+      if (!map.getLayer('live-vessel-hull-outlines')) map.addLayer({
+        id: 'live-vessel-hull-outlines', type: 'line', source: 'live-vessel-hulls', minzoom: 12,
+        layout: { 'line-sort-key': ['case', ['get', 'known'], 1, 0] },
+        paint: {
+          'line-color': ['interpolate', ['linear'], ['zoom'], 14, '#a030ff', 17, '#c58cf7'],
+          'line-width': ['interpolate', ['linear'], ['zoom'], 12, 0.5, 16, 1.5],
+          'line-opacity': ['interpolate', ['linear'], ['zoom'],
+            12, 0,
+            14, ['*', ['get', 'opacity'], 0.9],
+            17, ['*', ['get', 'opacity'], 0.55]
+          ]
+        }
       });
       if (!map.getLayer('live-vessels')) map.addLayer({
         id: 'live-vessels', type: 'symbol', source: 'live-vessels', minzoom: legacyZoomToMapLibre(8),
@@ -1325,18 +1519,28 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
             12, ['case', ['>', ['get', 'sog'], 0.1], 1.3, 0.9]
           ],
           'icon-rotate': ['case', ['>', ['get', 'sog'], 0.1], ['get', 'cog'], 0],
+          'symbol-sort-key': ['case', ['get', 'known'], 1, 0],
           'icon-rotation-alignment': 'map', 'icon-allow-overlap': true, 'icon-ignore-placement': true
         },
-        paint: { 'icon-opacity': ['get', 'opacity'] }
+        paint: {
+          'icon-opacity': ['step', ['zoom'], ['get', 'opacity'], 14,
+            ['case', ['get', 'hasHull'], 0, ['get', 'opacity']]
+          ]
+        }
       });
       if (!map.getLayer('live-vessel-labels')) map.addLayer({
         id: 'live-vessel-labels', type: 'symbol', source: 'live-vessels', minzoom: legacyZoomToMapLibre(9),
         layout: {
           'text-field': ['get', 'name'],
           'text-font': ['Noto Sans Bold'],
-          'text-size': ['case', ['>', ['get', 'sog'], 0.1], 12, 9],
+          'text-size': ['interpolate', ['linear'], ['zoom'],
+            12, ['case', ['get', 'known'], ['case', ['>', ['get', 'sog'], 0.1], 12, 9], ['case', ['>', ['get', 'sog'], 0.1], 10, 8]],
+            14, ['case', ['get', 'known'], ['case', ['>', ['get', 'sog'], 0.1], 13, 10], ['case', ['>', ['get', 'sog'], 0.1], 11, 9]],
+            16, ['case', ['get', 'known'], ['case', ['>', ['get', 'sog'], 0.1], 15, 12], ['case', ['>', ['get', 'sog'], 0.1], 13, 11]]
+          ],
           'text-offset': ['case', ['>', ['get', 'sog'], 0.1], ['literal', [-0.35, -0.35]], ['literal', [-0.2, -0.2]]],
           'text-anchor': 'bottom-right',
+          'symbol-sort-key': ['case', ['get', 'known'], 1, 0],
           'text-allow-overlap': true, 'text-ignore-placement': true
         },
         paint: { 'text-color': '#880078', 'text-halo-color': 'rgba(255,255,255,0.9)', 'text-halo-width': 1 }
@@ -1347,6 +1551,7 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
 
     const clearLiveData = () => {
       map.getSource('live-vessels')?.setData(emptyFeatureCollection());
+      map.getSource('live-vessel-hulls')?.setData(emptyFeatureCollection());
       map.getSource('live-history')?.setData(emptyFeatureCollection());
       liveFeaturesRef.current = [];
       dispatch({ type: 'UPDATE_INDICATOR_MSG', payload: '' });
@@ -1368,21 +1573,31 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
           const age = Math.max(0, now - Number(feature.properties?.timestampExternal || 0)) / 1000;
           const liveVessel = feature.properties?.vessel || {};
           const mmsi = Number(feature.properties?.mmsi ?? liveVessel.mmsi ?? feature.mmsi);
+          const known = knownVesselNames.has(mmsi);
           const name = knownVesselNames.get(mmsi) || liveVessel.name || '';
           return {
             ...feature,
             properties: {
               ...feature.properties,
               vessel: { ...liveVessel, name },
-              name, age,
+              name, known, age,
               opacity: Math.max(0.3, 1 - 0.7 * Math.max(0, age - 180) / 600)
             }
           };
         }).filter(feature => feature.properties.age < 600);
-        liveFeaturesRef.current = features;
-        map.getSource('live-vessels').setData({ type: 'FeatureCollection', features });
+        const rendered = features.map(feature => ({ feature, hull: vesselHullGeometry(feature) }));
+        const displayedFeatures = rendered.map(({ feature, hull }) => ({
+          ...feature,
+          properties: { ...feature.properties, hasHull: Boolean(hull) }
+        }));
+        liveFeaturesRef.current = displayedFeatures;
+        map.getSource('live-vessels').setData({ type: 'FeatureCollection', features: displayedFeatures });
+        map.getSource('live-vessel-hulls').setData({
+          type: 'FeatureCollection',
+          features: rendered.map(({ feature, hull }) => vesselHullFeature(feature, hull)).filter(Boolean)
+        });
         map.getSource('live-history').setData(history);
-        updateLiveIndicator(map, features, dispatch);
+        updateLiveIndicator(map, displayedFeatures, dispatch);
       } catch (error) {
         if (!cancelled) {
           console.error('Live data error', error);

@@ -1,0 +1,7 @@
+.git
+.DS_Store
+build
+node_modules
+public/data
+*.log
+

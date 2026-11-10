@@ -1,0 +1,4 @@
+networks:
+  web:
+    external: true
+    name: ${WEB_NETWORK_NAME:-public-web}

@@ -31,9 +31,31 @@ function localTimetablePage() {
   };
 }
 
+function localSeoPages() {
+  const pagePrefixes = [
+    '/fi/lauttareitit/',
+    '/sv/farjerutter/',
+    '/en/ferry-routes/',
+  ];
+
+  return {
+    name: 'local-seo-pages',
+    configureServer(server) {
+      server.middlewares.use((request, response, next) => {
+        const url = new URL(request.url, 'http://localhost');
+        const isSeoPage = pagePrefixes.some(prefix => url.pathname.startsWith(prefix));
+        if (isSeoPage && url.pathname.endsWith('/')) {
+          request.url = `${url.pathname}index.html${url.search}`;
+        }
+        next();
+      });
+    },
+  };
+}
+
 export default defineConfig({
   base: './',
-  plugins: [react(), localTimetablePage()],
+  plugins: [react(), localTimetablePage(), localSeoPages()],
   server: {
     proxy: {
       '/live': {
