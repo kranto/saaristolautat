@@ -19,6 +19,8 @@ const legacyZoomToMapLibre = zoom => Number(zoom) - 1;
 const mapLibreZoomToExternal = zoom => Number(zoom) + 1;
 const legacyEmSize = em => ['interpolate', ['linear'], ['zoom'], 4, em * 6, 18, em * 20];
 const DISTANCE_SIGN_TEXT_SIZE = 14.4;
+const LAND_DETAIL_ZOOM_START = 11;
+const LAND_DETAIL_ZOOM_END = 13;
 const ROUTE_AREA_BOUNDS = [[19.45, 59.72], [23.05, 60.58]];
 const MIN_ROUTE_RENDER_ZOOM = 7;
 const HIITTINEN = [22.69, 59.88];
@@ -67,6 +69,27 @@ function fitRouteArea(map, options = {}) {
 }
 
 function customizeBaseMap(map) {
+  const firstLandLayer = map.getLayer('park') ? 'park' : undefined;
+  const firstLanduseLayer = map.getLayer('landuse_residential') ? 'landuse_residential' : firstLandLayer;
+  if (!map.getLayer('landcover-farmland-detail')) map.addLayer({
+    id: 'landcover-farmland-detail', type: 'fill', source: 'openmaptiles', 'source-layer': 'landcover',
+    minzoom: LAND_DETAIL_ZOOM_START,
+    filter: ['==', ['get', 'class'], 'farmland'],
+    paint: { 'fill-color': '#fff1a3', 'fill-opacity': 0 }
+  }, firstLandLayer);
+  if (!map.getLayer('landcover-rock-detail')) map.addLayer({
+    id: 'landcover-rock-detail', type: 'fill', source: 'openmaptiles', 'source-layer': 'landcover',
+    minzoom: LAND_DETAIL_ZOOM_START,
+    filter: ['==', ['get', 'class'], 'rock'],
+    paint: { 'fill-color': '#eee8d7', 'fill-opacity': 0 }
+  }, firstLandLayer);
+  if (!map.getLayer('landuse-developed-detail')) map.addLayer({
+    id: 'landuse-developed-detail', type: 'fill', source: 'openmaptiles', 'source-layer': 'landuse',
+    minzoom: LAND_DETAIL_ZOOM_START,
+    filter: ['match', ['get', 'class'], ['commercial', 'industrial', 'retail'], true, false],
+    paint: { 'fill-color': '#e6c49d', 'fill-opacity': 0 }
+  }, firstLanduseLayer);
+
   map.getStyle().layers.forEach(layer => {
     const sourceLayer = layer['source-layer'];
     const layerId = layer.id.toLowerCase();
@@ -80,21 +103,114 @@ function customizeBaseMap(map) {
     } else if (layer.type === 'symbol' && layer.layout?.['text-field']) {
       map.setPaintProperty(layer.id, 'text-opacity', ['step', ['zoom'], 1, 7, 0, 12, 1]);
     } else if (layer.type === 'background') {
-      map.setPaintProperty(layer.id, 'background-color', '#b8dfc2');
+      map.setPaintProperty(layer.id, 'background-color', [
+        'interpolate', ['linear'], ['zoom'],
+        LAND_DETAIL_ZOOM_START, '#b8dfc2',
+        LAND_DETAIL_ZOOM_END, '#fffcef'
+      ]);
     } else if (sourceLayer === 'water' && layer.type === 'fill') {
-      map.setPaintProperty(layer.id, 'fill-color', '#f3f7fd');
+      map.setPaintProperty(layer.id, 'fill-color', [
+        'interpolate', ['linear'], ['zoom'],
+        LAND_DETAIL_ZOOM_START, '#f3f7fd',
+        LAND_DETAIL_ZOOM_END, '#c7e7f6'
+      ]);
       map.setPaintProperty(layer.id, 'fill-opacity', 1);
     } else if (sourceLayer === 'waterway' && layer.type === 'line') {
-      map.setPaintProperty(layer.id, 'line-color', '#dce7f3');
+      map.setPaintProperty(layer.id, 'line-color', [
+        'interpolate', ['linear'], ['zoom'],
+        LAND_DETAIL_ZOOM_START, '#dce7f3',
+        LAND_DETAIL_ZOOM_END, '#61bfe5'
+      ]);
+    } else if (sourceLayer === 'park' && layer.type === 'fill') {
+      map.setPaintProperty(layer.id, 'fill-color', [
+        'interpolate', ['linear'], ['zoom'],
+        LAND_DETAIL_ZOOM_START, '#d8e8c8',
+        LAND_DETAIL_ZOOM_END, '#b9e49b'
+      ]);
+      map.setPaintProperty(layer.id, 'fill-opacity', [
+        'interpolate', ['linear'], ['zoom'],
+        LAND_DETAIL_ZOOM_START, 0.7,
+        LAND_DETAIL_ZOOM_END, 0.85
+      ]);
+    } else if (sourceLayer === 'park' && layer.type === 'line') {
+      map.setPaintProperty(layer.id, 'line-color', [
+        'interpolate', ['linear'], ['zoom'],
+        LAND_DETAIL_ZOOM_START, 'rgba(228,241,215,1)',
+        LAND_DETAIL_ZOOM_END, '#62b94f'
+      ]);
     } else if (sourceLayer === 'landcover' && layer.type === 'fill') {
-      map.setPaintProperty(layer.id, 'fill-color', '#addbb9');
+      map.setPaintProperty(layer.id, 'fill-color', [
+        'interpolate', ['linear'], ['zoom'],
+        LAND_DETAIL_ZOOM_START, '#addbb9',
+        LAND_DETAIL_ZOOM_END,
+        ['match', ['get', 'class'],
+          'wood', '#d1ecae',
+          'grass', '#e7efae',
+          'farmland', '#fff09b',
+          'rock', '#eee8d7',
+          'ice', '#e7f0f2',
+          'sand', '#ecd8a1',
+          '#addbb9']
+      ]);
+      map.setPaintProperty(layer.id, 'fill-opacity', [
+        'interpolate', ['linear'], ['zoom'],
+        LAND_DETAIL_ZOOM_START, layer.paint?.['fill-opacity'] ?? 1,
+        LAND_DETAIL_ZOOM_END,
+        ['match', ['get', 'class'],
+          'wood', 0.9,
+          'grass', 0.82,
+          'farmland', 0.88,
+          'rock', 0.78,
+          'ice', 0.9,
+          'sand', 0.85,
+          'wetland', 0.8,
+          0.55]
+      ]);
     } else if (sourceLayer === 'landuse' && layer.type === 'fill') {
-      map.setPaintProperty(layer.id, 'fill-color', '#b9ddbf');
+      map.setLayerZoomRange(layer.id, layer.minzoom ?? 0, 24);
+      map.setPaintProperty(layer.id, 'fill-color', [
+        'interpolate', ['linear'], ['zoom'],
+        LAND_DETAIL_ZOOM_START, '#b9ddbf',
+        LAND_DETAIL_ZOOM_END,
+        ['match', ['get', 'class'],
+          'residential', '#e8b17b',
+          'commercial', '#e7c59e',
+          'industrial', '#d8d4ce',
+          'retail', '#e3a97b',
+          'pitch', '#b8dda0',
+          'track', '#e2d2a1',
+          'cemetery', '#c7dfa9',
+          'hospital', '#ecd4dc',
+          'school', '#eee4b4',
+          '#b9ddbf']
+      ]);
+      map.setPaintProperty(layer.id, 'fill-opacity', [
+        'interpolate', ['linear'], ['zoom'],
+        LAND_DETAIL_ZOOM_START, layer.paint?.['fill-opacity'] ?? 1,
+        LAND_DETAIL_ZOOM_END, 0.88
+      ]);
+    } else if (sourceLayer === 'building' && layer.type === 'fill') {
+      map.setPaintProperty(layer.id, 'fill-color', '#74736f');
+      map.setPaintProperty(layer.id, 'fill-outline-color', '#f7f2e7');
+    } else if (sourceLayer === 'building' && layer.type === 'fill-extrusion') {
+      map.setPaintProperty(layer.id, 'fill-extrusion-color', '#74736f');
+      map.setPaintProperty(layer.id, 'fill-extrusion-opacity', 0.88);
     } else if (sourceLayer === 'transportation' && layer.type === 'line') {
       map.setLayerZoomRange(layer.id, Math.min(layer.minzoom ?? 0, 7), layer.maxzoom ?? 24);
       const isCasing = layerId.includes('casing');
       const isMainRoad = ['motorway', 'trunk', 'primary', 'secondary'].some(roadClass => layerId.includes(roadClass));
-      map.setPaintProperty(layer.id, 'line-color', isCasing ? '#8b918e' : isMainRoad ? '#9da3a0' : '#b1b6b3');
+      const isRail = layerId.includes('rail');
+      const isPath = ['path', 'pedestrian', 'track'].some(roadClass => layerId.includes(roadClass));
+      const overviewColor = isCasing ? '#8b918e' : isMainRoad ? '#9da3a0' : '#b1b6b3';
+      const detailColor = isRail ? '#747474'
+        : isCasing ? (isMainRoad ? '#b34f38' : '#c7c3b9')
+          : isMainRoad ? '#ed7250'
+            : isPath ? '#85857f' : '#fffdf5';
+      map.setPaintProperty(layer.id, 'line-color', [
+        'interpolate', ['linear'], ['zoom'],
+        LAND_DETAIL_ZOOM_START, overviewColor,
+        LAND_DETAIL_ZOOM_END, detailColor
+      ]);
       map.setPaintProperty(layer.id, 'line-width', isCasing
         ? ['interpolate', ['linear'], ['zoom'], 7, 0.8, 11, 1.8, 15, 4]
         : isMainRoad
