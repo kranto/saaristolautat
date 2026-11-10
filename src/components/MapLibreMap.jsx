@@ -18,6 +18,7 @@ const SHOW_MAP_DEBUG = typeof window !== 'undefined' && ['localhost', '127.0.0.1
 const legacyZoomToMapLibre = zoom => Number(zoom) - 1;
 const mapLibreZoomToExternal = zoom => Number(zoom) + 1;
 const legacyEmSize = em => ['interpolate', ['linear'], ['zoom'], 4, em * 6, 18, em * 20];
+const DISTANCE_SIGN_TEXT_SIZE = 14.4;
 const ROUTE_AREA_BOUNDS = [[19.45, 59.72], [23.05, 60.58]];
 const MIN_ROUTE_RENDER_ZOOM = 7;
 const HIITTINEN = [22.69, 59.88];
@@ -1178,9 +1179,10 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
           id: `distance-boxes-${range}`, type: 'symbol', source: 'saaristolautat', minzoom: from, maxzoom: to + 1,
           filter: ['all', ['==', ['get', 'kind'], 'box'], ['==', ['get', 'objectMinZoom'], from], ['==', ['get', 'objectMaxZoom'], to]],
           layout: {
-            'text-field': ['get', 'description'], 'text-font': ['Noto Sans Bold'], 'text-size': legacyEmSize(0.9),
+            'text-field': ['get', 'description'], 'text-font': ['Noto Sans Bold'], 'text-size': DISTANCE_SIGN_TEXT_SIZE,
             'text-line-height': 1.1, 'text-max-width': 100,
             'text-offset': ['array', 'number', 2, ['get', 'labelOffset']], 'text-anchor': ['get', 'labelTextAnchor'], 'text-optional': true,
+            'text-justify': 'center',
             'text-allow-overlap': true, 'text-ignore-placement': true,
             'icon-image': 'distance-sign', 'icon-text-fit': 'both', 'icon-text-fit-padding': [4, 6, 4, 6],
             'icon-allow-overlap': true, 'icon-ignore-placement': true
