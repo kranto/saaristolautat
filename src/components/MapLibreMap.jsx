@@ -18,9 +18,28 @@ const RASTER_BASE_LAYERS = {
   OSM: 'base-osm'
 };
 const SHOW_MAP_DEBUG = typeof window !== 'undefined' && ['localhost', '127.0.0.1', '::1'].includes(window.location.hostname);
+const LANDCOVER_VARIANTS = {
+  kmtk: {
+    archive: 'landcover-pilot-kustavi-inio-velkua-kmtk.pmtiles',
+    attribution: 'Lähde: Maanmittauslaitos, Kansallinen maastotietokanta BETA (CC BY 4.0)',
+    label: 'KMTK'
+  },
+  syke: {
+    archive: 'landcover-pilot-kustavi-inio-velkua.pmtiles',
+    attribution: 'Lähde: Syke, Maanpeite 2 m 2022 (CC BY 4.0)',
+    label: 'Syke'
+  }
+};
+const landcoverParameter = new URLSearchParams(window.location.search).get('landcover');
+const complementaryLandcover = LANDCOVER_VARIANTS[landcoverParameter] || LANDCOVER_VARIANTS.kmtk;
 const COMPLEMENTARY_LANDCOVER_ENABLED = (import.meta.env.DEV || import.meta.env.VITE_APP_ENV === 'test')
-  && new URLSearchParams(window.location.search).get('landcover') !== '0';
-const COMPLEMENTARY_LANDCOVER_ARCHIVE = 'landcover-pilot-kustavi-inio-velkua.pmtiles';
+  && landcoverParameter !== '0';
+const screenshotCenter = new URLSearchParams(window.location.search).get('screenshotCenter')?.split(',').map(Number);
+const screenshotZoom = Number(new URLSearchParams(window.location.search).get('screenshotZoom'));
+const SCREENSHOT_MAP_VIEW = (import.meta.env.DEV || import.meta.env.VITE_APP_ENV === 'test') &&
+  screenshotCenter?.length === 2 && screenshotCenter.every(Number.isFinite) && Number.isFinite(screenshotZoom)
+  ? { center: screenshotCenter, zoom: screenshotZoom }
+  : null;
 const legacyZoomToMapLibre = zoom => Number(zoom) - 1;
 const mapLibreZoomToExternal = zoom => Number(zoom) + 1;
 const legacyEmSize = em => ['interpolate', ['linear'], ['zoom'], 4, em * 6, 18, em * 20];
@@ -238,11 +257,11 @@ function addComplementaryLandcover(map) {
   if (!COMPLEMENTARY_LANDCOVER_ENABLED) return;
 
   if (!map.getSource('complementary-landcover')) {
-    const archiveUrl = new URL(`/data/tiles/${COMPLEMENTARY_LANDCOVER_ARCHIVE}`, window.location.origin);
+    const archiveUrl = new URL(`/data/tiles/${complementaryLandcover.archive}`, window.location.origin);
     map.addSource('complementary-landcover', {
       type: 'vector',
       url: `pmtiles://${archiveUrl.href}`,
-      attribution: 'Lähde: Syke, Maanpeite 2 m 2022 (CC BY 4.0)'
+      attribution: complementaryLandcover.attribution
     });
   }
   if (map.getLayer('complementary-landcover-fill')) return;
@@ -262,7 +281,10 @@ function addComplementaryLandcover(map) {
         'farmland', '#ffe36e',
         'open', '#d8e893',
         'rock', '#c7c3b8',
+        'wetland', '#b5d9b6',
+        'sand', '#f1dda4',
         'bare', '#e3c895',
+        'urban', '#dfb285',
         '#e9e8cf'],
       'fill-opacity': 0.94
     }
@@ -801,11 +823,12 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
 
   useEffect(() => {
     if (!mapContainer.current || mapRef.current) return undefined;
+    if (SCREENSHOT_MAP_VIEW) document.getElementById('loader')?.style.setProperty('display', 'none');
     const map = new maplibregl.Map({
       container: mapContainer.current,
       style: OPENFREEMAP_STYLE,
-      center: [21.25, 60.15],
-      zoom: MIN_ROUTE_RENDER_ZOOM,
+      center: SCREENSHOT_MAP_VIEW?.center || [21.25, 60.15],
+      zoom: SCREENSHOT_MAP_VIEW?.zoom || MIN_ROUTE_RENDER_ZOOM,
       minZoom: 4,
       maxZoom: 17,
       attributionControl: false
@@ -814,7 +837,7 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
     map.once('load', () => {
       window.requestAnimationFrame(() => {
         map.resize();
-        fitRouteArea(map);
+        if (!SCREENSHOT_MAP_VIEW) fitRouteArea(map);
       });
     });
     const unregisterMapNavigation = registerMapNavigation(id => {
@@ -1735,7 +1758,7 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
       aria-pressed={landcoverVisible}
       onClick={() => setLandcoverVisible(visible => !visible)}
     >
-      Täydentävä maanpeite
+      Täydentävä maanpeite ({complementaryLandcover.label})
     </button>
   );
 
