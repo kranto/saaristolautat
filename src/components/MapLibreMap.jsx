@@ -106,7 +106,7 @@ function customizeBaseMap(map) {
     id: 'landcover-rock-detail', type: 'fill', source: 'openmaptiles', 'source-layer': 'landcover',
     minzoom: LAND_DETAIL_ZOOM_START,
     filter: ['==', ['get', 'class'], 'rock'],
-    paint: { 'fill-color': '#eee8d7', 'fill-opacity': 0 }
+    paint: { 'fill-color': '#d9d8cf', 'fill-opacity': 0 }
   }, firstLandLayer);
   if (!map.getLayer('landuse-developed-detail')) map.addLayer({
     id: 'landuse-developed-detail', type: 'fill', source: 'openmaptiles', 'source-layer': 'landuse',
@@ -173,7 +173,7 @@ function customizeBaseMap(map) {
           'wood', '#d1ecae',
           'grass', '#e7efae',
           'farmland', '#f4e9b2',
-          'rock', '#eee8d7',
+          'rock', '#d9d8cf',
           'ice', '#e7f0f2',
           'sand', '#ecd8a1',
           '#addbb9']
@@ -275,19 +275,23 @@ function addComplementaryLandcover(map) {
     type: 'fill',
     source: 'complementary-landcover',
     'source-layer': 'landcover',
-    minzoom: 10,
+    minzoom: LAND_DETAIL_ZOOM_START,
     paint: {
       'fill-color': ['match', ['get', 'class'],
         'forest', '#b5cda6',
-        'farmland', '#f0e6bc',
+        'farmland', '#f4e9b2',
         'open', '#c9d4b1',
-        'rock', '#c4c1b7',
+        'rock', '#d9d8cf',
         'wetland', '#b8cbc0',
         'sand', '#ded2b4',
         'bare', '#d1c4ae',
         'urban', '#cdb9a8',
         '#dedfc9'],
-      'fill-opacity': 0.88
+      'fill-opacity': [
+        'interpolate', ['linear'], ['zoom'],
+        LAND_DETAIL_ZOOM_START, 0,
+        LAND_DETAIL_ZOOM_END, 1
+      ]
     }
   }, beforeLayer);
 }
