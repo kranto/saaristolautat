@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { connect } from 'react-redux';
 import * as maplibregl from 'maplibre-gl';
 import maplibreWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?url';
+import { Protocol } from 'pmtiles';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import './MapLibreMap.css';
 import { phases } from '../lib/constants';
@@ -9,12 +10,17 @@ import { mapDataReady, registerMapNavigation, registerMapPierTooltip, registerMa
 import { hideMenuAndSettings } from '../lib/uicontrol';
 
 maplibregl.setWorkerUrl(maplibreWorkerUrl);
+const pmtilesProtocol = new Protocol();
+maplibregl.addProtocol('pmtiles', pmtilesProtocol.tile);
 
 const OPENFREEMAP_STYLE = 'https://tiles.openfreemap.org/styles/liberty';
 const RASTER_BASE_LAYERS = {
   OSM: 'base-osm'
 };
 const SHOW_MAP_DEBUG = typeof window !== 'undefined' && ['localhost', '127.0.0.1', '::1'].includes(window.location.hostname);
+const COMPLEMENTARY_LANDCOVER_ENABLED = (import.meta.env.DEV || import.meta.env.VITE_APP_ENV === 'test')
+  && new URLSearchParams(window.location.search).get('landcover') !== '0';
+const COMPLEMENTARY_LANDCOVER_ARCHIVE = 'landcover-pilot-kustavi-inio-velkua.pmtiles';
 const legacyZoomToMapLibre = zoom => Number(zoom) - 1;
 const mapLibreZoomToExternal = zoom => Number(zoom) + 1;
 const legacyEmSize = em => ['interpolate', ['linear'], ['zoom'], 4, em * 6, 18, em * 20];
@@ -226,6 +232,41 @@ function customizeBaseMap(map) {
     }
   });
 
+}
+
+function addComplementaryLandcover(map) {
+  if (!COMPLEMENTARY_LANDCOVER_ENABLED) return;
+
+  if (!map.getSource('complementary-landcover')) {
+    const archiveUrl = new URL(`/data/tiles/${COMPLEMENTARY_LANDCOVER_ARCHIVE}`, window.location.origin);
+    map.addSource('complementary-landcover', {
+      type: 'vector',
+      url: `pmtiles://${archiveUrl.href}`,
+      attribution: 'Lähde: Syke, Maanpeite 2 m 2022 (CC BY 4.0)'
+    });
+  }
+  if (map.getLayer('complementary-landcover-fill')) return;
+
+  const beforeLayer = map.getStyle().layers.find(layer => (
+    layer['source-layer'] === 'building' || layer['source-layer'] === 'transportation'
+  ))?.id;
+  map.addLayer({
+    id: 'complementary-landcover-fill',
+    type: 'fill',
+    source: 'complementary-landcover',
+    'source-layer': 'landcover',
+    minzoom: 10,
+    paint: {
+      'fill-color': ['match', ['get', 'class'],
+        'forest', '#9fd17e',
+        'farmland', '#ffe36e',
+        'open', '#d8e893',
+        'rock', '#c7c3b8',
+        'bare', '#e3c895',
+        '#e9e8cf'],
+      'fill-opacity': 0.94
+    }
+  }, beforeLayer);
 }
 
 function addRasterBaseMaps(map) {
@@ -756,6 +797,7 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
   const [mapDebug, setMapDebug] = useState(null);
   const [showReset, setShowReset] = useState(false);
   const [mapReady, setMapReady] = useState(false);
+  const [landcoverVisible, setLandcoverVisible] = useState(true);
 
   useEffect(() => {
     if (!mapContainer.current || mapRef.current) return undefined;
@@ -1054,6 +1096,7 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
     };
     map.on('load', () => {
       customizeBaseMap(map);
+      addComplementaryLandcover(map);
       addRasterBaseMaps(map);
       setBaseMap(map, mapTypeRef.current);
       addArchipelagoTarget(map);
@@ -1462,6 +1505,17 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
   }, [layers]);
 
   useEffect(() => {
+    const map = mapRef.current;
+    if (map?.getLayer('complementary-landcover-fill')) {
+      map.setLayoutProperty(
+        'complementary-landcover-fill',
+        'visibility',
+        landcoverVisible ? 'visible' : 'none'
+      );
+    }
+  }, [landcoverVisible]);
+
+  useEffect(() => {
     mapTypeRef.current = mapTypeId;
     const map = mapRef.current;
     if (map) setBaseMap(map, mapTypeId);
@@ -1674,10 +1728,22 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
     />
   );
 
+  const landcoverToggle = COMPLEMENTARY_LANDCOVER_ENABLED && (
+    <button
+      type="button"
+      className={`landcover-toggle ${landcoverVisible ? 'active' : ''}`}
+      aria-pressed={landcoverVisible}
+      onClick={() => setLandcoverVisible(visible => !visible)}
+    >
+      Täydentävä maanpeite
+    </button>
+  );
+
   if (embedded) return (
     <>
       <div ref={mapContainer} id="map" className={`map maplibre-embedded ${mapReady ? 'maplibre-map-ready' : 'maplibre-map-loading'}`} aria-label="Saaristolauttojen kartta" />
       {resetButton}
+      {landcoverToggle}
       {debugElement}
     </>
   );
@@ -1686,6 +1752,7 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
     <main className="map-view">
       <div ref={mapContainer} className={`map-view__canvas ${mapReady ? 'maplibre-map-ready' : 'maplibre-map-loading'}`} aria-label="Saaristolauttojen kartta" />
       {resetButton}
+      {landcoverToggle}
       <header className="map-view__header">
         <div className="map-view__brand">
           <img src="/mstile-70x70.png" alt="" />
