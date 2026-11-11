@@ -277,16 +277,16 @@ function addComplementaryLandcover(map) {
     minzoom: 10,
     paint: {
       'fill-color': ['match', ['get', 'class'],
-        'forest', '#9fd17e',
-        'farmland', '#ffe36e',
-        'open', '#d8e893',
-        'rock', '#c7c3b8',
-        'wetland', '#b5d9b6',
-        'sand', '#f1dda4',
-        'bare', '#e3c895',
-        'urban', '#dfb285',
-        '#e9e8cf'],
-      'fill-opacity': 0.94
+        'forest', '#b5cda6',
+        'farmland', '#ddd4ac',
+        'open', '#c9d4b1',
+        'rock', '#c4c1b7',
+        'wetland', '#b8cbc0',
+        'sand', '#ded2b4',
+        'bare', '#d1c4ae',
+        'urban', '#cdb9a8',
+        '#dedfc9'],
+      'fill-opacity': 0.88
     }
   }, beforeLayer);
 }
