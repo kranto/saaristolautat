@@ -139,6 +139,7 @@ function customizeBaseMap(map) {
         LAND_DETAIL_ZOOM_START, '#f3f7fd',
         LAND_DETAIL_ZOOM_END, '#ffffff'
       ]);
+      map.setPaintProperty(layer.id, 'fill-outline-color', '#acd3e8');
       map.setPaintProperty(layer.id, 'fill-opacity', 1);
     } else if (sourceLayer === 'waterway' && layer.type === 'line') {
       map.setPaintProperty(layer.id, 'line-color', [
