@@ -100,7 +100,7 @@ function customizeBaseMap(map) {
     id: 'landcover-farmland-detail', type: 'fill', source: 'openmaptiles', 'source-layer': 'landcover',
     minzoom: LAND_DETAIL_ZOOM_START,
     filter: ['==', ['get', 'class'], 'farmland'],
-    paint: { 'fill-color': '#fff1a3', 'fill-opacity': 0 }
+    paint: { 'fill-color': '#f4e9b2', 'fill-opacity': 0 }
   }, firstLandLayer);
   if (!map.getLayer('landcover-rock-detail')) map.addLayer({
     id: 'landcover-rock-detail', type: 'fill', source: 'openmaptiles', 'source-layer': 'landcover',
@@ -172,7 +172,7 @@ function customizeBaseMap(map) {
         ['match', ['get', 'class'],
           'wood', '#d1ecae',
           'grass', '#e7efae',
-          'farmland', '#fff09b',
+          'farmland', '#f4e9b2',
           'rock', '#eee8d7',
           'ice', '#e7f0f2',
           'sand', '#ecd8a1',
@@ -279,7 +279,7 @@ function addComplementaryLandcover(map) {
     paint: {
       'fill-color': ['match', ['get', 'class'],
         'forest', '#b5cda6',
-        'farmland', '#ddd4ac',
+        'farmland', '#f0e6bc',
         'open', '#c9d4b1',
         'rock', '#c4c1b7',
         'wetland', '#b8cbc0',
