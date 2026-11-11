@@ -20,7 +20,7 @@ const RASTER_BASE_LAYERS = {
 const SHOW_MAP_DEBUG = typeof window !== 'undefined' && ['localhost', '127.0.0.1', '::1'].includes(window.location.hostname);
 const LANDCOVER_VARIANTS = {
   kmtk: {
-    archive: 'landcover-pilot-kustavi-inio-velkua-kmtk.pmtiles',
+    archive: 'landcover-pilot-archipelago-sea-kmtk.pmtiles',
     attribution: 'Lähde: Maanmittauslaitos, Kansallinen maastotietokanta BETA (CC BY 4.0)',
     label: 'KMTK'
   },
