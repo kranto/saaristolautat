@@ -30,18 +30,28 @@ const LANDCOVER_VARIANTS = {
     label: 'Syke'
   }
 };
-const COMPLEMENTARY_FOREST = {
-  archive: 'landcover-pilot-archipelago-sea-syke-forest.pmtiles',
-  attribution: 'Lähde: Syke, Maanpeite 2 m 2022 (CC BY 4.0)'
+const COMPLEMENTARY_FOREST_VARIANTS = {
+  original: {
+    archive: 'landcover-pilot-archipelago-sea-syke-forest.pmtiles',
+    attribution: 'Lähde: Syke, Maanpeite 2 m 2022 (CC BY 4.0)'
+  },
+  smoothed: {
+    archive: 'landcover-pilot-kumlinge-seglinge-syke-forest-smoothed.pmtiles',
+    attribution: 'Lähde: Syke, Maanpeite 2 m 2022 (CC BY 4.0), pehmennetty koeversio'
+  }
 };
-const landcoverParameter = new URLSearchParams(window.location.search).get('landcover');
+const mapParameters = new URLSearchParams(window.location.search);
+const landcoverParameter = mapParameters.get('landcover');
+const forestParameter = mapParameters.get('forest');
 const complementaryLandcover = LANDCOVER_VARIANTS[landcoverParameter] || LANDCOVER_VARIANTS.kmtk;
+const complementaryForest = COMPLEMENTARY_FOREST_VARIANTS[forestParameter]
+  || COMPLEMENTARY_FOREST_VARIANTS.original;
 const COMPLEMENTARY_LANDCOVER_ENABLED = (import.meta.env.DEV || import.meta.env.VITE_APP_ENV === 'test')
   && landcoverParameter !== '0';
 const COMPLEMENTARY_FOREST_ENABLED = COMPLEMENTARY_LANDCOVER_ENABLED
   && complementaryLandcover === LANDCOVER_VARIANTS.kmtk;
-const screenshotCenter = new URLSearchParams(window.location.search).get('screenshotCenter')?.split(',').map(Number);
-const screenshotZoom = Number(new URLSearchParams(window.location.search).get('screenshotZoom'));
+const screenshotCenter = mapParameters.get('screenshotCenter')?.split(',').map(Number);
+const screenshotZoom = Number(mapParameters.get('screenshotZoom'));
 const SCREENSHOT_MAP_VIEW = (import.meta.env.DEV || import.meta.env.VITE_APP_ENV === 'test') &&
   screenshotCenter?.length === 2 && screenshotCenter.every(Number.isFinite) && Number.isFinite(screenshotZoom)
   ? { center: screenshotCenter, zoom: screenshotZoom }
@@ -418,11 +428,11 @@ function addComplementaryForest(map, tuning) {
   if (!COMPLEMENTARY_FOREST_ENABLED) return;
 
   if (!map.getSource('complementary-forest')) {
-    const archiveUrl = new URL(`/data/tiles/${COMPLEMENTARY_FOREST.archive}`, window.location.origin);
+    const archiveUrl = new URL(`/data/tiles/${complementaryForest.archive}`, window.location.origin);
     map.addSource('complementary-forest', {
       type: 'vector',
       url: `pmtiles://${archiveUrl.href}`,
-      attribution: COMPLEMENTARY_FOREST.attribution
+      attribution: complementaryForest.attribution
     });
   }
   if (map.getLayer('complementary-forest-fill')) return;
