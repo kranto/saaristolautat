@@ -30,10 +30,16 @@ const LANDCOVER_VARIANTS = {
     label: 'Syke'
   }
 };
+const COMPLEMENTARY_FOREST = {
+  archive: 'landcover-pilot-archipelago-sea-syke-forest.pmtiles',
+  attribution: 'Lähde: Syke, Maanpeite 2 m 2022 (CC BY 4.0)'
+};
 const landcoverParameter = new URLSearchParams(window.location.search).get('landcover');
 const complementaryLandcover = LANDCOVER_VARIANTS[landcoverParameter] || LANDCOVER_VARIANTS.kmtk;
 const COMPLEMENTARY_LANDCOVER_ENABLED = (import.meta.env.DEV || import.meta.env.VITE_APP_ENV === 'test')
   && landcoverParameter !== '0';
+const COMPLEMENTARY_FOREST_ENABLED = COMPLEMENTARY_LANDCOVER_ENABLED
+  && complementaryLandcover === LANDCOVER_VARIANTS.kmtk;
 const screenshotCenter = new URLSearchParams(window.location.search).get('screenshotCenter')?.split(',').map(Number);
 const screenshotZoom = Number(new URLSearchParams(window.location.search).get('screenshotZoom'));
 const SCREENSHOT_MAP_VIEW = (import.meta.env.DEV || import.meta.env.VITE_APP_ENV === 'test') &&
@@ -294,6 +300,47 @@ function addComplementaryLandcover(map) {
       ]
     }
   }, beforeLayer);
+}
+
+function addComplementaryForest(map) {
+  if (!COMPLEMENTARY_FOREST_ENABLED) return;
+
+  if (!map.getSource('complementary-forest')) {
+    const archiveUrl = new URL(`/data/tiles/${COMPLEMENTARY_FOREST.archive}`, window.location.origin);
+    map.addSource('complementary-forest', {
+      type: 'vector',
+      url: `pmtiles://${archiveUrl.href}`,
+      attribution: COMPLEMENTARY_FOREST.attribution
+    });
+  }
+  if (map.getLayer('complementary-forest-fill')) return;
+
+  const beforeLayer = map.getStyle().layers.find(layer => (
+    layer['source-layer'] === 'building' || layer['source-layer'] === 'transportation'
+  ))?.id;
+  map.addLayer({
+    id: 'complementary-forest-fill',
+    type: 'fill',
+    source: 'complementary-forest',
+    'source-layer': 'landcover',
+    minzoom: LAND_DETAIL_ZOOM_START,
+    paint: {
+      'fill-color': '#d1ecae',
+      'fill-opacity': [
+        'interpolate', ['linear'], ['zoom'],
+        LAND_DETAIL_ZOOM_START, 0,
+        LAND_DETAIL_ZOOM_END, 1
+      ]
+    }
+  }, beforeLayer);
+}
+
+function setComplementaryLandcoverVisibility(map, visible) {
+  ['complementary-forest-fill', 'complementary-landcover-fill'].forEach(layerId => {
+    if (map.getLayer(layerId)) {
+      map.setLayoutProperty(layerId, 'visibility', visible ? 'visible' : 'none');
+    }
+  });
 }
 
 function addRasterBaseMaps(map) {
@@ -818,6 +865,7 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
   const stopLocationTrackingRef = useRef(() => {});
   const mapTypeRef = useRef(mapTypeId);
   const layersRef = useRef(layers);
+  const landcoverVisibleRef = useRef(true);
   layersRef.current = layers;
   const [status, setStatus] = useState('Ladataan karttaa…');
   const [selection, setSelection] = useState(null);
@@ -1124,7 +1172,9 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
     };
     map.on('load', () => {
       customizeBaseMap(map);
+      addComplementaryForest(map);
       addComplementaryLandcover(map);
+      setComplementaryLandcoverVisibility(map, landcoverVisibleRef.current);
       addRasterBaseMaps(map);
       setBaseMap(map, mapTypeRef.current);
       addArchipelagoTarget(map);
@@ -1533,14 +1583,9 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
   }, [layers]);
 
   useEffect(() => {
+    landcoverVisibleRef.current = landcoverVisible;
     const map = mapRef.current;
-    if (map?.getLayer('complementary-landcover-fill')) {
-      map.setLayoutProperty(
-        'complementary-landcover-fill',
-        'visibility',
-        landcoverVisible ? 'visible' : 'none'
-      );
-    }
+    if (map) setComplementaryLandcoverVisibility(map, landcoverVisible);
   }, [landcoverVisible]);
 
   useEffect(() => {
