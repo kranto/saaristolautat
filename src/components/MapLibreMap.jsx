@@ -397,13 +397,15 @@ function customizeBaseMap(map) {
       map.setLayerZoomRange(layer.id, Math.min(layer.minzoom ?? 0, 7), layer.maxzoom ?? 24);
       const isCasing = layerId.includes('casing');
       const isMainRoad = ['motorway', 'trunk', 'primary', 'secondary'].some(roadClass => layerId.includes(roadClass));
+      const isMinorRoad = ['minor', 'street'].some(roadClass => layerId.includes(roadClass));
       const isRail = layerId.includes('rail');
       const isPath = ['path', 'pedestrian', 'track'].some(roadClass => layerId.includes(roadClass));
       const overviewColor = isCasing ? '#8b918e' : isMainRoad ? '#9da3a0' : '#b1b6b3';
       const detailColor = isRail ? '#747474'
-        : isCasing ? (isMainRoad ? '#b34f38' : '#c7c3b9')
+        : isCasing ? (isMainRoad ? '#b34f38' : isMinorRoad ? '#918d83' : '#c7c3b9')
           : isMainRoad ? '#ed7250'
-            : isPath ? '#85857f' : '#fffdf5';
+            : isMinorRoad ? '#d9a36d'
+              : isPath ? '#85857f' : '#fffdf5';
       map.setPaintProperty(layer.id, 'line-color', [
         'interpolate', ['linear'], ['zoom'],
         LAND_DETAIL_ZOOM_START, overviewColor,
@@ -413,8 +415,14 @@ function customizeBaseMap(map) {
         ? ['interpolate', ['linear'], ['zoom'], 7, 0.8, 11, 1.8, 15, 4]
         : isMainRoad
           ? ['interpolate', ['linear'], ['zoom'], 7, 0.5, 11, 1.2, 15, 3]
-          : ['interpolate', ['linear'], ['zoom'], 9, 0.35, 12, 0.8, 15, 1.8]);
-      map.setPaintProperty(layer.id, 'line-opacity', isMainRoad || isCasing ? 0.9 : 0.72);
+          : isMinorRoad
+            ? ['interpolate', ['linear'], ['zoom'], 9, 0.4, 12, 1, 15, 2.2]
+            : ['interpolate', ['linear'], ['zoom'], 9, 0.35, 12, 0.8, 15, 1.8]);
+      map.setPaintProperty(
+        layer.id,
+        'line-opacity',
+        isMinorRoad ? (isCasing ? 0.95 : 0.98) : isMainRoad || isCasing ? 0.9 : 0.72
+      );
     }
 
     if (layer.type === 'symbol' && layer.layout?.['text-field'] && !layer.layout?.['icon-image']) {
