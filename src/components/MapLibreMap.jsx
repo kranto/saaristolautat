@@ -36,8 +36,8 @@ const COMPLEMENTARY_FOREST_VARIANTS = {
     attribution: 'Lähde: Syke, Maanpeite 2 m 2022 (CC BY 4.0)'
   },
   smoothed: {
-    archive: 'landcover-pilot-kumlinge-seglinge-syke-forest-smoothed.pmtiles',
-    attribution: 'Lähde: Syke, Maanpeite 2 m 2022 (CC BY 4.0), pehmennetty koeversio'
+    archive: 'landcover-pilot-archipelago-sea-syke-forest-smoothed.pmtiles',
+    attribution: 'Lähde: Syke, Maanpeite 2 m 2022 (CC BY 4.0), kartografisesti pehmennetty'
   }
 };
 const mapParameters = new URLSearchParams(window.location.search);
@@ -45,7 +45,7 @@ const landcoverParameter = mapParameters.get('landcover');
 const forestParameter = mapParameters.get('forest');
 const complementaryLandcover = LANDCOVER_VARIANTS[landcoverParameter] || LANDCOVER_VARIANTS.kmtk;
 const complementaryForest = COMPLEMENTARY_FOREST_VARIANTS[forestParameter]
-  || COMPLEMENTARY_FOREST_VARIANTS.original;
+  || COMPLEMENTARY_FOREST_VARIANTS.smoothed;
 const COMPLEMENTARY_LANDCOVER_ENABLED = (import.meta.env.DEV || import.meta.env.VITE_APP_ENV === 'test')
   && landcoverParameter !== '0';
 const COMPLEMENTARY_FOREST_ENABLED = COMPLEMENTARY_LANDCOVER_ENABLED
@@ -62,6 +62,8 @@ const legacyEmSize = em => ['interpolate', ['linear'], ['zoom'], 4, em * 6, 18, 
 const DISTANCE_SIGN_TEXT_SIZE = 14.4;
 const LAND_DETAIL_ZOOM_START = 11;
 const LAND_DETAIL_ZOOM_END = 13;
+const DEVELOPED_AREA_FADE_ZOOM_START = 14;
+const DEVELOPED_AREA_FADE_ZOOM_END = 15;
 const LANDCOVER_TUNING_STORAGE_KEY = 'saaristolautat.landcoverTuning.v1';
 const LANDCOVER_TUNING_DEFAULTS = {
   forest: { label: 'Metsä', color: '#d1ecae', opacity: 1 },
@@ -125,19 +127,31 @@ function complementaryLandcoverColorExpression(tuning) {
 }
 
 function complementaryLandcoverOpacityExpression(tuning) {
+  const opacityAtDetail = ['match', ['get', 'class'],
+    'forest', tuning.forest.opacity,
+    'farmland', tuning.farmland.opacity,
+    'open', tuning.open.opacity,
+    'rock', tuning.rock.opacity,
+    'wetland', tuning.wetland.opacity,
+    'sand', tuning.sand.opacity,
+    'bare', tuning.bare.opacity,
+    'urban', tuning.urban.opacity,
+    1];
+  const opacityAfterDevelopedFade = ['match', ['get', 'class'],
+    'forest', tuning.forest.opacity,
+    'farmland', tuning.farmland.opacity,
+    'open', tuning.open.opacity,
+    'rock', tuning.rock.opacity,
+    'wetland', tuning.wetland.opacity,
+    'sand', tuning.sand.opacity,
+    'bare', tuning.bare.opacity,
+    'urban', 0,
+    1];
   return ['interpolate', ['linear'], ['zoom'],
     LAND_DETAIL_ZOOM_START, 0,
-    LAND_DETAIL_ZOOM_END,
-    ['match', ['get', 'class'],
-      'forest', tuning.forest.opacity,
-      'farmland', tuning.farmland.opacity,
-      'open', tuning.open.opacity,
-      'rock', tuning.rock.opacity,
-      'wetland', tuning.wetland.opacity,
-      'sand', tuning.sand.opacity,
-      'bare', tuning.bare.opacity,
-      'urban', tuning.urban.opacity,
-      1]];
+    LAND_DETAIL_ZOOM_END, opacityAtDetail,
+    DEVELOPED_AREA_FADE_ZOOM_START, opacityAtDetail,
+    DEVELOPED_AREA_FADE_ZOOM_END, opacityAfterDevelopedFade];
 }
 
 function openFreeMapLandcoverOpacityExpression(tuning, overviewOpacity) {
@@ -168,11 +182,18 @@ function openFreeMapLandcoverOpacityExpression(tuning, overviewOpacity) {
 
 function openFreeMapLanduseOpacityExpression(tuning, overviewOpacity) {
   const developedClasses = ['residential', 'commercial', 'industrial', 'retail'];
+  const opacityAtDetail = ['match', ['get', 'class'],
+    developedClasses, 0.88 * tuning.urban.opacity,
+    0.88];
+  const opacityAfterDevelopedFade = ['match', ['get', 'class'],
+    developedClasses, 0,
+    0.88];
   return ['interpolate', ['linear'], ['zoom'],
     LAND_DETAIL_ZOOM_START,
     ['match', ['get', 'class'], developedClasses, overviewOpacity * tuning.urban.opacity, overviewOpacity],
-    LAND_DETAIL_ZOOM_END,
-    ['match', ['get', 'class'], developedClasses, 0.88 * tuning.urban.opacity, 0.88]];
+    LAND_DETAIL_ZOOM_END, opacityAtDetail,
+    DEVELOPED_AREA_FADE_ZOOM_START, opacityAtDetail,
+    DEVELOPED_AREA_FADE_ZOOM_END, opacityAfterDevelopedFade];
 }
 
 function knownVesselNamesByMmsi(data) {
