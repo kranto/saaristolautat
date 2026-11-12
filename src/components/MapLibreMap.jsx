@@ -67,6 +67,8 @@ const LANDCOVER_OPACITY_CAP_RATIO = (LANDCOVER_OPACITY_CAP_ZOOM - LAND_DETAIL_ZO
   / (LAND_DETAIL_ZOOM_END - LAND_DETAIL_ZOOM_START);
 const DEVELOPED_AREA_FADE_ZOOM_START = 14;
 const DEVELOPED_AREA_FADE_ZOOM_END = 15;
+const SIMPLE_DEVELOPED_AREA_FADE_IN_ZOOM_START = 9.5;
+const SIMPLE_DEVELOPED_AREA_FADE_IN_ZOOM_END = LANDCOVER_OPACITY_CAP_ZOOM + 1;
 const LANDCOVER_TUNING_STORAGE_KEY = 'saaristolautat.landcoverTuning.v1';
 const SIMPLE_LAND_COLOR = '#b8dfc2';
 const SIMPLE_LAND_DETAIL_COLOR = '#d4e8d8';
@@ -209,17 +211,26 @@ function openFreeMapLanduseOpacityExpression(tuning, overviewOpacity) {
     DEVELOPED_AREA_FADE_ZOOM_END, opacityAfterDevelopedFade];
 }
 
+function simplifiedDevelopedAreaOpacityExpression(tuning) {
+  const detailedDevelopedOpacity = cappedOpacity(tuning.urban.opacity, 0.88 * tuning.urban.opacity);
+  return ['interpolate', ['linear'], ['zoom'],
+    SIMPLE_DEVELOPED_AREA_FADE_IN_ZOOM_START, 0,
+    SIMPLE_DEVELOPED_AREA_FADE_IN_ZOOM_END, detailedDevelopedOpacity,
+    DEVELOPED_AREA_FADE_ZOOM_START, detailedDevelopedOpacity,
+    DEVELOPED_AREA_FADE_ZOOM_END, 0];
+}
+
 function simplifiedDevelopedLanduseOpacityExpression(tuning, overviewOpacity) {
   const developedClasses = ['residential', 'commercial', 'industrial', 'retail'];
-  const overviewDevelopedOpacity = overviewOpacity * tuning.urban.opacity;
-  const detailedDevelopedOpacity = cappedOpacity(overviewDevelopedOpacity, 0.88 * tuning.urban.opacity);
+  const detailedDevelopedOpacity = cappedOpacity(
+    overviewOpacity * tuning.urban.opacity,
+    0.88 * tuning.urban.opacity
+  );
+  const developedOpacity = ['match', ['get', 'class'], developedClasses, detailedDevelopedOpacity, 0];
   return ['interpolate', ['linear'], ['zoom'],
-    LAND_DETAIL_ZOOM_START,
-    ['match', ['get', 'class'], developedClasses, overviewDevelopedOpacity, 0],
-    LANDCOVER_OPACITY_CAP_ZOOM,
-    ['match', ['get', 'class'], developedClasses, detailedDevelopedOpacity, 0],
-    DEVELOPED_AREA_FADE_ZOOM_START,
-    ['match', ['get', 'class'], developedClasses, detailedDevelopedOpacity, 0],
+    SIMPLE_DEVELOPED_AREA_FADE_IN_ZOOM_START, 0,
+    SIMPLE_DEVELOPED_AREA_FADE_IN_ZOOM_END, developedOpacity,
+    DEVELOPED_AREA_FADE_ZOOM_START, developedOpacity,
     DEVELOPED_AREA_FADE_ZOOM_END, 0];
 }
 
@@ -582,6 +593,19 @@ function addComplementaryLandcover(map, tuning) {
       'fill-opacity': complementaryLandcoverOpacityExpression(tuning)
     }
   }, beforeLayer);
+  map.addLayer({
+    id: 'complementary-urban-fill',
+    type: 'fill',
+    source: 'complementary-landcover',
+    'source-layer': 'landcover',
+    minzoom: SIMPLE_DEVELOPED_AREA_FADE_IN_ZOOM_START,
+    filter: ['==', ['get', 'class'], 'urban'],
+    layout: { visibility: 'none' },
+    paint: {
+      'fill-color': tuning.urban.color,
+      'fill-opacity': simplifiedDevelopedAreaOpacityExpression(tuning)
+    }
+  }, beforeLayer);
 }
 
 function addComplementaryForest(map, tuning) {
@@ -696,12 +720,20 @@ function applyLandcoverTuning(map, tuning) {
   });
 }
 
-function setComplementaryLandcoverVisibility(map, visible) {
+function setComplementaryLandcoverVisibility(map, mapTypeId, landcoverVisible) {
+  const terrainVisible = mapTypeId === 'openfreemapTerrain' && landcoverVisible;
   ['complementary-forest-fill', 'complementary-landcover-fill'].forEach(layerId => {
     if (map.getLayer(layerId)) {
-      map.setLayoutProperty(layerId, 'visibility', visible ? 'visible' : 'none');
+      map.setLayoutProperty(layerId, 'visibility', terrainVisible ? 'visible' : 'none');
     }
   });
+  if (map.getLayer('complementary-urban-fill')) {
+    map.setLayoutProperty(
+      'complementary-urban-fill',
+      'visibility',
+      mapTypeId === 'openfreemap' ? 'visible' : 'none'
+    );
+  }
 }
 
 function applyOpenFreeMapAppearance(map, mapTypeId, tuning) {
@@ -750,6 +782,15 @@ function applyOpenFreeMapAppearance(map, mapTypeId, tuning) {
     return;
   }
 
+  const complementaryUrbanAvailable = Boolean(map.getLayer('complementary-urban-fill'));
+  if (complementaryUrbanAvailable) {
+    map.setPaintProperty('complementary-urban-fill', 'fill-color', tuning.urban.color);
+    map.setPaintProperty(
+      'complementary-urban-fill',
+      'fill-opacity',
+      simplifiedDevelopedAreaOpacityExpression(tuning)
+    );
+  }
   style.layers.forEach(layer => {
     if (layer.source !== 'openmaptiles' || layer.type !== 'fill' || layer['source-layer'] !== 'landuse') return;
     const overviewOpacity = openFreeMapOverviewOpacities.get(map)?.get(layer.id) ?? 1;
@@ -757,7 +798,9 @@ function applyOpenFreeMapAppearance(map, mapTypeId, tuning) {
     map.setPaintProperty(
       layer.id,
       'fill-opacity',
-      simplifiedDevelopedLanduseOpacityExpression(tuning, overviewOpacity)
+      complementaryUrbanAvailable
+        ? 0
+        : simplifiedDevelopedLanduseOpacityExpression(tuning, overviewOpacity)
     );
   });
 }
@@ -775,10 +818,7 @@ function setBaseMap(map, mapTypeId, tuning, landcoverVisible) {
     if (map.getLayer(layerId)) map.setLayoutProperty(layerId, 'visibility', mapTypeId === type ? 'visible' : 'none');
   });
   applyOpenFreeMapAppearance(map, mapTypeId, tuning);
-  setComplementaryLandcoverVisibility(
-    map,
-    mapTypeId === 'openfreemapTerrain' && landcoverVisible
-  );
+  setComplementaryLandcoverVisibility(map, mapTypeId, landcoverVisible);
 }
 
 function localizedName(item = {}, locale = 'fi') {
@@ -2013,7 +2053,8 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
     const map = mapRef.current;
     if (map) setComplementaryLandcoverVisibility(
       map,
-      mapTypeRef.current === 'openfreemapTerrain' && landcoverVisible
+      mapTypeRef.current,
+      landcoverVisible
     );
   }, [landcoverVisible]);
 
