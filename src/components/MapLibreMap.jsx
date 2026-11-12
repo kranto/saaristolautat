@@ -68,6 +68,8 @@ const LANDCOVER_OPACITY_CAP_RATIO = (LANDCOVER_OPACITY_CAP_ZOOM - LAND_DETAIL_ZO
 const DEVELOPED_AREA_FADE_ZOOM_START = 14;
 const DEVELOPED_AREA_FADE_ZOOM_END = 15;
 const LANDCOVER_TUNING_STORAGE_KEY = 'saaristolautat.landcoverTuning.v1';
+const SIMPLE_LAND_COLOR = '#b8dfc2';
+const SIMPLE_WATER_COLOR = '#f3f7fd';
 const LANDCOVER_TUNING_DEFAULTS = {
   forest: { label: 'Metsä', color: '#72c10b', opacity: 0.65 },
   farmland: { label: 'Pelto', color: '#f7e469', opacity: 1 },
@@ -204,6 +206,20 @@ function openFreeMapLanduseOpacityExpression(tuning, overviewOpacity) {
     LANDCOVER_OPACITY_CAP_ZOOM, opacityAtCap,
     DEVELOPED_AREA_FADE_ZOOM_START, opacityAtCap,
     DEVELOPED_AREA_FADE_ZOOM_END, opacityAfterDevelopedFade];
+}
+
+function simplifiedDevelopedLanduseOpacityExpression(tuning, overviewOpacity) {
+  const developedClasses = ['residential', 'commercial', 'industrial', 'retail'];
+  const overviewDevelopedOpacity = overviewOpacity * tuning.urban.opacity;
+  const detailedDevelopedOpacity = cappedOpacity(overviewDevelopedOpacity, 0.88 * tuning.urban.opacity);
+  return ['interpolate', ['linear'], ['zoom'],
+    LAND_DETAIL_ZOOM_START,
+    ['match', ['get', 'class'], developedClasses, overviewDevelopedOpacity, 0],
+    LANDCOVER_OPACITY_CAP_ZOOM,
+    ['match', ['get', 'class'], developedClasses, detailedDevelopedOpacity, 0],
+    DEVELOPED_AREA_FADE_ZOOM_START,
+    ['match', ['get', 'class'], developedClasses, detailedDevelopedOpacity, 0],
+    DEVELOPED_AREA_FADE_ZOOM_END, 0];
 }
 
 function knownVesselNamesByMmsi(data) {
@@ -625,6 +641,55 @@ function setComplementaryLandcoverVisibility(map, visible) {
   });
 }
 
+function applyOpenFreeMapAppearance(map, mapTypeId, tuning) {
+  const style = map.getStyle();
+  if (!style?.layers) return;
+  const terrain = mapTypeId === 'openfreemapTerrain';
+  style.layers.forEach(layer => {
+    const sourceLayer = layer['source-layer'];
+
+    if (layer.type === 'background') {
+      map.setPaintProperty(layer.id, 'background-color', terrain ? [
+        'interpolate', ['linear'], ['zoom'],
+        LAND_DETAIL_ZOOM_START, SIMPLE_LAND_COLOR,
+        LAND_DETAIL_ZOOM_END, '#e9e8cf'
+      ] : SIMPLE_LAND_COLOR);
+    } else if (sourceLayer === 'water' && layer.type === 'fill') {
+      map.setPaintProperty(layer.id, 'fill-color', terrain ? [
+        'interpolate', ['linear'], ['zoom'],
+        LAND_DETAIL_ZOOM_START, SIMPLE_WATER_COLOR,
+        LAND_DETAIL_ZOOM_END, '#ffffff'
+      ] : SIMPLE_WATER_COLOR);
+    } else if (sourceLayer === 'waterway' && layer.type === 'line') {
+      map.setPaintProperty(layer.id, 'line-color', terrain ? [
+        'interpolate', ['linear'], ['zoom'],
+        LAND_DETAIL_ZOOM_START, '#dce7f3',
+        LAND_DETAIL_ZOOM_END, '#61bfe5'
+      ] : '#dce7f3');
+    }
+
+    if (sourceLayer === 'landcover' || sourceLayer === 'park') {
+      map.setLayoutProperty(layer.id, 'visibility', terrain ? 'visible' : 'none');
+    }
+  });
+
+  if (terrain) {
+    applyLandcoverTuning(map, tuning);
+    return;
+  }
+
+  style.layers.forEach(layer => {
+    if (layer.source !== 'openmaptiles' || layer.type !== 'fill' || layer['source-layer'] !== 'landuse') return;
+    const overviewOpacity = openFreeMapOverviewOpacities.get(map)?.get(layer.id) ?? 1;
+    map.setPaintProperty(layer.id, 'fill-color', tuning.urban.color);
+    map.setPaintProperty(
+      layer.id,
+      'fill-opacity',
+      simplifiedDevelopedLanduseOpacityExpression(tuning, overviewOpacity)
+    );
+  });
+}
+
 function addRasterBaseMaps(map) {
   if (!map.getSource('osm-raster')) map.addSource('osm-raster', {
     type: 'raster', tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'], tileSize: 256, maxzoom: 19,
@@ -633,10 +698,15 @@ function addRasterBaseMaps(map) {
   if (!map.getLayer('base-osm')) map.addLayer({ id: 'base-osm', type: 'raster', source: 'osm-raster', layout: { visibility: 'none' } });
 }
 
-function setBaseMap(map, mapTypeId) {
+function setBaseMap(map, mapTypeId, tuning, landcoverVisible) {
   Object.entries(RASTER_BASE_LAYERS).forEach(([type, layerId]) => {
     if (map.getLayer(layerId)) map.setLayoutProperty(layerId, 'visibility', mapTypeId === type ? 'visible' : 'none');
   });
+  applyOpenFreeMapAppearance(map, mapTypeId, tuning);
+  setComplementaryLandcoverVisibility(
+    map,
+    mapTypeId === 'openfreemapTerrain' && landcoverVisible
+  );
 }
 
 function localizedName(item = {}, locale = 'fi') {
@@ -1459,10 +1529,8 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
       customizeBaseMap(map);
       addComplementaryForest(map, landcoverTuningRef.current);
       addComplementaryLandcover(map, landcoverTuningRef.current);
-      applyLandcoverTuning(map, landcoverTuningRef.current);
-      setComplementaryLandcoverVisibility(map, landcoverVisibleRef.current);
       addRasterBaseMaps(map);
-      setBaseMap(map, mapTypeRef.current);
+      setBaseMap(map, mapTypeRef.current, landcoverTuningRef.current, landcoverVisibleRef.current);
       addArchipelagoTarget(map);
       collapseAttribution();
       updateMapDebug();
@@ -1871,7 +1939,10 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
   useEffect(() => {
     landcoverVisibleRef.current = landcoverVisible;
     const map = mapRef.current;
-    if (map) setComplementaryLandcoverVisibility(map, landcoverVisible);
+    if (map) setComplementaryLandcoverVisibility(
+      map,
+      mapTypeRef.current === 'openfreemapTerrain' && landcoverVisible
+    );
   }, [landcoverVisible]);
 
   useEffect(() => {
@@ -1880,13 +1951,15 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
       window.localStorage.setItem(LANDCOVER_TUNING_STORAGE_KEY, JSON.stringify(landcoverTuning));
     }
     const map = mapRef.current;
-    if (map?.isStyleLoaded()) applyLandcoverTuning(map, landcoverTuning);
+    if (map?.isStyleLoaded()) {
+      applyOpenFreeMapAppearance(map, mapTypeRef.current, landcoverTuning);
+    }
   }, [landcoverTuning]);
 
   useEffect(() => {
     mapTypeRef.current = mapTypeId;
     const map = mapRef.current;
-    if (map) setBaseMap(map, mapTypeId);
+    if (map) setBaseMap(map, mapTypeId, landcoverTuningRef.current, landcoverVisibleRef.current);
   }, [mapTypeId]);
 
   useEffect(() => {
@@ -2096,7 +2169,8 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
     />
   );
 
-  const landcoverToggle = COMPLEMENTARY_LANDCOVER_ENABLED && (
+  const terrainMapSelected = mapTypeId === 'openfreemapTerrain';
+  const landcoverToggle = terrainMapSelected && COMPLEMENTARY_LANDCOVER_ENABLED && (
     <button
       type="button"
       className={`landcover-toggle ${landcoverVisible ? 'active' : ''}`}
@@ -2107,7 +2181,7 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
     </button>
   );
 
-  const landcoverTuningPanel = SHOW_MAP_DEBUG && COMPLEMENTARY_LANDCOVER_ENABLED && (
+  const landcoverTuningPanel = terrainMapSelected && SHOW_MAP_DEBUG && COMPLEMENTARY_LANDCOVER_ENABLED && (
     <details className="landcover-tuning">
       <summary>Maanpeitevärien säätö</summary>
       <div className="landcover-tuning__head" aria-hidden="true">
