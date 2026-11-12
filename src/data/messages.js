@@ -108,6 +108,7 @@ const messagesRaw = { // FI SV EN
     },
     mapTypes: {
         openfreemap: ["OpenFreeMap", "OpenFreeMap", "OpenFreeMap"],
+        openfreemapTerrain: ["OpenFreeMap maasto", "OpenFreeMap terräng", "OpenFreeMap terrain"],
         OSM: ["OpenStreetMap", "OpenStreetMap", "OpenStreetMap"],
     },
     mapLayers: {

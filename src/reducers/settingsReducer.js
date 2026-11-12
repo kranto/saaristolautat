@@ -25,7 +25,7 @@ if (locales.indexOf(initialSettings.locale) < 0) {
 initialSettings = {...initialSettings, isFullScreen: false};
 
 // Migrate saved settings for retired map types to the default base map.
-if (!["openfreemap", "OSM"].includes(initialSettings.mapTypeId)) {
+if (!["openfreemap", "openfreemapTerrain", "OSM"].includes(initialSettings.mapTypeId)) {
   initialSettings.mapTypeId = 'openfreemap';
 }
 

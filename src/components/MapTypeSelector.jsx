@@ -9,7 +9,11 @@ class MapTypeSelector extends Component {
         this.state = { open: false }
     }
 
-    mapTypes = ["openfreemap", "OSM"];
+    mapTypes = ["openfreemap", "openfreemapTerrain", "OSM"];
+
+    previewImages = {
+        openfreemapTerrain: "openfreemap-terrain"
+    };
 
     componentDidUpdate(previousProps) {
         if (previousProps.settingsOpen && !this.props.settingsOpen && this.state.open) {
@@ -37,10 +41,11 @@ class MapTypeSelector extends Component {
 
         const options = this.mapTypes.map(mapType => {
             const classes = "mapSelectOption" + (this.props.mapTypeId === mapType ? " selected" : "");
+            const previewImage = this.previewImages[mapType] || mapType;
             return (
                 <div key={mapType} data-target={mapType} onClick={this.onClick.bind(this)} className={classes}>
                     <div style={{ position: "relative", pointerEvents: "none" }}>
-                        <img src={"img/" + mapType + ".png"} alt={mapType} style={{ maxWidth: "100%", maxHeight: "100%" }} />
+                        <img src={"img/" + previewImage + ".png"} alt={L2("mapTypes." + mapType)} style={{ maxWidth: "100%", maxHeight: "100%" }} />
                         <div className="text">{L2("mapTypes." + mapType)}</div>
                     </div>
                 </div>
