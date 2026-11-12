@@ -52,11 +52,118 @@ const legacyEmSize = em => ['interpolate', ['linear'], ['zoom'], 4, em * 6, 18, 
 const DISTANCE_SIGN_TEXT_SIZE = 14.4;
 const LAND_DETAIL_ZOOM_START = 11;
 const LAND_DETAIL_ZOOM_END = 13;
+const LANDCOVER_TUNING_STORAGE_KEY = 'saaristolautat.landcoverTuning.v1';
+const LANDCOVER_TUNING_DEFAULTS = {
+  forest: { label: 'Metsä', color: '#d1ecae', opacity: 1 },
+  farmland: { label: 'Pelto', color: '#f4e9b2', opacity: 1 },
+  rock: { label: 'Avokallio', color: '#d9d8cf', opacity: 1 },
+  open: { label: 'Avoin maa', color: '#c9d4b1', opacity: 1 },
+  wetland: { label: 'Kosteikko', color: '#b8cbc0', opacity: 1 },
+  sand: { label: 'Hiekka', color: '#ded2b4', opacity: 1 },
+  bare: { label: 'Paljas maa', color: '#d1c4ae', opacity: 1 },
+  urban: { label: 'Rakennettu', color: '#cdb9a8', opacity: 1 },
+  park: { label: 'Puisto', color: '#b9e49b', opacity: 1 },
+  ice: { label: 'Jää / lumi', color: '#e7f0f2', opacity: 1 }
+};
+const openFreeMapOverviewOpacities = new WeakMap();
 const ROUTE_AREA_BOUNDS = [[19.45, 59.72], [23.05, 60.58]];
 const MIN_ROUTE_RENDER_ZOOM = 7;
 const HIITTINEN = [22.69, 59.88];
 const ARCHIPELAGO_BOUNDS = { south: 59.72, west: 19, north: 60.54, east: 23 };
 const noRouteFilter = kind => ['all', ['==', ['get', 'kind'], kind], ['==', ['get', 'ref'], '__no-route__']];
+
+function defaultLandcoverTuning() {
+  return Object.fromEntries(Object.entries(LANDCOVER_TUNING_DEFAULTS).map(([key, value]) => (
+    [key, { ...value }]
+  )));
+}
+
+function loadLandcoverTuning() {
+  const defaults = defaultLandcoverTuning();
+  if (!SHOW_MAP_DEBUG) return defaults;
+  try {
+    const stored = JSON.parse(window.localStorage.getItem(LANDCOVER_TUNING_STORAGE_KEY));
+    Object.keys(defaults).forEach(key => {
+      const color = stored?.[key]?.color;
+      const opacity = Number(stored?.[key]?.opacity);
+      if (/^#[0-9a-f]{6}$/i.test(color)) defaults[key].color = color;
+      if (Number.isFinite(opacity)) defaults[key].opacity = Math.max(0, Math.min(1, opacity));
+    });
+  } catch {
+    // Ignore malformed local tuning values and use the checked-in defaults.
+  }
+  return defaults;
+}
+
+const landcoverFadeExpression = endOpacity => [
+  'interpolate', ['linear'], ['zoom'],
+  LAND_DETAIL_ZOOM_START, 0,
+  LAND_DETAIL_ZOOM_END, endOpacity
+];
+
+function complementaryLandcoverColorExpression(tuning) {
+  return ['match', ['get', 'class'],
+    'forest', tuning.forest.color,
+    'farmland', tuning.farmland.color,
+    'open', tuning.open.color,
+    'rock', tuning.rock.color,
+    'wetland', tuning.wetland.color,
+    'sand', tuning.sand.color,
+    'bare', tuning.bare.color,
+    'urban', tuning.urban.color,
+    '#dedfc9'];
+}
+
+function complementaryLandcoverOpacityExpression(tuning) {
+  return ['interpolate', ['linear'], ['zoom'],
+    LAND_DETAIL_ZOOM_START, 0,
+    LAND_DETAIL_ZOOM_END,
+    ['match', ['get', 'class'],
+      'forest', tuning.forest.opacity,
+      'farmland', tuning.farmland.opacity,
+      'open', tuning.open.opacity,
+      'rock', tuning.rock.opacity,
+      'wetland', tuning.wetland.opacity,
+      'sand', tuning.sand.opacity,
+      'bare', tuning.bare.opacity,
+      'urban', tuning.urban.opacity,
+      1]];
+}
+
+function openFreeMapLandcoverOpacityExpression(tuning, overviewOpacity) {
+  const opacityAtOverview = ['match', ['get', 'class'],
+    'wood', overviewOpacity * tuning.forest.opacity,
+    'grass', overviewOpacity * tuning.open.opacity,
+    'farmland', overviewOpacity * tuning.farmland.opacity,
+    'rock', overviewOpacity * tuning.rock.opacity,
+    'wetland', overviewOpacity * tuning.wetland.opacity,
+    'sand', overviewOpacity * tuning.sand.opacity,
+    'bare', overviewOpacity * tuning.bare.opacity,
+    'ice', overviewOpacity * tuning.ice.opacity,
+    overviewOpacity];
+  const opacityAtDetail = ['match', ['get', 'class'],
+    'wood', 0.9 * tuning.forest.opacity,
+    'grass', 0.82 * tuning.open.opacity,
+    'farmland', 0.88 * tuning.farmland.opacity,
+    'rock', 0.78 * tuning.rock.opacity,
+    'ice', 0.9 * tuning.ice.opacity,
+    'sand', 0.85 * tuning.sand.opacity,
+    'bare', 0.78 * tuning.bare.opacity,
+    'wetland', 0.8 * tuning.wetland.opacity,
+    0.55];
+  return ['interpolate', ['linear'], ['zoom'],
+    LAND_DETAIL_ZOOM_START, opacityAtOverview,
+    LAND_DETAIL_ZOOM_END, opacityAtDetail];
+}
+
+function openFreeMapLanduseOpacityExpression(tuning, overviewOpacity) {
+  const developedClasses = ['residential', 'commercial', 'industrial', 'retail'];
+  return ['interpolate', ['linear'], ['zoom'],
+    LAND_DETAIL_ZOOM_START,
+    ['match', ['get', 'class'], developedClasses, overviewOpacity * tuning.urban.opacity, overviewOpacity],
+    LAND_DETAIL_ZOOM_END,
+    ['match', ['get', 'class'], developedClasses, 0.88 * tuning.urban.opacity, 0.88]];
+}
 
 function knownVesselNamesByMmsi(data) {
   return new Map(Object.values(data?.ferries || {})
@@ -171,6 +278,15 @@ function customizeBaseMap(map) {
         LAND_DETAIL_ZOOM_END, '#62b94f'
       ]);
     } else if (sourceLayer === 'landcover' && layer.type === 'fill') {
+      let overviewOpacities = openFreeMapOverviewOpacities.get(map);
+      if (!overviewOpacities) {
+        overviewOpacities = new Map();
+        openFreeMapOverviewOpacities.set(map, overviewOpacities);
+      }
+      if (!overviewOpacities.has(layer.id)) {
+        const originalOpacity = layer.paint?.['fill-opacity'];
+        overviewOpacities.set(layer.id, typeof originalOpacity === 'number' ? originalOpacity : 1);
+      }
       map.setPaintProperty(layer.id, 'fill-color', [
         'interpolate', ['linear'], ['zoom'],
         LAND_DETAIL_ZOOM_START, '#addbb9',
@@ -199,6 +315,15 @@ function customizeBaseMap(map) {
           0.55]
       ]);
     } else if (sourceLayer === 'landuse' && layer.type === 'fill') {
+      let overviewOpacities = openFreeMapOverviewOpacities.get(map);
+      if (!overviewOpacities) {
+        overviewOpacities = new Map();
+        openFreeMapOverviewOpacities.set(map, overviewOpacities);
+      }
+      if (!overviewOpacities.has(layer.id)) {
+        const originalOpacity = layer.paint?.['fill-opacity'];
+        overviewOpacities.set(layer.id, typeof originalOpacity === 'number' ? originalOpacity : 1);
+      }
       map.setLayerZoomRange(layer.id, layer.minzoom ?? 0, 24);
       map.setPaintProperty(layer.id, 'fill-color', [
         'interpolate', ['linear'], ['zoom'],
@@ -260,7 +385,7 @@ function customizeBaseMap(map) {
 
 }
 
-function addComplementaryLandcover(map) {
+function addComplementaryLandcover(map, tuning) {
   if (!COMPLEMENTARY_LANDCOVER_ENABLED) return;
 
   if (!map.getSource('complementary-landcover')) {
@@ -283,26 +408,13 @@ function addComplementaryLandcover(map) {
     'source-layer': 'landcover',
     minzoom: LAND_DETAIL_ZOOM_START,
     paint: {
-      'fill-color': ['match', ['get', 'class'],
-        'forest', '#b5cda6',
-        'farmland', '#f4e9b2',
-        'open', '#c9d4b1',
-        'rock', '#d9d8cf',
-        'wetland', '#b8cbc0',
-        'sand', '#ded2b4',
-        'bare', '#d1c4ae',
-        'urban', '#cdb9a8',
-        '#dedfc9'],
-      'fill-opacity': [
-        'interpolate', ['linear'], ['zoom'],
-        LAND_DETAIL_ZOOM_START, 0,
-        LAND_DETAIL_ZOOM_END, 1
-      ]
+      'fill-color': complementaryLandcoverColorExpression(tuning),
+      'fill-opacity': complementaryLandcoverOpacityExpression(tuning)
     }
   }, beforeLayer);
 }
 
-function addComplementaryForest(map) {
+function addComplementaryForest(map, tuning) {
   if (!COMPLEMENTARY_FOREST_ENABLED) return;
 
   if (!map.getSource('complementary-forest')) {
@@ -325,14 +437,92 @@ function addComplementaryForest(map) {
     'source-layer': 'landcover',
     minzoom: LAND_DETAIL_ZOOM_START,
     paint: {
-      'fill-color': '#d1ecae',
-      'fill-opacity': [
-        'interpolate', ['linear'], ['zoom'],
-        LAND_DETAIL_ZOOM_START, 0,
-        LAND_DETAIL_ZOOM_END, 1
-      ]
+      'fill-color': tuning.forest.color,
+      'fill-opacity': landcoverFadeExpression(tuning.forest.opacity)
     }
   }, beforeLayer);
+}
+
+function applyLandcoverTuning(map, tuning) {
+  if (map.getLayer('complementary-forest-fill')) {
+    map.setPaintProperty('complementary-forest-fill', 'fill-color', tuning.forest.color);
+    map.setPaintProperty(
+      'complementary-forest-fill',
+      'fill-opacity',
+      landcoverFadeExpression(tuning.forest.opacity)
+    );
+  }
+  if (map.getLayer('complementary-landcover-fill')) {
+    map.setPaintProperty(
+      'complementary-landcover-fill',
+      'fill-color',
+      complementaryLandcoverColorExpression(tuning)
+    );
+    map.setPaintProperty(
+      'complementary-landcover-fill',
+      'fill-opacity',
+      complementaryLandcoverOpacityExpression(tuning)
+    );
+  }
+
+  map.getStyle().layers.forEach(layer => {
+    if (layer.source !== 'openmaptiles' || layer.type !== 'fill') return;
+    const sourceLayer = layer['source-layer'];
+    if (sourceLayer === 'landcover') {
+      map.setPaintProperty(layer.id, 'fill-color', [
+        'interpolate', ['linear'], ['zoom'],
+        LAND_DETAIL_ZOOM_START, '#addbb9',
+        LAND_DETAIL_ZOOM_END,
+        ['match', ['get', 'class'],
+          'wood', tuning.forest.color,
+          'grass', tuning.open.color,
+          'farmland', tuning.farmland.color,
+          'rock', tuning.rock.color,
+          'wetland', tuning.wetland.color,
+          'sand', tuning.sand.color,
+          'bare', tuning.bare.color,
+          'ice', tuning.ice.color,
+          '#addbb9']
+      ]);
+      const overviewOpacity = openFreeMapOverviewOpacities.get(map)?.get(layer.id) ?? 1;
+      map.setPaintProperty(
+        layer.id,
+        'fill-opacity',
+        openFreeMapLandcoverOpacityExpression(tuning, overviewOpacity)
+      );
+    } else if (sourceLayer === 'landuse') {
+      map.setPaintProperty(layer.id, 'fill-color', [
+        'interpolate', ['linear'], ['zoom'],
+        LAND_DETAIL_ZOOM_START, '#b9ddbf',
+        LAND_DETAIL_ZOOM_END,
+        ['match', ['get', 'class'],
+          ['residential', 'commercial', 'industrial', 'retail'], tuning.urban.color,
+          'pitch', '#b8dda0',
+          'track', '#e2d2a1',
+          'cemetery', '#c7dfa9',
+          'hospital', '#ecd4dc',
+          'school', '#eee4b4',
+          '#b9ddbf']
+      ]);
+      const overviewOpacity = openFreeMapOverviewOpacities.get(map)?.get(layer.id) ?? 1;
+      map.setPaintProperty(
+        layer.id,
+        'fill-opacity',
+        openFreeMapLanduseOpacityExpression(tuning, overviewOpacity)
+      );
+    } else if (sourceLayer === 'park') {
+      map.setPaintProperty(layer.id, 'fill-color', [
+        'interpolate', ['linear'], ['zoom'],
+        LAND_DETAIL_ZOOM_START, '#d8e8c8',
+        LAND_DETAIL_ZOOM_END, tuning.park.color
+      ]);
+      map.setPaintProperty(layer.id, 'fill-opacity', [
+        'interpolate', ['linear'], ['zoom'],
+        LAND_DETAIL_ZOOM_START, 0.7 * tuning.park.opacity,
+        LAND_DETAIL_ZOOM_END, 0.85 * tuning.park.opacity
+      ]);
+    }
+  });
 }
 
 function setComplementaryLandcoverVisibility(map, visible) {
@@ -866,6 +1056,7 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
   const mapTypeRef = useRef(mapTypeId);
   const layersRef = useRef(layers);
   const landcoverVisibleRef = useRef(true);
+  const landcoverTuningRef = useRef(null);
   layersRef.current = layers;
   const [status, setStatus] = useState('Ladataan karttaa…');
   const [selection, setSelection] = useState(null);
@@ -873,6 +1064,8 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
   const [showReset, setShowReset] = useState(false);
   const [mapReady, setMapReady] = useState(false);
   const [landcoverVisible, setLandcoverVisible] = useState(true);
+  const [landcoverTuning, setLandcoverTuning] = useState(loadLandcoverTuning);
+  landcoverTuningRef.current = landcoverTuning;
 
   useEffect(() => {
     if (!mapContainer.current || mapRef.current) return undefined;
@@ -1172,8 +1365,9 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
     };
     map.on('load', () => {
       customizeBaseMap(map);
-      addComplementaryForest(map);
-      addComplementaryLandcover(map);
+      addComplementaryForest(map, landcoverTuningRef.current);
+      addComplementaryLandcover(map, landcoverTuningRef.current);
+      applyLandcoverTuning(map, landcoverTuningRef.current);
       setComplementaryLandcoverVisibility(map, landcoverVisibleRef.current);
       addRasterBaseMaps(map);
       setBaseMap(map, mapTypeRef.current);
@@ -1589,6 +1783,15 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
   }, [landcoverVisible]);
 
   useEffect(() => {
+    landcoverTuningRef.current = landcoverTuning;
+    if (SHOW_MAP_DEBUG) {
+      window.localStorage.setItem(LANDCOVER_TUNING_STORAGE_KEY, JSON.stringify(landcoverTuning));
+    }
+    const map = mapRef.current;
+    if (map?.isStyleLoaded()) applyLandcoverTuning(map, landcoverTuning);
+  }, [landcoverTuning]);
+
+  useEffect(() => {
     mapTypeRef.current = mapTypeId;
     const map = mapRef.current;
     if (map) setBaseMap(map, mapTypeId);
@@ -1812,11 +2015,54 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
     </button>
   );
 
+  const landcoverTuningPanel = SHOW_MAP_DEBUG && COMPLEMENTARY_LANDCOVER_ENABLED && (
+    <details className="landcover-tuning">
+      <summary>Maanpeitevärien säätö</summary>
+      <div className="landcover-tuning__head" aria-hidden="true">
+        <span>Luokka</span><span>Väri</span><span>Peittävyys</span><span />
+      </div>
+      {Object.entries(LANDCOVER_TUNING_DEFAULTS).map(([className, defaults]) => {
+        const setting = landcoverTuning[className];
+        return (
+          <div className="landcover-tuning__row" key={className}>
+            <span>{defaults.label}</span>
+            <input
+              type="color"
+              value={setting.color}
+              aria-label={`${defaults.label}: väri`}
+              onChange={event => setLandcoverTuning(current => ({
+                ...current,
+                [className]: { ...current[className], color: event.target.value }
+              }))}
+            />
+            <input
+              type="range"
+              min="0"
+              max="1"
+              step="0.05"
+              value={setting.opacity}
+              aria-label={`${defaults.label}: peittävyys`}
+              onChange={event => setLandcoverTuning(current => ({
+                ...current,
+                [className]: { ...current[className], opacity: Number(event.target.value) }
+              }))}
+            />
+            <output>{Math.round(setting.opacity * 100)}%</output>
+          </div>
+        );
+      })}
+      <button type="button" onClick={() => setLandcoverTuning(defaultLandcoverTuning())}>
+        Palauta oletukset
+      </button>
+    </details>
+  );
+
   if (embedded) return (
     <>
       <div ref={mapContainer} id="map" className={`map maplibre-embedded ${mapReady ? 'maplibre-map-ready' : 'maplibre-map-loading'}`} aria-label="Saaristolauttojen kartta" />
       {resetButton}
       {landcoverToggle}
+      {landcoverTuningPanel}
       {debugElement}
     </>
   );
@@ -1826,6 +2072,7 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
       <div ref={mapContainer} className={`map-view__canvas ${mapReady ? 'maplibre-map-ready' : 'maplibre-map-loading'}`} aria-label="Saaristolauttojen kartta" />
       {resetButton}
       {landcoverToggle}
+      {landcoverTuningPanel}
       <header className="map-view__header">
         <div className="map-view__brand">
           <img src="/mstile-70x70.png" alt="" />
