@@ -60,9 +60,9 @@ const legacyZoomToMapLibre = zoom => Number(zoom) - 1;
 const mapLibreZoomToExternal = zoom => Number(zoom) + 1;
 const legacyEmSize = em => ['interpolate', ['linear'], ['zoom'], 4, em * 6, 18, em * 20];
 const DISTANCE_SIGN_TEXT_SIZE = 14.4;
-const LAND_DETAIL_ZOOM_START = 11;
-const LAND_DETAIL_ZOOM_END = 13;
-const LANDCOVER_OPACITY_CAP_ZOOM = 12.65;
+const LAND_DETAIL_ZOOM_START = 8;
+const LAND_DETAIL_ZOOM_END = 10;
+const LANDCOVER_OPACITY_CAP_ZOOM = 9.65;
 const LANDCOVER_OPACITY_CAP_RATIO = (LANDCOVER_OPACITY_CAP_ZOOM - LAND_DETAIL_ZOOM_START)
   / (LAND_DETAIL_ZOOM_END - LAND_DETAIL_ZOOM_START);
 const DEVELOPED_AREA_FADE_ZOOM_START = 14;
