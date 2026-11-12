@@ -74,7 +74,7 @@ const LANDCOVER_TUNING_DEFAULTS = {
   rock: { label: 'Avokallio', color: '#d9d8cf', opacity: 1 },
   open: { label: 'Avoin maa', color: '#c9d4b1', opacity: 1 },
   wetland: { label: 'Kosteikko', color: '#8497d2', opacity: 0.65 },
-  sand: { label: 'Hiekka', color: '#ded2b4', opacity: 1 },
+  sand: { label: 'Hiekka', color: '#ffd875', opacity: 1 },
   bare: { label: 'Paljas maa', color: '#d1c4ae', opacity: 1 },
   urban: { label: 'Rakennettu', color: '#cdb9a8', opacity: 1 },
   park: { label: 'Puisto', color: '#b9e49b', opacity: 1 },
@@ -276,11 +276,52 @@ function customizeBaseMap(map) {
       sourceLayer === 'transportation_name' ||
       ['road', 'route', 'shield', 'highway', 'transportation'].some(value => layerId.includes(value))
     );
+    const isNamedRoadLabel = ['highway-name-major', 'highway-name-minor'].some(value => layerId.includes(value));
+    const isPathNameLabel = layerId.includes('highway-name-path');
+    const isPoiNameLabel = sourceLayer === 'poi' && layerId.startsWith('poi_r');
 
     if (isRoadLabel && layer.layout?.['text-field']) {
       map.setPaintProperty(layer.id, 'text-opacity', 1);
+      if (isNamedRoadLabel) {
+        map.setPaintProperty(layer.id, 'text-color', '#3f3b36');
+        map.setPaintProperty(layer.id, 'text-halo-color', 'rgba(255,255,255,0.98)');
+        map.setPaintProperty(layer.id, 'text-halo-width', 2);
+        map.setPaintProperty(layer.id, 'text-halo-blur', 0.05);
+        map.setLayoutProperty(layer.id, 'text-size', [
+          'interpolate', ['linear'], ['zoom'],
+          12, 12.5,
+          14, 14.5,
+          16, 16
+        ]);
+        if (layerId.includes('highway-name-minor')) {
+          map.setLayerZoomRange(layer.id, 14, layer.maxzoom ?? 24);
+        }
+      } else if (isPathNameLabel) {
+        map.setPaintProperty(layer.id, 'text-color', '#4b4741');
+        map.setPaintProperty(layer.id, 'text-halo-color', 'rgba(255,255,255,0.98)');
+        map.setPaintProperty(layer.id, 'text-halo-width', 1.8);
+        map.setPaintProperty(layer.id, 'text-halo-blur', 0.05);
+        map.setLayoutProperty(layer.id, 'text-size', [
+          'interpolate', ['linear'], ['zoom'],
+          14, 13,
+          16, 14.5,
+          18, 16
+        ]);
+      }
     } else if (layer.type === 'symbol' && layer.layout?.['text-field']) {
       map.setPaintProperty(layer.id, 'text-opacity', ['step', ['zoom'], 1, 7, 0, 12, 1]);
+      if (isPoiNameLabel) {
+        map.setPaintProperty(layer.id, 'text-color', '#4b4741');
+        map.setPaintProperty(layer.id, 'text-halo-color', 'rgba(255,255,255,0.98)');
+        map.setPaintProperty(layer.id, 'text-halo-width', 2);
+        map.setPaintProperty(layer.id, 'text-halo-blur', 0.05);
+        map.setLayoutProperty(layer.id, 'text-size', [
+          'interpolate', ['linear'], ['zoom'],
+          15, 13,
+          17, 14.5,
+          19, 16
+        ]);
+      }
     } else if (layer.type === 'background') {
       map.setPaintProperty(layer.id, 'background-color', [
         'interpolate', ['linear'], ['zoom'],
@@ -425,7 +466,8 @@ function customizeBaseMap(map) {
       );
     }
 
-    if (layer.type === 'symbol' && layer.layout?.['text-field'] && !layer.layout?.['icon-image']) {
+    if (layer.type === 'symbol' && layer.layout?.['text-field'] && !layer.layout?.['icon-image']
+      && !isNamedRoadLabel && !isPathNameLabel && !isPoiNameLabel) {
       map.setPaintProperty(layer.id, 'text-halo-color', 'rgba(255,255,255,0.95)');
       map.setPaintProperty(layer.id, 'text-halo-width', 1.7);
       map.setPaintProperty(layer.id, 'text-halo-blur', 0.25);
