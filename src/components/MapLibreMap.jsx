@@ -69,6 +69,7 @@ const DEVELOPED_AREA_FADE_ZOOM_START = 14;
 const DEVELOPED_AREA_FADE_ZOOM_END = 15;
 const LANDCOVER_TUNING_STORAGE_KEY = 'saaristolautat.landcoverTuning.v1';
 const SIMPLE_LAND_COLOR = '#b8dfc2';
+const SIMPLE_LAND_DETAIL_COLOR = '#d4e8d8';
 const SIMPLE_WATER_COLOR = '#f3f7fd';
 const LANDCOVER_TUNING_DEFAULTS = {
   forest: { label: 'Metsä', color: '#72c10b', opacity: 0.65 },
@@ -220,6 +221,86 @@ function simplifiedDevelopedLanduseOpacityExpression(tuning, overviewOpacity) {
     DEVELOPED_AREA_FADE_ZOOM_START,
     ['match', ['get', 'class'], developedClasses, detailedDevelopedOpacity, 0],
     DEVELOPED_AREA_FADE_ZOOM_END, 0];
+}
+
+function transportationLineColorExpression(layerId, simplified = false) {
+  const isCasing = layerId.includes('casing');
+  const isPrimaryRoad = ['motorway', 'trunk', 'primary'].some(roadClass => layerId.includes(roadClass));
+  const isSecondaryRoad = layerId.includes('secondary');
+  const isTertiaryRoad = layerId.includes('tertiary');
+  const isMainRoad = isPrimaryRoad || isSecondaryRoad;
+  const isMinorRoad = ['minor', 'street'].some(roadClass => layerId.includes(roadClass));
+  const isRail = layerId.includes('rail');
+  const isPath = ['path', 'pedestrian', 'track'].some(roadClass => layerId.includes(roadClass));
+  const overviewColor = simplified
+    ? (isCasing
+      ? (isPrimaryRoad ? '#52605b'
+        : isSecondaryRoad ? '#737d78'
+          : isTertiaryRoad ? '#909792'
+            : isMinorRoad ? '#a5aaa4' : '#bec2bd')
+      : isPrimaryRoad ? '#83918b'
+        : isSecondaryRoad ? '#a9b2ad'
+          : isTertiaryRoad ? '#c4c9c4'
+            : isMinorRoad ? '#d6d9d4' : '#eef0eb')
+    : (isCasing ? '#8b918e' : isMainRoad ? '#9da3a0' : '#b1b6b3');
+  let detailColor;
+  if (!simplified) {
+    detailColor = isRail ? '#747474'
+      : isCasing ? (isMainRoad ? '#b34f38' : isMinorRoad ? '#918d83' : '#c7c3b9')
+        : isMainRoad ? '#ed7250'
+          : isMinorRoad ? '#d9a36d'
+            : isPath ? '#85857f' : '#fffdf5';
+  } else if (isRail) {
+    detailColor = '#747474';
+  } else if (isCasing) {
+    detailColor = isPrimaryRoad ? '#31453f'
+      : isSecondaryRoad ? '#55645e'
+        : isTertiaryRoad ? '#747b73'
+          : isMinorRoad ? '#6f7872' : '#adb3aa';
+  } else {
+    detailColor = isPrimaryRoad ? '#6d8279'
+      : isSecondaryRoad ? '#a2b0a8'
+        : isTertiaryRoad ? '#d0d7cf'
+          : isMinorRoad ? '#dfe5dd'
+            : isPath ? '#7f857e' : '#fafbf5';
+  }
+  return [
+    'interpolate', ['linear'], ['zoom'],
+    LAND_DETAIL_ZOOM_START, overviewColor,
+    LAND_DETAIL_ZOOM_END, detailColor
+  ];
+}
+
+function transportationLineWidthExpression(layerId, simplified = false) {
+  const isCasing = layerId.includes('casing');
+  const isPrimaryRoad = ['motorway', 'trunk', 'primary'].some(roadClass => layerId.includes(roadClass));
+  const isSecondaryRoad = layerId.includes('secondary');
+  const isTertiaryRoad = layerId.includes('tertiary');
+  const isMainRoad = isPrimaryRoad || isSecondaryRoad;
+  const isMinorRoad = ['minor', 'street'].some(roadClass => layerId.includes(roadClass));
+
+  if (!simplified) {
+    return isCasing
+      ? ['interpolate', ['linear'], ['zoom'], 7, 0.8, 11, 1.8, 15, 4]
+      : isMainRoad
+        ? ['interpolate', ['linear'], ['zoom'], 7, 0.5, 11, 1.2, 15, 3]
+        : isMinorRoad
+          ? ['interpolate', ['linear'], ['zoom'], 9, 0.4, 12, 1, 15, 2.2]
+          : ['interpolate', ['linear'], ['zoom'], 9, 0.35, 12, 0.8, 15, 1.8];
+  }
+
+  if (isCasing) {
+    if (isPrimaryRoad) return ['interpolate', ['linear'], ['zoom'], 7, 0.9, 11, 2.3, 15, 5.2];
+    if (isSecondaryRoad) return ['interpolate', ['linear'], ['zoom'], 7, 0.75, 11, 1.9, 15, 4.3];
+    if (isTertiaryRoad) return ['interpolate', ['linear'], ['zoom'], 8, 0.6, 11, 1.55, 15, 3.5];
+    if (isMinorRoad) return ['interpolate', ['linear'], ['zoom'], 9, 0.5, 12, 1.3, 15, 3];
+    return ['interpolate', ['linear'], ['zoom'], 10, 0.3, 12, 0.75, 15, 1.8];
+  }
+  if (isPrimaryRoad) return ['interpolate', ['linear'], ['zoom'], 7, 0.55, 11, 1.5, 15, 3.8];
+  if (isSecondaryRoad) return ['interpolate', ['linear'], ['zoom'], 7, 0.45, 11, 1.2, 15, 3];
+  if (isTertiaryRoad) return ['interpolate', ['linear'], ['zoom'], 8, 0.35, 11, 0.95, 15, 2.3];
+  if (isMinorRoad) return ['interpolate', ['linear'], ['zoom'], 9, 0.35, 12, 0.85, 15, 1.9];
+  return ['interpolate', ['linear'], ['zoom'], 10, 0.25, 12, 0.55, 15, 1.15];
 }
 
 function knownVesselNamesByMmsi(data) {
@@ -455,26 +536,8 @@ function customizeBaseMap(map) {
       const isCasing = layerId.includes('casing');
       const isMainRoad = ['motorway', 'trunk', 'primary', 'secondary'].some(roadClass => layerId.includes(roadClass));
       const isMinorRoad = ['minor', 'street'].some(roadClass => layerId.includes(roadClass));
-      const isRail = layerId.includes('rail');
-      const isPath = ['path', 'pedestrian', 'track'].some(roadClass => layerId.includes(roadClass));
-      const overviewColor = isCasing ? '#8b918e' : isMainRoad ? '#9da3a0' : '#b1b6b3';
-      const detailColor = isRail ? '#747474'
-        : isCasing ? (isMainRoad ? '#b34f38' : isMinorRoad ? '#918d83' : '#c7c3b9')
-          : isMainRoad ? '#ed7250'
-            : isMinorRoad ? '#d9a36d'
-              : isPath ? '#85857f' : '#fffdf5';
-      map.setPaintProperty(layer.id, 'line-color', [
-        'interpolate', ['linear'], ['zoom'],
-        LAND_DETAIL_ZOOM_START, overviewColor,
-        LAND_DETAIL_ZOOM_END, detailColor
-      ]);
-      map.setPaintProperty(layer.id, 'line-width', isCasing
-        ? ['interpolate', ['linear'], ['zoom'], 7, 0.8, 11, 1.8, 15, 4]
-        : isMainRoad
-          ? ['interpolate', ['linear'], ['zoom'], 7, 0.5, 11, 1.2, 15, 3]
-          : isMinorRoad
-            ? ['interpolate', ['linear'], ['zoom'], 9, 0.4, 12, 1, 15, 2.2]
-            : ['interpolate', ['linear'], ['zoom'], 9, 0.35, 12, 0.8, 15, 1.8]);
+      map.setPaintProperty(layer.id, 'line-color', transportationLineColorExpression(layerId));
+      map.setPaintProperty(layer.id, 'line-width', transportationLineWidthExpression(layerId));
       map.setPaintProperty(
         layer.id,
         'line-opacity',
@@ -649,23 +712,32 @@ function applyOpenFreeMapAppearance(map, mapTypeId, tuning) {
     const sourceLayer = layer['source-layer'];
 
     if (layer.type === 'background') {
-      map.setPaintProperty(layer.id, 'background-color', terrain ? [
+      map.setPaintProperty(layer.id, 'background-color', [
         'interpolate', ['linear'], ['zoom'],
         LAND_DETAIL_ZOOM_START, SIMPLE_LAND_COLOR,
-        LAND_DETAIL_ZOOM_END, '#e9e8cf'
-      ] : SIMPLE_LAND_COLOR);
+        LAND_DETAIL_ZOOM_END, terrain ? '#e9e8cf' : SIMPLE_LAND_DETAIL_COLOR
+      ]);
     } else if (sourceLayer === 'water' && layer.type === 'fill') {
-      map.setPaintProperty(layer.id, 'fill-color', terrain ? [
+      map.setPaintProperty(layer.id, 'fill-color', [
         'interpolate', ['linear'], ['zoom'],
         LAND_DETAIL_ZOOM_START, SIMPLE_WATER_COLOR,
         LAND_DETAIL_ZOOM_END, '#ffffff'
-      ] : SIMPLE_WATER_COLOR);
+      ]);
     } else if (sourceLayer === 'waterway' && layer.type === 'line') {
       map.setPaintProperty(layer.id, 'line-color', terrain ? [
         'interpolate', ['linear'], ['zoom'],
         LAND_DETAIL_ZOOM_START, '#dce7f3',
         LAND_DETAIL_ZOOM_END, '#61bfe5'
       ] : '#dce7f3');
+    } else if (sourceLayer === 'transportation' && layer.type === 'line') {
+      const simplified = !terrain;
+      const layerId = layer.id.toLowerCase();
+      map.setPaintProperty(
+        layer.id,
+        'line-color',
+        transportationLineColorExpression(layerId, simplified)
+      );
+      map.setPaintProperty(layer.id, 'line-width', transportationLineWidthExpression(layerId, simplified));
     }
 
     if (sourceLayer === 'landcover' || sourceLayer === 'park') {
