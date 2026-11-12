@@ -62,15 +62,18 @@ const legacyEmSize = em => ['interpolate', ['linear'], ['zoom'], 4, em * 6, 18, 
 const DISTANCE_SIGN_TEXT_SIZE = 14.4;
 const LAND_DETAIL_ZOOM_START = 11;
 const LAND_DETAIL_ZOOM_END = 13;
+const LANDCOVER_OPACITY_CAP_ZOOM = 12.65;
+const LANDCOVER_OPACITY_CAP_RATIO = (LANDCOVER_OPACITY_CAP_ZOOM - LAND_DETAIL_ZOOM_START)
+  / (LAND_DETAIL_ZOOM_END - LAND_DETAIL_ZOOM_START);
 const DEVELOPED_AREA_FADE_ZOOM_START = 14;
 const DEVELOPED_AREA_FADE_ZOOM_END = 15;
 const LANDCOVER_TUNING_STORAGE_KEY = 'saaristolautat.landcoverTuning.v1';
 const LANDCOVER_TUNING_DEFAULTS = {
-  forest: { label: 'Metsä', color: '#d1ecae', opacity: 1 },
-  farmland: { label: 'Pelto', color: '#f4e9b2', opacity: 1 },
+  forest: { label: 'Metsä', color: '#72c10b', opacity: 0.65 },
+  farmland: { label: 'Pelto', color: '#f7e469', opacity: 1 },
   rock: { label: 'Avokallio', color: '#d9d8cf', opacity: 1 },
   open: { label: 'Avoin maa', color: '#c9d4b1', opacity: 1 },
-  wetland: { label: 'Kosteikko', color: '#b8cbc0', opacity: 1 },
+  wetland: { label: 'Kosteikko', color: '#8497d2', opacity: 0.65 },
   sand: { label: 'Hiekka', color: '#ded2b4', opacity: 1 },
   bare: { label: 'Paljas maa', color: '#d1c4ae', opacity: 1 },
   urban: { label: 'Rakennettu', color: '#cdb9a8', opacity: 1 },
@@ -110,8 +113,12 @@ function loadLandcoverTuning() {
 const landcoverFadeExpression = endOpacity => [
   'interpolate', ['linear'], ['zoom'],
   LAND_DETAIL_ZOOM_START, 0,
-  LAND_DETAIL_ZOOM_END, endOpacity
+  LANDCOVER_OPACITY_CAP_ZOOM, endOpacity * LANDCOVER_OPACITY_CAP_RATIO
 ];
+
+const cappedOpacity = (overviewOpacity, detailOpacity) => (
+  overviewOpacity + LANDCOVER_OPACITY_CAP_RATIO * (detailOpacity - overviewOpacity)
+);
 
 function complementaryLandcoverColorExpression(tuning) {
   return ['match', ['get', 'class'],
@@ -127,30 +134,30 @@ function complementaryLandcoverColorExpression(tuning) {
 }
 
 function complementaryLandcoverOpacityExpression(tuning) {
-  const opacityAtDetail = ['match', ['get', 'class'],
-    'forest', tuning.forest.opacity,
-    'farmland', tuning.farmland.opacity,
-    'open', tuning.open.opacity,
-    'rock', tuning.rock.opacity,
-    'wetland', tuning.wetland.opacity,
-    'sand', tuning.sand.opacity,
-    'bare', tuning.bare.opacity,
-    'urban', tuning.urban.opacity,
-    1];
+  const opacityAtCap = ['match', ['get', 'class'],
+    'forest', tuning.forest.opacity * LANDCOVER_OPACITY_CAP_RATIO,
+    'farmland', tuning.farmland.opacity * LANDCOVER_OPACITY_CAP_RATIO,
+    'open', tuning.open.opacity * LANDCOVER_OPACITY_CAP_RATIO,
+    'rock', tuning.rock.opacity * LANDCOVER_OPACITY_CAP_RATIO,
+    'wetland', tuning.wetland.opacity * LANDCOVER_OPACITY_CAP_RATIO,
+    'sand', tuning.sand.opacity * LANDCOVER_OPACITY_CAP_RATIO,
+    'bare', tuning.bare.opacity * LANDCOVER_OPACITY_CAP_RATIO,
+    'urban', tuning.urban.opacity * LANDCOVER_OPACITY_CAP_RATIO,
+    LANDCOVER_OPACITY_CAP_RATIO];
   const opacityAfterDevelopedFade = ['match', ['get', 'class'],
-    'forest', tuning.forest.opacity,
-    'farmland', tuning.farmland.opacity,
-    'open', tuning.open.opacity,
-    'rock', tuning.rock.opacity,
-    'wetland', tuning.wetland.opacity,
-    'sand', tuning.sand.opacity,
-    'bare', tuning.bare.opacity,
+    'forest', tuning.forest.opacity * LANDCOVER_OPACITY_CAP_RATIO,
+    'farmland', tuning.farmland.opacity * LANDCOVER_OPACITY_CAP_RATIO,
+    'open', tuning.open.opacity * LANDCOVER_OPACITY_CAP_RATIO,
+    'rock', tuning.rock.opacity * LANDCOVER_OPACITY_CAP_RATIO,
+    'wetland', tuning.wetland.opacity * LANDCOVER_OPACITY_CAP_RATIO,
+    'sand', tuning.sand.opacity * LANDCOVER_OPACITY_CAP_RATIO,
+    'bare', tuning.bare.opacity * LANDCOVER_OPACITY_CAP_RATIO,
     'urban', 0,
-    1];
+    LANDCOVER_OPACITY_CAP_RATIO];
   return ['interpolate', ['linear'], ['zoom'],
     LAND_DETAIL_ZOOM_START, 0,
-    LAND_DETAIL_ZOOM_END, opacityAtDetail,
-    DEVELOPED_AREA_FADE_ZOOM_START, opacityAtDetail,
+    LANDCOVER_OPACITY_CAP_ZOOM, opacityAtCap,
+    DEVELOPED_AREA_FADE_ZOOM_START, opacityAtCap,
     DEVELOPED_AREA_FADE_ZOOM_END, opacityAfterDevelopedFade];
 }
 
@@ -165,34 +172,37 @@ function openFreeMapLandcoverOpacityExpression(tuning, overviewOpacity) {
     'bare', overviewOpacity * tuning.bare.opacity,
     'ice', overviewOpacity * tuning.ice.opacity,
     overviewOpacity];
-  const opacityAtDetail = ['match', ['get', 'class'],
-    'wood', 0.9 * tuning.forest.opacity,
-    'grass', 0.82 * tuning.open.opacity,
-    'farmland', 0.88 * tuning.farmland.opacity,
-    'rock', 0.78 * tuning.rock.opacity,
-    'ice', 0.9 * tuning.ice.opacity,
-    'sand', 0.85 * tuning.sand.opacity,
-    'bare', 0.78 * tuning.bare.opacity,
-    'wetland', 0.8 * tuning.wetland.opacity,
-    0.55];
+  const opacityAtCap = ['match', ['get', 'class'],
+    'wood', cappedOpacity(overviewOpacity * tuning.forest.opacity, 0.9 * tuning.forest.opacity),
+    'grass', cappedOpacity(overviewOpacity * tuning.open.opacity, 0.82 * tuning.open.opacity),
+    'farmland', cappedOpacity(overviewOpacity * tuning.farmland.opacity, 0.88 * tuning.farmland.opacity),
+    'rock', cappedOpacity(overviewOpacity * tuning.rock.opacity, 0.78 * tuning.rock.opacity),
+    'ice', cappedOpacity(overviewOpacity * tuning.ice.opacity, 0.9 * tuning.ice.opacity),
+    'sand', cappedOpacity(overviewOpacity * tuning.sand.opacity, 0.85 * tuning.sand.opacity),
+    'bare', cappedOpacity(overviewOpacity * tuning.bare.opacity, 0.78 * tuning.bare.opacity),
+    'wetland', cappedOpacity(overviewOpacity * tuning.wetland.opacity, 0.8 * tuning.wetland.opacity),
+    cappedOpacity(overviewOpacity, 0.55)];
   return ['interpolate', ['linear'], ['zoom'],
     LAND_DETAIL_ZOOM_START, opacityAtOverview,
-    LAND_DETAIL_ZOOM_END, opacityAtDetail];
+    LANDCOVER_OPACITY_CAP_ZOOM, opacityAtCap];
 }
 
 function openFreeMapLanduseOpacityExpression(tuning, overviewOpacity) {
   const developedClasses = ['residential', 'commercial', 'industrial', 'retail'];
-  const opacityAtDetail = ['match', ['get', 'class'],
-    developedClasses, 0.88 * tuning.urban.opacity,
-    0.88];
+  const opacityAtCap = ['match', ['get', 'class'],
+    developedClasses, cappedOpacity(
+      overviewOpacity * tuning.urban.opacity,
+      0.88 * tuning.urban.opacity
+    ),
+    cappedOpacity(overviewOpacity, 0.88)];
   const opacityAfterDevelopedFade = ['match', ['get', 'class'],
     developedClasses, 0,
-    0.88];
+    cappedOpacity(overviewOpacity, 0.88)];
   return ['interpolate', ['linear'], ['zoom'],
     LAND_DETAIL_ZOOM_START,
     ['match', ['get', 'class'], developedClasses, overviewOpacity * tuning.urban.opacity, overviewOpacity],
-    LAND_DETAIL_ZOOM_END, opacityAtDetail,
-    DEVELOPED_AREA_FADE_ZOOM_START, opacityAtDetail,
+    LANDCOVER_OPACITY_CAP_ZOOM, opacityAtCap,
+    DEVELOPED_AREA_FADE_ZOOM_START, opacityAtCap,
     DEVELOPED_AREA_FADE_ZOOM_END, opacityAfterDevelopedFade];
 }
 
@@ -550,7 +560,8 @@ function applyLandcoverTuning(map, tuning) {
       map.setPaintProperty(layer.id, 'fill-opacity', [
         'interpolate', ['linear'], ['zoom'],
         LAND_DETAIL_ZOOM_START, 0.7 * tuning.park.opacity,
-        LAND_DETAIL_ZOOM_END, 0.85 * tuning.park.opacity
+        LANDCOVER_OPACITY_CAP_ZOOM,
+        cappedOpacity(0.7 * tuning.park.opacity, 0.85 * tuning.park.opacity)
       ]);
     }
   });
