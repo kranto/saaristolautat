@@ -2278,7 +2278,7 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
   );
 
   const terrainMapSelected = mapTypeId === 'openfreemapTerrain';
-  const landcoverToggle = terrainMapSelected && COMPLEMENTARY_LANDCOVER_ENABLED && (
+  const landcoverToggle = terrainMapSelected && SHOW_MAP_DEBUG && COMPLEMENTARY_LANDCOVER_ENABLED && (
     <button
       type="button"
       className={`landcover-toggle ${landcoverVisible ? 'active' : ''}`}
