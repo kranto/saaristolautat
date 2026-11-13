@@ -156,9 +156,11 @@ git commit -m "Kuvaava viesti"
 git push
 ```
 
-Julkaisuhaara on tällä hetkellä `contanerized-app`. Tarkista ennen julkaisua,
-että paikallinen commit on pushattu juuri sille haaralle, jota Hetznerin
-checkout seuraa.
+Ylläpidettävä ja tuotantoon julkaistava haara on `master`. Uusi ominaisuus
+voidaan julkaista ensin testipalveluun suoraan fiitserihaarasta. Kun se on
+hyväksytty testissä, sama sisältö mergetään `master`-haaraan ennen
+tuotantojulkaisua. Tarkista aina ennen rakentamista, mitä haaraa Hetznerin
+checkout seuraa ja että testattu commit on pushattu originiin.
 
 ### 2. Julkaisu Hetznerin testipalveluun
 

@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { connect } from 'react-redux';
 import * as maplibregl from 'maplibre-gl';
 import maplibreWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?url';
+import { Protocol } from 'pmtiles';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import './MapLibreMap.css';
 import { phases } from '../lib/constants';
@@ -9,23 +10,295 @@ import { mapDataReady, registerMapNavigation, registerMapPierTooltip, registerMa
 import { hideMenuAndSettings } from '../lib/uicontrol';
 
 maplibregl.setWorkerUrl(maplibreWorkerUrl);
+const pmtilesProtocol = new Protocol();
+maplibregl.addProtocol('pmtiles', pmtilesProtocol.tile);
 
 const OPENFREEMAP_STYLE = 'https://tiles.openfreemap.org/styles/liberty';
 const RASTER_BASE_LAYERS = {
   OSM: 'base-osm'
 };
 const SHOW_MAP_DEBUG = typeof window !== 'undefined' && ['localhost', '127.0.0.1', '::1'].includes(window.location.hostname);
+const TERRAIN_LANDCOVER = {
+  archive: 'landcover-archipelago-sea-kmtk.pmtiles',
+  attribution: 'Lähde: Maanmittauslaitos, Kansallinen maastotietokanta BETA (CC BY 4.0)',
+  label: 'KMTK'
+};
+const DEFAULT_URBAN_LANDCOVER = {
+  archive: 'landcover-archipelago-sea-kmtk-urban.pmtiles',
+  attribution: 'Lähde: Maanmittauslaitos, Kansallinen maastotietokanta BETA (CC BY 4.0)'
+};
+const COMPLEMENTARY_FOREST = {
+  archive: 'landcover-archipelago-sea-syke-forest-smoothed.pmtiles',
+  attribution: 'Lähde: Syke, Maanpeite 2 m 2022 (CC BY 4.0), kartografisesti pehmennetty'
+};
+const mapParameters = new URLSearchParams(window.location.search);
+const landcoverParameter = mapParameters.get('landcover');
+const COMPLEMENTARY_LANDCOVER_ENABLED = (import.meta.env.DEV || import.meta.env.VITE_APP_ENV === 'test')
+  && landcoverParameter !== '0';
+const COMPLEMENTARY_FOREST_ENABLED = COMPLEMENTARY_LANDCOVER_ENABLED;
+const screenshotCenter = mapParameters.get('screenshotCenter')?.split(',').map(Number);
+const screenshotZoom = Number(mapParameters.get('screenshotZoom'));
+const SCREENSHOT_MAP_VIEW = (import.meta.env.DEV || import.meta.env.VITE_APP_ENV === 'test') &&
+  screenshotCenter?.length === 2 && screenshotCenter.every(Number.isFinite) && Number.isFinite(screenshotZoom)
+  ? { center: screenshotCenter, zoom: screenshotZoom }
+  : null;
 const legacyZoomToMapLibre = zoom => Number(zoom) - 1;
 const mapLibreZoomToExternal = zoom => Number(zoom) + 1;
 const legacyEmSize = em => ['interpolate', ['linear'], ['zoom'], 4, em * 6, 18, em * 20];
 const DISTANCE_SIGN_TEXT_SIZE = 14.4;
-const LAND_DETAIL_ZOOM_START = 11;
-const LAND_DETAIL_ZOOM_END = 13;
+const LAND_DETAIL_ZOOM_START = 8;
+const LAND_DETAIL_ZOOM_END = 10;
+const LANDCOVER_OPACITY_CAP_ZOOM = 9.65;
+const LANDCOVER_OPACITY_CAP_RATIO = (LANDCOVER_OPACITY_CAP_ZOOM - LAND_DETAIL_ZOOM_START)
+  / (LAND_DETAIL_ZOOM_END - LAND_DETAIL_ZOOM_START);
+const DEVELOPED_AREA_FADE_ZOOM_START = 14;
+const DEVELOPED_AREA_FADE_ZOOM_END = 15;
+const SIMPLE_DEVELOPED_AREA_FADE_IN_ZOOM_START = 9.5;
+const SIMPLE_DEVELOPED_AREA_FADE_IN_ZOOM_END = LANDCOVER_OPACITY_CAP_ZOOM + 1;
+const LANDCOVER_TUNING_STORAGE_KEY = 'saaristolautat.landcoverTuning.v1';
+const SIMPLE_LAND_COLOR = '#b8dfc2';
+const SIMPLE_LAND_DETAIL_COLOR = '#d4e8d8';
+const SIMPLE_WATER_COLOR = '#f3f7fd';
+const LANDCOVER_TUNING_DEFAULTS = {
+  forest: { label: 'Metsä', color: '#72c10b', opacity: 0.65 },
+  farmland: { label: 'Pelto', color: '#f7e469', opacity: 1 },
+  rock: { label: 'Avokallio', color: '#d9d8cf', opacity: 1 },
+  open: { label: 'Avoin maa', color: '#c9d4b1', opacity: 1 },
+  wetland: { label: 'Kosteikko', color: '#8497d2', opacity: 0.65 },
+  sand: { label: 'Hiekka', color: '#ffd875', opacity: 1 },
+  bare: { label: 'Paljas maa', color: '#d1c4ae', opacity: 1 },
+  urban: { label: 'Rakennettu', color: '#cdb9a8', opacity: 1 },
+  park: { label: 'Puisto', color: '#b9e49b', opacity: 1 },
+  ice: { label: 'Jää / lumi', color: '#e7f0f2', opacity: 1 }
+};
+const openFreeMapOverviewOpacities = new WeakMap();
 const ROUTE_AREA_BOUNDS = [[19.45, 59.72], [23.05, 60.58]];
 const MIN_ROUTE_RENDER_ZOOM = 7;
 const HIITTINEN = [22.69, 59.88];
 const ARCHIPELAGO_BOUNDS = { south: 59.72, west: 19, north: 60.54, east: 23 };
 const noRouteFilter = kind => ['all', ['==', ['get', 'kind'], kind], ['==', ['get', 'ref'], '__no-route__']];
+
+function defaultLandcoverTuning() {
+  return Object.fromEntries(Object.entries(LANDCOVER_TUNING_DEFAULTS).map(([key, value]) => (
+    [key, { ...value }]
+  )));
+}
+
+function loadLandcoverTuning() {
+  const defaults = defaultLandcoverTuning();
+  if (!SHOW_MAP_DEBUG) return defaults;
+  try {
+    const stored = JSON.parse(window.localStorage.getItem(LANDCOVER_TUNING_STORAGE_KEY));
+    Object.keys(defaults).forEach(key => {
+      const color = stored?.[key]?.color;
+      const opacity = Number(stored?.[key]?.opacity);
+      if (/^#[0-9a-f]{6}$/i.test(color)) defaults[key].color = color;
+      if (Number.isFinite(opacity)) defaults[key].opacity = Math.max(0, Math.min(1, opacity));
+    });
+  } catch {
+    // Ignore malformed local tuning values and use the checked-in defaults.
+  }
+  return defaults;
+}
+
+const landcoverFadeExpression = endOpacity => [
+  'interpolate', ['linear'], ['zoom'],
+  LAND_DETAIL_ZOOM_START, 0,
+  LANDCOVER_OPACITY_CAP_ZOOM, endOpacity * LANDCOVER_OPACITY_CAP_RATIO
+];
+
+const cappedOpacity = (overviewOpacity, detailOpacity) => (
+  overviewOpacity + LANDCOVER_OPACITY_CAP_RATIO * (detailOpacity - overviewOpacity)
+);
+
+function complementaryLandcoverColorExpression(tuning) {
+  return ['match', ['get', 'class'],
+    'forest', tuning.forest.color,
+    'farmland', tuning.farmland.color,
+    'open', tuning.open.color,
+    'rock', tuning.rock.color,
+    'wetland', tuning.wetland.color,
+    'sand', tuning.sand.color,
+    'bare', tuning.bare.color,
+    'urban', tuning.urban.color,
+    '#dedfc9'];
+}
+
+function complementaryLandcoverOpacityExpression(tuning) {
+  const opacityAtCap = ['match', ['get', 'class'],
+    'forest', tuning.forest.opacity * LANDCOVER_OPACITY_CAP_RATIO,
+    'farmland', tuning.farmland.opacity * LANDCOVER_OPACITY_CAP_RATIO,
+    'open', tuning.open.opacity * LANDCOVER_OPACITY_CAP_RATIO,
+    'rock', tuning.rock.opacity * LANDCOVER_OPACITY_CAP_RATIO,
+    'wetland', tuning.wetland.opacity * LANDCOVER_OPACITY_CAP_RATIO,
+    'sand', tuning.sand.opacity * LANDCOVER_OPACITY_CAP_RATIO,
+    'bare', tuning.bare.opacity * LANDCOVER_OPACITY_CAP_RATIO,
+    'urban', tuning.urban.opacity * LANDCOVER_OPACITY_CAP_RATIO,
+    LANDCOVER_OPACITY_CAP_RATIO];
+  const opacityAfterDevelopedFade = ['match', ['get', 'class'],
+    'forest', tuning.forest.opacity * LANDCOVER_OPACITY_CAP_RATIO,
+    'farmland', tuning.farmland.opacity * LANDCOVER_OPACITY_CAP_RATIO,
+    'open', tuning.open.opacity * LANDCOVER_OPACITY_CAP_RATIO,
+    'rock', tuning.rock.opacity * LANDCOVER_OPACITY_CAP_RATIO,
+    'wetland', tuning.wetland.opacity * LANDCOVER_OPACITY_CAP_RATIO,
+    'sand', tuning.sand.opacity * LANDCOVER_OPACITY_CAP_RATIO,
+    'bare', tuning.bare.opacity * LANDCOVER_OPACITY_CAP_RATIO,
+    'urban', 0,
+    LANDCOVER_OPACITY_CAP_RATIO];
+  return ['interpolate', ['linear'], ['zoom'],
+    LAND_DETAIL_ZOOM_START, 0,
+    LANDCOVER_OPACITY_CAP_ZOOM, opacityAtCap,
+    DEVELOPED_AREA_FADE_ZOOM_START, opacityAtCap,
+    DEVELOPED_AREA_FADE_ZOOM_END, opacityAfterDevelopedFade];
+}
+
+function openFreeMapLandcoverOpacityExpression(tuning, overviewOpacity) {
+  const opacityAtOverview = ['match', ['get', 'class'],
+    'wood', overviewOpacity * tuning.forest.opacity,
+    'grass', overviewOpacity * tuning.open.opacity,
+    'farmland', overviewOpacity * tuning.farmland.opacity,
+    'rock', overviewOpacity * tuning.rock.opacity,
+    'wetland', overviewOpacity * tuning.wetland.opacity,
+    'sand', overviewOpacity * tuning.sand.opacity,
+    'bare', overviewOpacity * tuning.bare.opacity,
+    'ice', overviewOpacity * tuning.ice.opacity,
+    overviewOpacity];
+  const opacityAtCap = ['match', ['get', 'class'],
+    'wood', cappedOpacity(overviewOpacity * tuning.forest.opacity, 0.9 * tuning.forest.opacity),
+    'grass', cappedOpacity(overviewOpacity * tuning.open.opacity, 0.82 * tuning.open.opacity),
+    'farmland', cappedOpacity(overviewOpacity * tuning.farmland.opacity, 0.88 * tuning.farmland.opacity),
+    'rock', cappedOpacity(overviewOpacity * tuning.rock.opacity, 0.78 * tuning.rock.opacity),
+    'ice', cappedOpacity(overviewOpacity * tuning.ice.opacity, 0.9 * tuning.ice.opacity),
+    'sand', cappedOpacity(overviewOpacity * tuning.sand.opacity, 0.85 * tuning.sand.opacity),
+    'bare', cappedOpacity(overviewOpacity * tuning.bare.opacity, 0.78 * tuning.bare.opacity),
+    'wetland', cappedOpacity(overviewOpacity * tuning.wetland.opacity, 0.8 * tuning.wetland.opacity),
+    cappedOpacity(overviewOpacity, 0.55)];
+  return ['interpolate', ['linear'], ['zoom'],
+    LAND_DETAIL_ZOOM_START, opacityAtOverview,
+    LANDCOVER_OPACITY_CAP_ZOOM, opacityAtCap];
+}
+
+function openFreeMapLanduseOpacityExpression(tuning, overviewOpacity) {
+  const developedClasses = ['residential', 'commercial', 'industrial', 'retail'];
+  const opacityAtCap = ['match', ['get', 'class'],
+    developedClasses, cappedOpacity(
+      overviewOpacity * tuning.urban.opacity,
+      0.88 * tuning.urban.opacity
+    ),
+    cappedOpacity(overviewOpacity, 0.88)];
+  const opacityAfterDevelopedFade = ['match', ['get', 'class'],
+    developedClasses, 0,
+    cappedOpacity(overviewOpacity, 0.88)];
+  return ['interpolate', ['linear'], ['zoom'],
+    LAND_DETAIL_ZOOM_START,
+    ['match', ['get', 'class'], developedClasses, overviewOpacity * tuning.urban.opacity, overviewOpacity],
+    LANDCOVER_OPACITY_CAP_ZOOM, opacityAtCap,
+    DEVELOPED_AREA_FADE_ZOOM_START, opacityAtCap,
+    DEVELOPED_AREA_FADE_ZOOM_END, opacityAfterDevelopedFade];
+}
+
+function simplifiedDevelopedAreaOpacityExpression(tuning) {
+  const detailedDevelopedOpacity = cappedOpacity(tuning.urban.opacity, 0.88 * tuning.urban.opacity);
+  return ['interpolate', ['linear'], ['zoom'],
+    SIMPLE_DEVELOPED_AREA_FADE_IN_ZOOM_START, 0,
+    SIMPLE_DEVELOPED_AREA_FADE_IN_ZOOM_END, detailedDevelopedOpacity,
+    DEVELOPED_AREA_FADE_ZOOM_START, detailedDevelopedOpacity,
+    DEVELOPED_AREA_FADE_ZOOM_END, 0];
+}
+
+function simplifiedDevelopedLanduseOpacityExpression(tuning, overviewOpacity) {
+  const developedClasses = ['residential', 'commercial', 'industrial', 'retail'];
+  const detailedDevelopedOpacity = cappedOpacity(
+    overviewOpacity * tuning.urban.opacity,
+    0.88 * tuning.urban.opacity
+  );
+  const developedOpacity = ['match', ['get', 'class'], developedClasses, detailedDevelopedOpacity, 0];
+  return ['interpolate', ['linear'], ['zoom'],
+    SIMPLE_DEVELOPED_AREA_FADE_IN_ZOOM_START, 0,
+    SIMPLE_DEVELOPED_AREA_FADE_IN_ZOOM_END, developedOpacity,
+    DEVELOPED_AREA_FADE_ZOOM_START, developedOpacity,
+    DEVELOPED_AREA_FADE_ZOOM_END, 0];
+}
+
+function transportationLineColorExpression(layerId, simplified = false) {
+  const isCasing = layerId.includes('casing');
+  const isPrimaryRoad = ['motorway', 'trunk', 'primary'].some(roadClass => layerId.includes(roadClass));
+  const isSecondaryRoad = layerId.includes('secondary');
+  const isTertiaryRoad = layerId.includes('tertiary');
+  const isMainRoad = isPrimaryRoad || isSecondaryRoad;
+  const isMinorRoad = ['minor', 'street'].some(roadClass => layerId.includes(roadClass));
+  const isRail = layerId.includes('rail');
+  const isPath = ['path', 'pedestrian', 'track'].some(roadClass => layerId.includes(roadClass));
+  const overviewColor = simplified
+    ? (isCasing
+      ? (isPrimaryRoad ? '#52605b'
+        : isSecondaryRoad ? '#737d78'
+          : isTertiaryRoad ? '#909792'
+            : isMinorRoad ? '#a5aaa4' : '#bec2bd')
+      : isPrimaryRoad ? '#83918b'
+        : isSecondaryRoad ? '#a9b2ad'
+          : isTertiaryRoad ? '#c4c9c4'
+            : isMinorRoad ? '#d6d9d4' : '#eef0eb')
+    : (isCasing ? '#8b918e' : isMainRoad ? '#9da3a0' : '#b1b6b3');
+  let detailColor;
+  if (!simplified) {
+    detailColor = isRail ? '#747474'
+      : isCasing ? (isMainRoad ? '#b34f38' : isMinorRoad ? '#918d83' : '#c7c3b9')
+        : isMainRoad ? '#ed7250'
+          : isMinorRoad ? '#d9a36d'
+            : isPath ? '#85857f' : '#fffdf5';
+  } else if (isRail) {
+    detailColor = '#747474';
+  } else if (isCasing) {
+    detailColor = isPrimaryRoad ? '#31453f'
+      : isSecondaryRoad ? '#55645e'
+        : isTertiaryRoad ? '#747b73'
+          : isMinorRoad ? '#6f7872' : '#adb3aa';
+  } else {
+    detailColor = isPrimaryRoad ? '#6d8279'
+      : isSecondaryRoad ? '#a2b0a8'
+        : isTertiaryRoad ? '#d0d7cf'
+          : isMinorRoad ? '#dfe5dd'
+            : isPath ? '#7f857e' : '#fafbf5';
+  }
+  return [
+    'interpolate', ['linear'], ['zoom'],
+    LAND_DETAIL_ZOOM_START, overviewColor,
+    LAND_DETAIL_ZOOM_END, detailColor
+  ];
+}
+
+function transportationLineWidthExpression(layerId, simplified = false) {
+  const isCasing = layerId.includes('casing');
+  const isPrimaryRoad = ['motorway', 'trunk', 'primary'].some(roadClass => layerId.includes(roadClass));
+  const isSecondaryRoad = layerId.includes('secondary');
+  const isTertiaryRoad = layerId.includes('tertiary');
+  const isMainRoad = isPrimaryRoad || isSecondaryRoad;
+  const isMinorRoad = ['minor', 'street'].some(roadClass => layerId.includes(roadClass));
+
+  if (!simplified) {
+    return isCasing
+      ? ['interpolate', ['linear'], ['zoom'], 7, 0.8, 11, 1.8, 15, 4]
+      : isMainRoad
+        ? ['interpolate', ['linear'], ['zoom'], 7, 0.5, 11, 1.2, 15, 3]
+        : isMinorRoad
+          ? ['interpolate', ['linear'], ['zoom'], 9, 0.4, 12, 1, 15, 2.2]
+          : ['interpolate', ['linear'], ['zoom'], 9, 0.35, 12, 0.8, 15, 1.8];
+  }
+
+  if (isCasing) {
+    if (isPrimaryRoad) return ['interpolate', ['linear'], ['zoom'], 7, 0.9, 11, 2.3, 15, 5.2];
+    if (isSecondaryRoad) return ['interpolate', ['linear'], ['zoom'], 7, 0.75, 11, 1.9, 15, 4.3];
+    if (isTertiaryRoad) return ['interpolate', ['linear'], ['zoom'], 8, 0.6, 11, 1.55, 15, 3.5];
+    if (isMinorRoad) return ['interpolate', ['linear'], ['zoom'], 9, 0.5, 12, 1.3, 15, 3];
+    return ['interpolate', ['linear'], ['zoom'], 10, 0.3, 12, 0.75, 15, 1.8];
+  }
+  if (isPrimaryRoad) return ['interpolate', ['linear'], ['zoom'], 7, 0.55, 11, 1.5, 15, 3.8];
+  if (isSecondaryRoad) return ['interpolate', ['linear'], ['zoom'], 7, 0.45, 11, 1.2, 15, 3];
+  if (isTertiaryRoad) return ['interpolate', ['linear'], ['zoom'], 8, 0.35, 11, 0.95, 15, 2.3];
+  if (isMinorRoad) return ['interpolate', ['linear'], ['zoom'], 9, 0.35, 12, 0.85, 15, 1.9];
+  return ['interpolate', ['linear'], ['zoom'], 10, 0.25, 12, 0.55, 15, 1.15];
+}
 
 function knownVesselNamesByMmsi(data) {
   return new Map(Object.values(data?.ferries || {})
@@ -75,13 +348,13 @@ function customizeBaseMap(map) {
     id: 'landcover-farmland-detail', type: 'fill', source: 'openmaptiles', 'source-layer': 'landcover',
     minzoom: LAND_DETAIL_ZOOM_START,
     filter: ['==', ['get', 'class'], 'farmland'],
-    paint: { 'fill-color': '#fff1a3', 'fill-opacity': 0 }
+    paint: { 'fill-color': '#f4e9b2', 'fill-opacity': 0 }
   }, firstLandLayer);
   if (!map.getLayer('landcover-rock-detail')) map.addLayer({
     id: 'landcover-rock-detail', type: 'fill', source: 'openmaptiles', 'source-layer': 'landcover',
     minzoom: LAND_DETAIL_ZOOM_START,
     filter: ['==', ['get', 'class'], 'rock'],
-    paint: { 'fill-color': '#eee8d7', 'fill-opacity': 0 }
+    paint: { 'fill-color': '#d9d8cf', 'fill-opacity': 0 }
   }, firstLandLayer);
   if (!map.getLayer('landuse-developed-detail')) map.addLayer({
     id: 'landuse-developed-detail', type: 'fill', source: 'openmaptiles', 'source-layer': 'landuse',
@@ -97,11 +370,52 @@ function customizeBaseMap(map) {
       sourceLayer === 'transportation_name' ||
       ['road', 'route', 'shield', 'highway', 'transportation'].some(value => layerId.includes(value))
     );
+    const isNamedRoadLabel = ['highway-name-major', 'highway-name-minor'].some(value => layerId.includes(value));
+    const isPathNameLabel = layerId.includes('highway-name-path');
+    const isPoiNameLabel = sourceLayer === 'poi' && layerId.startsWith('poi_r');
 
     if (isRoadLabel && layer.layout?.['text-field']) {
       map.setPaintProperty(layer.id, 'text-opacity', 1);
+      if (isNamedRoadLabel) {
+        map.setPaintProperty(layer.id, 'text-color', '#3f3b36');
+        map.setPaintProperty(layer.id, 'text-halo-color', 'rgba(255,255,255,0.98)');
+        map.setPaintProperty(layer.id, 'text-halo-width', 2);
+        map.setPaintProperty(layer.id, 'text-halo-blur', 0.05);
+        map.setLayoutProperty(layer.id, 'text-size', [
+          'interpolate', ['linear'], ['zoom'],
+          12, 12.5,
+          14, 14.5,
+          16, 16
+        ]);
+        if (layerId.includes('highway-name-minor')) {
+          map.setLayerZoomRange(layer.id, 14, layer.maxzoom ?? 24);
+        }
+      } else if (isPathNameLabel) {
+        map.setPaintProperty(layer.id, 'text-color', '#4b4741');
+        map.setPaintProperty(layer.id, 'text-halo-color', 'rgba(255,255,255,0.98)');
+        map.setPaintProperty(layer.id, 'text-halo-width', 1.8);
+        map.setPaintProperty(layer.id, 'text-halo-blur', 0.05);
+        map.setLayoutProperty(layer.id, 'text-size', [
+          'interpolate', ['linear'], ['zoom'],
+          14, 13,
+          16, 14.5,
+          18, 16
+        ]);
+      }
     } else if (layer.type === 'symbol' && layer.layout?.['text-field']) {
       map.setPaintProperty(layer.id, 'text-opacity', ['step', ['zoom'], 1, 7, 0, 12, 1]);
+      if (isPoiNameLabel) {
+        map.setPaintProperty(layer.id, 'text-color', '#4b4741');
+        map.setPaintProperty(layer.id, 'text-halo-color', 'rgba(255,255,255,0.98)');
+        map.setPaintProperty(layer.id, 'text-halo-width', 2);
+        map.setPaintProperty(layer.id, 'text-halo-blur', 0.05);
+        map.setLayoutProperty(layer.id, 'text-size', [
+          'interpolate', ['linear'], ['zoom'],
+          15, 13,
+          17, 14.5,
+          19, 16
+        ]);
+      }
     } else if (layer.type === 'background') {
       map.setPaintProperty(layer.id, 'background-color', [
         'interpolate', ['linear'], ['zoom'],
@@ -114,6 +428,7 @@ function customizeBaseMap(map) {
         LAND_DETAIL_ZOOM_START, '#f3f7fd',
         LAND_DETAIL_ZOOM_END, '#ffffff'
       ]);
+      map.setPaintProperty(layer.id, 'fill-outline-color', '#acd3e8');
       map.setPaintProperty(layer.id, 'fill-opacity', 1);
     } else if (sourceLayer === 'waterway' && layer.type === 'line') {
       map.setPaintProperty(layer.id, 'line-color', [
@@ -139,6 +454,15 @@ function customizeBaseMap(map) {
         LAND_DETAIL_ZOOM_END, '#62b94f'
       ]);
     } else if (sourceLayer === 'landcover' && layer.type === 'fill') {
+      let overviewOpacities = openFreeMapOverviewOpacities.get(map);
+      if (!overviewOpacities) {
+        overviewOpacities = new Map();
+        openFreeMapOverviewOpacities.set(map, overviewOpacities);
+      }
+      if (!overviewOpacities.has(layer.id)) {
+        const originalOpacity = layer.paint?.['fill-opacity'];
+        overviewOpacities.set(layer.id, typeof originalOpacity === 'number' ? originalOpacity : 1);
+      }
       map.setPaintProperty(layer.id, 'fill-color', [
         'interpolate', ['linear'], ['zoom'],
         LAND_DETAIL_ZOOM_START, '#addbb9',
@@ -146,8 +470,8 @@ function customizeBaseMap(map) {
         ['match', ['get', 'class'],
           'wood', '#d1ecae',
           'grass', '#e7efae',
-          'farmland', '#fff09b',
-          'rock', '#eee8d7',
+          'farmland', '#f4e9b2',
+          'rock', '#d9d8cf',
           'ice', '#e7f0f2',
           'sand', '#ecd8a1',
           '#addbb9']
@@ -167,6 +491,15 @@ function customizeBaseMap(map) {
           0.55]
       ]);
     } else if (sourceLayer === 'landuse' && layer.type === 'fill') {
+      let overviewOpacities = openFreeMapOverviewOpacities.get(map);
+      if (!overviewOpacities) {
+        overviewOpacities = new Map();
+        openFreeMapOverviewOpacities.set(map, overviewOpacities);
+      }
+      if (!overviewOpacities.has(layer.id)) {
+        const originalOpacity = layer.paint?.['fill-opacity'];
+        overviewOpacities.set(layer.id, typeof originalOpacity === 'number' ? originalOpacity : 1);
+      }
       map.setLayerZoomRange(layer.id, layer.minzoom ?? 0, 24);
       map.setPaintProperty(layer.id, 'fill-color', [
         'interpolate', ['linear'], ['zoom'],
@@ -199,33 +532,272 @@ function customizeBaseMap(map) {
       map.setLayerZoomRange(layer.id, Math.min(layer.minzoom ?? 0, 7), layer.maxzoom ?? 24);
       const isCasing = layerId.includes('casing');
       const isMainRoad = ['motorway', 'trunk', 'primary', 'secondary'].some(roadClass => layerId.includes(roadClass));
-      const isRail = layerId.includes('rail');
-      const isPath = ['path', 'pedestrian', 'track'].some(roadClass => layerId.includes(roadClass));
-      const overviewColor = isCasing ? '#8b918e' : isMainRoad ? '#9da3a0' : '#b1b6b3';
-      const detailColor = isRail ? '#747474'
-        : isCasing ? (isMainRoad ? '#b34f38' : '#c7c3b9')
-          : isMainRoad ? '#ed7250'
-            : isPath ? '#85857f' : '#fffdf5';
-      map.setPaintProperty(layer.id, 'line-color', [
-        'interpolate', ['linear'], ['zoom'],
-        LAND_DETAIL_ZOOM_START, overviewColor,
-        LAND_DETAIL_ZOOM_END, detailColor
-      ]);
-      map.setPaintProperty(layer.id, 'line-width', isCasing
-        ? ['interpolate', ['linear'], ['zoom'], 7, 0.8, 11, 1.8, 15, 4]
-        : isMainRoad
-          ? ['interpolate', ['linear'], ['zoom'], 7, 0.5, 11, 1.2, 15, 3]
-          : ['interpolate', ['linear'], ['zoom'], 9, 0.35, 12, 0.8, 15, 1.8]);
-      map.setPaintProperty(layer.id, 'line-opacity', isMainRoad || isCasing ? 0.9 : 0.72);
+      const isMinorRoad = ['minor', 'street'].some(roadClass => layerId.includes(roadClass));
+      map.setPaintProperty(layer.id, 'line-color', transportationLineColorExpression(layerId));
+      map.setPaintProperty(layer.id, 'line-width', transportationLineWidthExpression(layerId));
+      map.setPaintProperty(
+        layer.id,
+        'line-opacity',
+        isMinorRoad ? (isCasing ? 0.95 : 0.98) : isMainRoad || isCasing ? 0.9 : 0.72
+      );
     }
 
-    if (layer.type === 'symbol' && layer.layout?.['text-field'] && !layer.layout?.['icon-image']) {
+    if (layer.type === 'symbol' && layer.layout?.['text-field'] && !layer.layout?.['icon-image']
+      && !isNamedRoadLabel && !isPathNameLabel && !isPoiNameLabel) {
       map.setPaintProperty(layer.id, 'text-halo-color', 'rgba(255,255,255,0.95)');
       map.setPaintProperty(layer.id, 'text-halo-width', 1.7);
       map.setPaintProperty(layer.id, 'text-halo-blur', 0.25);
     }
   });
 
+}
+
+function addComplementaryLandcover(map, tuning) {
+  if (!COMPLEMENTARY_LANDCOVER_ENABLED) return;
+
+  if (!map.getSource('complementary-landcover')) {
+    const archiveUrl = new URL(`/data/tiles/${TERRAIN_LANDCOVER.archive}`, window.location.origin);
+    map.addSource('complementary-landcover', {
+      type: 'vector',
+      url: `pmtiles://${archiveUrl.href}`,
+      attribution: TERRAIN_LANDCOVER.attribution
+    });
+  }
+  if (!map.getSource('complementary-urban')) {
+    const archiveUrl = new URL(`/data/tiles/${DEFAULT_URBAN_LANDCOVER.archive}`, window.location.origin);
+    map.addSource('complementary-urban', {
+      type: 'vector',
+      url: `pmtiles://${archiveUrl.href}`,
+      attribution: DEFAULT_URBAN_LANDCOVER.attribution
+    });
+  }
+  if (map.getLayer('complementary-landcover-fill')) return;
+
+  const beforeLayer = map.getStyle().layers.find(layer => (
+    layer['source-layer'] === 'building' || layer['source-layer'] === 'transportation'
+  ))?.id;
+  map.addLayer({
+    id: 'complementary-landcover-fill',
+    type: 'fill',
+    source: 'complementary-landcover',
+    'source-layer': 'landcover',
+    minzoom: LAND_DETAIL_ZOOM_START,
+    layout: { visibility: 'none' },
+    paint: {
+      'fill-color': complementaryLandcoverColorExpression(tuning),
+      'fill-opacity': complementaryLandcoverOpacityExpression(tuning)
+    }
+  }, beforeLayer);
+  map.addLayer({
+    id: 'complementary-urban-fill',
+    type: 'fill',
+    source: 'complementary-urban',
+    'source-layer': 'landcover',
+    minzoom: SIMPLE_DEVELOPED_AREA_FADE_IN_ZOOM_START,
+    filter: ['==', ['get', 'class'], 'urban'],
+    layout: { visibility: 'none' },
+    paint: {
+      'fill-color': tuning.urban.color,
+      'fill-opacity': simplifiedDevelopedAreaOpacityExpression(tuning)
+    }
+  }, beforeLayer);
+}
+
+function addComplementaryForest(map, tuning) {
+  if (!COMPLEMENTARY_FOREST_ENABLED) return;
+
+  if (!map.getSource('complementary-forest')) {
+    const archiveUrl = new URL(`/data/tiles/${COMPLEMENTARY_FOREST.archive}`, window.location.origin);
+    map.addSource('complementary-forest', {
+      type: 'vector',
+      url: `pmtiles://${archiveUrl.href}`,
+      attribution: COMPLEMENTARY_FOREST.attribution
+    });
+  }
+  if (map.getLayer('complementary-forest-fill')) return;
+
+  const beforeLayer = map.getStyle().layers.find(layer => (
+    layer['source-layer'] === 'building' || layer['source-layer'] === 'transportation'
+  ))?.id;
+  map.addLayer({
+    id: 'complementary-forest-fill',
+    type: 'fill',
+    source: 'complementary-forest',
+    'source-layer': 'landcover',
+    minzoom: LAND_DETAIL_ZOOM_START,
+    paint: {
+      'fill-color': tuning.forest.color,
+      'fill-opacity': landcoverFadeExpression(tuning.forest.opacity)
+    }
+  }, beforeLayer);
+}
+
+function applyLandcoverTuning(map, tuning) {
+  if (map.getLayer('complementary-forest-fill')) {
+    map.setPaintProperty('complementary-forest-fill', 'fill-color', tuning.forest.color);
+    map.setPaintProperty(
+      'complementary-forest-fill',
+      'fill-opacity',
+      landcoverFadeExpression(tuning.forest.opacity)
+    );
+  }
+  if (map.getLayer('complementary-landcover-fill')) {
+    map.setPaintProperty(
+      'complementary-landcover-fill',
+      'fill-color',
+      complementaryLandcoverColorExpression(tuning)
+    );
+    map.setPaintProperty(
+      'complementary-landcover-fill',
+      'fill-opacity',
+      complementaryLandcoverOpacityExpression(tuning)
+    );
+  }
+
+  map.getStyle().layers.forEach(layer => {
+    if (layer.source !== 'openmaptiles' || layer.type !== 'fill') return;
+    const sourceLayer = layer['source-layer'];
+    if (sourceLayer === 'landcover') {
+      map.setPaintProperty(layer.id, 'fill-color', [
+        'interpolate', ['linear'], ['zoom'],
+        LAND_DETAIL_ZOOM_START, '#addbb9',
+        LAND_DETAIL_ZOOM_END,
+        ['match', ['get', 'class'],
+          'wood', tuning.forest.color,
+          'grass', tuning.open.color,
+          'farmland', tuning.farmland.color,
+          'rock', tuning.rock.color,
+          'wetland', tuning.wetland.color,
+          'sand', tuning.sand.color,
+          'bare', tuning.bare.color,
+          'ice', tuning.ice.color,
+          '#addbb9']
+      ]);
+      const overviewOpacity = openFreeMapOverviewOpacities.get(map)?.get(layer.id) ?? 1;
+      map.setPaintProperty(
+        layer.id,
+        'fill-opacity',
+        openFreeMapLandcoverOpacityExpression(tuning, overviewOpacity)
+      );
+    } else if (sourceLayer === 'landuse') {
+      map.setPaintProperty(layer.id, 'fill-color', [
+        'interpolate', ['linear'], ['zoom'],
+        LAND_DETAIL_ZOOM_START, '#b9ddbf',
+        LAND_DETAIL_ZOOM_END,
+        ['match', ['get', 'class'],
+          ['residential', 'commercial', 'industrial', 'retail'], tuning.urban.color,
+          'pitch', '#b8dda0',
+          'track', '#e2d2a1',
+          'cemetery', '#c7dfa9',
+          'hospital', '#ecd4dc',
+          'school', '#eee4b4',
+          '#b9ddbf']
+      ]);
+      const overviewOpacity = openFreeMapOverviewOpacities.get(map)?.get(layer.id) ?? 1;
+      map.setPaintProperty(
+        layer.id,
+        'fill-opacity',
+        openFreeMapLanduseOpacityExpression(tuning, overviewOpacity)
+      );
+    } else if (sourceLayer === 'park') {
+      map.setPaintProperty(layer.id, 'fill-color', [
+        'interpolate', ['linear'], ['zoom'],
+        LAND_DETAIL_ZOOM_START, '#d8e8c8',
+        LAND_DETAIL_ZOOM_END, tuning.park.color
+      ]);
+      map.setPaintProperty(layer.id, 'fill-opacity', [
+        'interpolate', ['linear'], ['zoom'],
+        LAND_DETAIL_ZOOM_START, 0.7 * tuning.park.opacity,
+        LANDCOVER_OPACITY_CAP_ZOOM,
+        cappedOpacity(0.7 * tuning.park.opacity, 0.85 * tuning.park.opacity)
+      ]);
+    }
+  });
+}
+
+function setComplementaryLandcoverVisibility(map, mapTypeId, landcoverVisible) {
+  const terrainVisible = mapTypeId === 'openfreemapTerrain' && landcoverVisible;
+  ['complementary-forest-fill', 'complementary-landcover-fill'].forEach(layerId => {
+    if (map.getLayer(layerId)) {
+      map.setLayoutProperty(layerId, 'visibility', terrainVisible ? 'visible' : 'none');
+    }
+  });
+  if (map.getLayer('complementary-urban-fill')) {
+    map.setLayoutProperty(
+      'complementary-urban-fill',
+      'visibility',
+      mapTypeId === 'openfreemap' ? 'visible' : 'none'
+    );
+  }
+}
+
+function applyOpenFreeMapAppearance(map, mapTypeId, tuning) {
+  const style = map.getStyle();
+  if (!style?.layers) return;
+  const terrain = mapTypeId === 'openfreemapTerrain';
+  style.layers.forEach(layer => {
+    const sourceLayer = layer['source-layer'];
+
+    if (layer.type === 'background') {
+      map.setPaintProperty(layer.id, 'background-color', [
+        'interpolate', ['linear'], ['zoom'],
+        LAND_DETAIL_ZOOM_START, SIMPLE_LAND_COLOR,
+        LAND_DETAIL_ZOOM_END, terrain ? '#e9e8cf' : SIMPLE_LAND_DETAIL_COLOR
+      ]);
+    } else if (sourceLayer === 'water' && layer.type === 'fill') {
+      map.setPaintProperty(layer.id, 'fill-color', [
+        'interpolate', ['linear'], ['zoom'],
+        LAND_DETAIL_ZOOM_START, SIMPLE_WATER_COLOR,
+        LAND_DETAIL_ZOOM_END, '#ffffff'
+      ]);
+    } else if (sourceLayer === 'waterway' && layer.type === 'line') {
+      map.setPaintProperty(layer.id, 'line-color', terrain ? [
+        'interpolate', ['linear'], ['zoom'],
+        LAND_DETAIL_ZOOM_START, '#dce7f3',
+        LAND_DETAIL_ZOOM_END, '#61bfe5'
+      ] : '#dce7f3');
+    } else if (sourceLayer === 'transportation' && layer.type === 'line') {
+      const simplified = !terrain;
+      const layerId = layer.id.toLowerCase();
+      map.setPaintProperty(
+        layer.id,
+        'line-color',
+        transportationLineColorExpression(layerId, simplified)
+      );
+      map.setPaintProperty(layer.id, 'line-width', transportationLineWidthExpression(layerId, simplified));
+    }
+
+    if (sourceLayer === 'landcover' || sourceLayer === 'park') {
+      map.setLayoutProperty(layer.id, 'visibility', terrain ? 'visible' : 'none');
+    }
+  });
+
+  if (terrain) {
+    applyLandcoverTuning(map, tuning);
+    return;
+  }
+
+  const complementaryUrbanAvailable = Boolean(map.getLayer('complementary-urban-fill'));
+  if (complementaryUrbanAvailable) {
+    map.setPaintProperty('complementary-urban-fill', 'fill-color', tuning.urban.color);
+    map.setPaintProperty(
+      'complementary-urban-fill',
+      'fill-opacity',
+      simplifiedDevelopedAreaOpacityExpression(tuning)
+    );
+  }
+  style.layers.forEach(layer => {
+    if (layer.source !== 'openmaptiles' || layer.type !== 'fill' || layer['source-layer'] !== 'landuse') return;
+    const overviewOpacity = openFreeMapOverviewOpacities.get(map)?.get(layer.id) ?? 1;
+    map.setPaintProperty(layer.id, 'fill-color', tuning.urban.color);
+    map.setPaintProperty(
+      layer.id,
+      'fill-opacity',
+      complementaryUrbanAvailable
+        ? 0
+        : simplifiedDevelopedLanduseOpacityExpression(tuning, overviewOpacity)
+    );
+  });
 }
 
 function addRasterBaseMaps(map) {
@@ -236,10 +808,12 @@ function addRasterBaseMaps(map) {
   if (!map.getLayer('base-osm')) map.addLayer({ id: 'base-osm', type: 'raster', source: 'osm-raster', layout: { visibility: 'none' } });
 }
 
-function setBaseMap(map, mapTypeId) {
+function setBaseMap(map, mapTypeId, tuning, landcoverVisible) {
   Object.entries(RASTER_BASE_LAYERS).forEach(([type, layerId]) => {
     if (map.getLayer(layerId)) map.setLayoutProperty(layerId, 'visibility', mapTypeId === type ? 'visible' : 'none');
   });
+  applyOpenFreeMapAppearance(map, mapTypeId, tuning);
+  setComplementaryLandcoverVisibility(map, mapTypeId, landcoverVisible);
 }
 
 function localizedName(item = {}, locale = 'fi') {
@@ -750,20 +1324,26 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
   const stopLocationTrackingRef = useRef(() => {});
   const mapTypeRef = useRef(mapTypeId);
   const layersRef = useRef(layers);
+  const landcoverVisibleRef = useRef(true);
+  const landcoverTuningRef = useRef(null);
   layersRef.current = layers;
   const [status, setStatus] = useState('Ladataan karttaa…');
   const [selection, setSelection] = useState(null);
   const [mapDebug, setMapDebug] = useState(null);
   const [showReset, setShowReset] = useState(false);
   const [mapReady, setMapReady] = useState(false);
+  const [landcoverVisible, setLandcoverVisible] = useState(true);
+  const [landcoverTuning, setLandcoverTuning] = useState(loadLandcoverTuning);
+  landcoverTuningRef.current = landcoverTuning;
 
   useEffect(() => {
     if (!mapContainer.current || mapRef.current) return undefined;
+    if (SCREENSHOT_MAP_VIEW) document.getElementById('loader')?.style.setProperty('display', 'none');
     const map = new maplibregl.Map({
       container: mapContainer.current,
       style: OPENFREEMAP_STYLE,
-      center: [21.25, 60.15],
-      zoom: MIN_ROUTE_RENDER_ZOOM,
+      center: SCREENSHOT_MAP_VIEW?.center || [21.25, 60.15],
+      zoom: SCREENSHOT_MAP_VIEW?.zoom || MIN_ROUTE_RENDER_ZOOM,
       minZoom: 4,
       maxZoom: 17,
       attributionControl: false
@@ -772,7 +1352,7 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
     map.once('load', () => {
       window.requestAnimationFrame(() => {
         map.resize();
-        fitRouteArea(map);
+        if (!SCREENSHOT_MAP_VIEW) fitRouteArea(map);
       });
     });
     const unregisterMapNavigation = registerMapNavigation(id => {
@@ -1054,8 +1634,10 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
     };
     map.on('load', () => {
       customizeBaseMap(map);
+      addComplementaryForest(map, landcoverTuningRef.current);
+      addComplementaryLandcover(map, landcoverTuningRef.current);
       addRasterBaseMaps(map);
-      setBaseMap(map, mapTypeRef.current);
+      setBaseMap(map, mapTypeRef.current, landcoverTuningRef.current, landcoverVisibleRef.current);
       addArchipelagoTarget(map);
       collapseAttribution();
       updateMapDebug();
@@ -1462,9 +2044,30 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
   }, [layers]);
 
   useEffect(() => {
+    landcoverVisibleRef.current = landcoverVisible;
+    const map = mapRef.current;
+    if (map) setComplementaryLandcoverVisibility(
+      map,
+      mapTypeRef.current,
+      landcoverVisible
+    );
+  }, [landcoverVisible]);
+
+  useEffect(() => {
+    landcoverTuningRef.current = landcoverTuning;
+    if (SHOW_MAP_DEBUG) {
+      window.localStorage.setItem(LANDCOVER_TUNING_STORAGE_KEY, JSON.stringify(landcoverTuning));
+    }
+    const map = mapRef.current;
+    if (map?.isStyleLoaded()) {
+      applyOpenFreeMapAppearance(map, mapTypeRef.current, landcoverTuning);
+    }
+  }, [landcoverTuning]);
+
+  useEffect(() => {
     mapTypeRef.current = mapTypeId;
     const map = mapRef.current;
-    if (map) setBaseMap(map, mapTypeId);
+    if (map) setBaseMap(map, mapTypeId, landcoverTuningRef.current, landcoverVisibleRef.current);
   }, [mapTypeId]);
 
   useEffect(() => {
@@ -1674,10 +2277,66 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
     />
   );
 
+  const terrainMapSelected = mapTypeId === 'openfreemapTerrain';
+  const landcoverToggle = terrainMapSelected && SHOW_MAP_DEBUG && COMPLEMENTARY_LANDCOVER_ENABLED && (
+    <button
+      type="button"
+      className={`landcover-toggle ${landcoverVisible ? 'active' : ''}`}
+      aria-pressed={landcoverVisible}
+      onClick={() => setLandcoverVisible(visible => !visible)}
+    >
+      Täydentävä maanpeite ({TERRAIN_LANDCOVER.label})
+    </button>
+  );
+
+  const landcoverTuningPanel = terrainMapSelected && SHOW_MAP_DEBUG && COMPLEMENTARY_LANDCOVER_ENABLED && (
+    <details className="landcover-tuning">
+      <summary>Maanpeitevärien säätö</summary>
+      <div className="landcover-tuning__head" aria-hidden="true">
+        <span>Luokka</span><span>Väri</span><span>Peittävyys</span><span />
+      </div>
+      {Object.entries(LANDCOVER_TUNING_DEFAULTS).map(([className, defaults]) => {
+        const setting = landcoverTuning[className];
+        return (
+          <div className="landcover-tuning__row" key={className}>
+            <span>{defaults.label}</span>
+            <input
+              type="color"
+              value={setting.color}
+              aria-label={`${defaults.label}: väri`}
+              onChange={event => setLandcoverTuning(current => ({
+                ...current,
+                [className]: { ...current[className], color: event.target.value }
+              }))}
+            />
+            <input
+              type="range"
+              min="0"
+              max="1"
+              step="0.05"
+              value={setting.opacity}
+              aria-label={`${defaults.label}: peittävyys`}
+              onChange={event => setLandcoverTuning(current => ({
+                ...current,
+                [className]: { ...current[className], opacity: Number(event.target.value) }
+              }))}
+            />
+            <output>{Math.round(setting.opacity * 100)}%</output>
+          </div>
+        );
+      })}
+      <button type="button" onClick={() => setLandcoverTuning(defaultLandcoverTuning())}>
+        Palauta oletukset
+      </button>
+    </details>
+  );
+
   if (embedded) return (
     <>
       <div ref={mapContainer} id="map" className={`map maplibre-embedded ${mapReady ? 'maplibre-map-ready' : 'maplibre-map-loading'}`} aria-label="Saaristolauttojen kartta" />
       {resetButton}
+      {landcoverToggle}
+      {landcoverTuningPanel}
       {debugElement}
     </>
   );
@@ -1686,6 +2345,8 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
     <main className="map-view">
       <div ref={mapContainer} className={`map-view__canvas ${mapReady ? 'maplibre-map-ready' : 'maplibre-map-loading'}`} aria-label="Saaristolauttojen kartta" />
       {resetButton}
+      {landcoverToggle}
+      {landcoverTuningPanel}
       <header className="map-view__header">
         <div className="map-view__brand">
           <img src="/mstile-70x70.png" alt="" />
