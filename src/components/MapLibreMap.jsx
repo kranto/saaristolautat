@@ -30,6 +30,10 @@ const LANDCOVER_VARIANTS = {
     label: 'Syke'
   }
 };
+const DEFAULT_URBAN_LANDCOVER = {
+  archive: 'landcover-pilot-archipelago-sea-kmtk-urban.pmtiles',
+  attribution: 'Lähde: Maanmittauslaitos, Kansallinen maastotietokanta BETA (CC BY 4.0)'
+};
 const COMPLEMENTARY_FOREST_VARIANTS = {
   original: {
     archive: 'landcover-pilot-archipelago-sea-syke-forest.pmtiles',
@@ -577,6 +581,14 @@ function addComplementaryLandcover(map, tuning) {
       attribution: complementaryLandcover.attribution
     });
   }
+  if (!map.getSource('complementary-urban')) {
+    const archiveUrl = new URL(`/data/tiles/${DEFAULT_URBAN_LANDCOVER.archive}`, window.location.origin);
+    map.addSource('complementary-urban', {
+      type: 'vector',
+      url: `pmtiles://${archiveUrl.href}`,
+      attribution: DEFAULT_URBAN_LANDCOVER.attribution
+    });
+  }
   if (map.getLayer('complementary-landcover-fill')) return;
 
   const beforeLayer = map.getStyle().layers.find(layer => (
@@ -588,6 +600,7 @@ function addComplementaryLandcover(map, tuning) {
     source: 'complementary-landcover',
     'source-layer': 'landcover',
     minzoom: LAND_DETAIL_ZOOM_START,
+    layout: { visibility: 'none' },
     paint: {
       'fill-color': complementaryLandcoverColorExpression(tuning),
       'fill-opacity': complementaryLandcoverOpacityExpression(tuning)
@@ -596,7 +609,7 @@ function addComplementaryLandcover(map, tuning) {
   map.addLayer({
     id: 'complementary-urban-fill',
     type: 'fill',
-    source: 'complementary-landcover',
+    source: 'complementary-urban',
     'source-layer': 'landcover',
     minzoom: SIMPLE_DEVELOPED_AREA_FADE_IN_ZOOM_START,
     filter: ['==', ['get', 'class'], 'urban'],
