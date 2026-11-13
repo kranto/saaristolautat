@@ -19,10 +19,10 @@ npm start
 
 Sovellus avautuu oletuksena osoitteessa <http://localhost:5173>.
 
-`complementary-landcover`-haaralla Syken täydentävä maanpeitepilotti näkyy
-paikallisessa kehitysympäristössä ja `APP_ENV=test`-käännöksessä MapLibre-
-zoomilta 10 alkaen. Pilotin voi kytkeä kartan oikean yläkulman painikkeesta
-päälle ja pois. Tuotantokäännös ei lataa pilottiaineistoa.
+OpenFreeMap-maastokartta käyttää täydentäviä KMTK- ja Syke-aineistoja.
+Oletuskartta käyttää KMTK:n kevyttä rakennetun maan aineistoa. Täydentävän
+maanpeitteen päälle/pois-valinta ja värisäätimet näytetään vain localhostilla;
+testi- ja tuotantokäännöksissä aineisto on aina käytössä.
 
 ## Tuotantokäännös
 

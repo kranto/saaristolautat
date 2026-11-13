@@ -33,8 +33,7 @@ const COMPLEMENTARY_FOREST = {
 };
 const mapParameters = new URLSearchParams(window.location.search);
 const landcoverParameter = mapParameters.get('landcover');
-const COMPLEMENTARY_LANDCOVER_ENABLED = (import.meta.env.DEV || import.meta.env.VITE_APP_ENV === 'test')
-  && landcoverParameter !== '0';
+const COMPLEMENTARY_LANDCOVER_ENABLED = !SHOW_MAP_DEBUG || landcoverParameter !== '0';
 const COMPLEMENTARY_FOREST_ENABLED = COMPLEMENTARY_LANDCOVER_ENABLED;
 const screenshotCenter = mapParameters.get('screenshotCenter')?.split(',').map(Number);
 const screenshotZoom = Number(mapParameters.get('screenshotZoom'));
