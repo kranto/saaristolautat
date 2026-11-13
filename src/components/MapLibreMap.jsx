@@ -44,7 +44,16 @@ const SCREENSHOT_MAP_VIEW = (import.meta.env.DEV || import.meta.env.VITE_APP_ENV
 const legacyZoomToMapLibre = zoom => Number(zoom) - 1;
 const mapLibreZoomToExternal = zoom => Number(zoom) + 1;
 const legacyEmSize = em => ['interpolate', ['linear'], ['zoom'], 4, em * 6, 18, em * 20];
-const DISTANCE_SIGN_TEXT_SIZE = 14.4;
+const DISTANCE_SIGN_MIN_ZOOM = 10;
+const DISTANCE_SIGN_FULL_SIZE_ZOOM = 12;
+const DISTANCE_SIGN_MIN_TEXT_SIZE = 9.9;
+const DISTANCE_SIGN_MAX_TEXT_SIZE = 14.4;
+const DISTANCE_SIGN_MAX_ZOOM = 13;
+const distanceSignTextSize = zoom => {
+  const progress = Math.max(0, Math.min(1,
+    (zoom - DISTANCE_SIGN_MIN_ZOOM) / (DISTANCE_SIGN_FULL_SIZE_ZOOM - DISTANCE_SIGN_MIN_ZOOM)));
+  return DISTANCE_SIGN_MIN_TEXT_SIZE + progress * (DISTANCE_SIGN_MAX_TEXT_SIZE - DISTANCE_SIGN_MIN_TEXT_SIZE);
+};
 const LAND_DETAIL_ZOOM_START = 8;
 const LAND_DETAIL_ZOOM_END = 10;
 const LANDCOVER_OPACITY_CAP_ZOOM = 9.65;
@@ -902,28 +911,6 @@ function addDirectionalPinImages(map) {
   });
 }
 
-function addDistanceSignImage(map) {
-  if (map.hasImage('distance-sign')) return;
-  const canvas = document.createElement('canvas');
-  canvas.width = 48;
-  canvas.height = 36;
-  const context = canvas.getContext('2d');
-  const radius = 6;
-  context.beginPath();
-  context.roundRect(3, 3, 42, 30, radius);
-  context.fillStyle = 'rgba(0,101,189,0.7)';
-  context.fill();
-  context.strokeStyle = '#ffffff';
-  context.lineWidth = 5;
-  context.stroke();
-  map.addImage('distance-sign', context.getImageData(0, 0, 48, 36), {
-    pixelRatio: 2,
-    stretchX: [[12, 36]],
-    stretchY: [[12, 24]],
-    content: [10, 8, 38, 28]
-  });
-}
-
 function addLiveVesselImages(map) {
   const addImage = (name, moving) => {
     if (map.hasImage(name)) return;
@@ -1284,7 +1271,6 @@ function applyLayerSettings(map, layers = {}) {
   const styleLayerIds = styleLayers.map(layer => layer.id);
   styleLayerIds.forEach(id => {
     if (id.startsWith('cable-ferry-')) groups.roadferries.push(id);
-    if (id.startsWith('distance-boxes-')) groups.distances.push(id);
   });
   Object.entries(groups).forEach(([setting, ids]) => {
     ids.forEach(id => {
@@ -1311,6 +1297,39 @@ function applyLayerSettings(map, layers = {}) {
   });
 }
 
+function updateDistanceSignMarkers(map, markers, visible) {
+  if (!map) return;
+  const zoom = map.getZoom();
+  const fontSize = distanceSignTextSize(zoom);
+  markers.forEach(({ element, minZoom, maxZoom }) => {
+    element.style.display = visible && zoom >= minZoom && zoom < maxZoom ? '' : 'none';
+    element.style.fontSize = `${fontSize}px`;
+  });
+}
+
+function createDistanceSignMarkers(map, sourceData) {
+  return sourceData.features.filter(feature => feature.properties.kind === 'box').map(feature => {
+    const element = document.createElement('div');
+    element.className = 'distance-sign-marker';
+    const label = document.createElement('div');
+    label.className = 'distance-sign-marker__label';
+    label.textContent = feature.properties.description;
+    label.style.setProperty('--distance-sign-offset-x', `${feature.properties.labelOffset[0]}em`);
+    label.style.setProperty('--distance-sign-offset-y', `${feature.properties.labelOffset[1]}em`);
+    element.appendChild(label);
+    const marker = new maplibregl.Marker({
+      element,
+      anchor: feature.properties.labelTextAnchor
+    }).setLngLat(feature.geometry.coordinates.slice(0, 2)).addTo(map);
+    return {
+      element,
+      marker,
+      minZoom: feature.properties.objectMinZoom,
+      maxZoom: Math.min(feature.properties.objectMaxZoom + 1, DISTANCE_SIGN_MAX_ZOOM)
+    };
+  });
+}
+
 function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale, mapTypeId, infoContent, infoContent2 }) {
   const mapContainer = useRef(null);
   const mapRef = useRef(null);
@@ -1320,6 +1339,7 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
   const hasSelectionRef = useRef(false);
   const liveFeaturesRef = useRef([]);
   const sourceDataRef = useRef(null);
+  const distanceSignMarkersRef = useRef([]);
   const stopLocationTrackingRef = useRef(() => {});
   const mapTypeRef = useRef(mapTypeId);
   const layersRef = useRef(layers);
@@ -1699,7 +1719,23 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
     sourceDataRef.current = sourceData;
     mapDataReady();
 
+    const removeDistanceSigns = () => {
+      distanceSignMarkersRef.current.forEach(({ marker }) => marker.remove());
+      distanceSignMarkersRef.current = [];
+    };
+    const updateDistanceSigns = () => updateDistanceSignMarkers(
+      map,
+      distanceSignMarkersRef.current,
+      layersRef.current.distances
+    );
+    const rebuildDistanceSigns = () => {
+      removeDistanceSigns();
+      distanceSignMarkersRef.current = createDistanceSignMarkers(map, sourceData);
+      updateDistanceSigns();
+    };
+
     function addLayers() {
+      rebuildDistanceSigns();
       if (map.getSource('saaristolautat')) {
         map.getSource('saaristolautat').setData(sourceData);
         applyLayerSettings(map, layersRef.current);
@@ -1709,7 +1745,6 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
       map.addSource('saaristolautat', { type: 'geojson', data: sourceData, generateId: true });
       addCableFerryRingImage(map);
       addDirectionalPinImages(map);
-      addDistanceSignImage(map);
 
       const roadRanges = [...new Set(sourceData.features.filter(feature => feature.properties.kind === 'road')
         .map(feature => `${feature.properties.objectMinZoom}-${feature.properties.objectMaxZoom}`))];
@@ -1868,25 +1903,6 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
         filter: ['==', ['get', 'kind'], 'pin'], minzoom: 10,
         layout: { 'icon-image': ['concat', 'direction-pin-', ['get', 'subtype']], 'icon-size': 1.8, 'icon-allow-overlap': true }
       });
-      const boxRanges = [...new Set(sourceData.features.filter(feature => feature.properties.kind === 'box')
-        .map(feature => `${feature.properties.objectMinZoom}-${feature.properties.objectMaxZoom}`))];
-      boxRanges.forEach(range => {
-        const [from, to] = range.split('-').map(Number);
-        map.addLayer({
-          id: `distance-boxes-${range}`, type: 'symbol', source: 'saaristolautat', minzoom: from, maxzoom: to + 1,
-          filter: ['all', ['==', ['get', 'kind'], 'box'], ['==', ['get', 'objectMinZoom'], from], ['==', ['get', 'objectMaxZoom'], to]],
-          layout: {
-            'text-field': ['get', 'description'], 'text-font': ['Noto Sans Bold'], 'text-size': DISTANCE_SIGN_TEXT_SIZE,
-            'text-line-height': 1.1, 'text-max-width': 100,
-            'text-offset': ['array', 'number', 2, ['get', 'labelOffset']], 'text-anchor': ['get', 'labelTextAnchor'], 'text-optional': true,
-            'text-justify': 'center',
-            'text-allow-overlap': true, 'text-ignore-placement': true,
-            'icon-image': 'distance-sign', 'icon-text-fit': 'both', 'icon-text-fit-padding': [4, 6, 4, 6],
-            'icon-allow-overlap': true, 'icon-ignore-placement': true
-          },
-          paint: { 'text-color': '#ffffff' }
-        });
-      });
 
       const pierStyles = [
         { type: '1', radius: ['step', ['zoom'], 3, 8, 4, 10, 5, 11, 6], opacity: ['step', ['zoom'], 1, 10, 0.8], em: 1.2, font: 'Noto Sans Bold' },
@@ -2029,17 +2045,21 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
     };
     map.on('styledata', ensureLayers);
     map.on('idle', ensureLayers);
+    map.on('zoom', updateDistanceSigns);
     if (map.isStyleLoaded()) addLayers();
     else map.once('load', addLayers);
     return () => {
       map.off('styledata', ensureLayers);
       map.off('idle', ensureLayers);
       map.off('load', addLayers);
+      map.off('zoom', updateDistanceSigns);
+      removeDistanceSigns();
     };
   }, [data, dispatch, geojson, locale]);
 
   useEffect(() => {
     applyLayerSettings(mapRef.current, layers);
+    updateDistanceSignMarkers(mapRef.current, distanceSignMarkersRef.current, layers.distances);
   }, [layers]);
 
   useEffect(() => {
