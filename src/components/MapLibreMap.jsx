@@ -18,42 +18,24 @@ const RASTER_BASE_LAYERS = {
   OSM: 'base-osm'
 };
 const SHOW_MAP_DEBUG = typeof window !== 'undefined' && ['localhost', '127.0.0.1', '::1'].includes(window.location.hostname);
-const LANDCOVER_VARIANTS = {
-  kmtk: {
-    archive: 'landcover-pilot-archipelago-sea-kmtk.pmtiles',
-    attribution: 'Lähde: Maanmittauslaitos, Kansallinen maastotietokanta BETA (CC BY 4.0)',
-    label: 'KMTK'
-  },
-  syke: {
-    archive: 'landcover-pilot-kustavi-inio-velkua.pmtiles',
-    attribution: 'Lähde: Syke, Maanpeite 2 m 2022 (CC BY 4.0)',
-    label: 'Syke'
-  }
+const TERRAIN_LANDCOVER = {
+  archive: 'landcover-archipelago-sea-kmtk.pmtiles',
+  attribution: 'Lähde: Maanmittauslaitos, Kansallinen maastotietokanta BETA (CC BY 4.0)',
+  label: 'KMTK'
 };
 const DEFAULT_URBAN_LANDCOVER = {
-  archive: 'landcover-pilot-archipelago-sea-kmtk-urban.pmtiles',
+  archive: 'landcover-archipelago-sea-kmtk-urban.pmtiles',
   attribution: 'Lähde: Maanmittauslaitos, Kansallinen maastotietokanta BETA (CC BY 4.0)'
 };
-const COMPLEMENTARY_FOREST_VARIANTS = {
-  original: {
-    archive: 'landcover-pilot-archipelago-sea-syke-forest.pmtiles',
-    attribution: 'Lähde: Syke, Maanpeite 2 m 2022 (CC BY 4.0)'
-  },
-  smoothed: {
-    archive: 'landcover-pilot-archipelago-sea-syke-forest-smoothed.pmtiles',
-    attribution: 'Lähde: Syke, Maanpeite 2 m 2022 (CC BY 4.0), kartografisesti pehmennetty'
-  }
+const COMPLEMENTARY_FOREST = {
+  archive: 'landcover-archipelago-sea-syke-forest-smoothed.pmtiles',
+  attribution: 'Lähde: Syke, Maanpeite 2 m 2022 (CC BY 4.0), kartografisesti pehmennetty'
 };
 const mapParameters = new URLSearchParams(window.location.search);
 const landcoverParameter = mapParameters.get('landcover');
-const forestParameter = mapParameters.get('forest');
-const complementaryLandcover = LANDCOVER_VARIANTS[landcoverParameter] || LANDCOVER_VARIANTS.kmtk;
-const complementaryForest = COMPLEMENTARY_FOREST_VARIANTS[forestParameter]
-  || COMPLEMENTARY_FOREST_VARIANTS.smoothed;
 const COMPLEMENTARY_LANDCOVER_ENABLED = (import.meta.env.DEV || import.meta.env.VITE_APP_ENV === 'test')
   && landcoverParameter !== '0';
-const COMPLEMENTARY_FOREST_ENABLED = COMPLEMENTARY_LANDCOVER_ENABLED
-  && complementaryLandcover === LANDCOVER_VARIANTS.kmtk;
+const COMPLEMENTARY_FOREST_ENABLED = COMPLEMENTARY_LANDCOVER_ENABLED;
 const screenshotCenter = mapParameters.get('screenshotCenter')?.split(',').map(Number);
 const screenshotZoom = Number(mapParameters.get('screenshotZoom'));
 const SCREENSHOT_MAP_VIEW = (import.meta.env.DEV || import.meta.env.VITE_APP_ENV === 'test') &&
@@ -574,11 +556,11 @@ function addComplementaryLandcover(map, tuning) {
   if (!COMPLEMENTARY_LANDCOVER_ENABLED) return;
 
   if (!map.getSource('complementary-landcover')) {
-    const archiveUrl = new URL(`/data/tiles/${complementaryLandcover.archive}`, window.location.origin);
+    const archiveUrl = new URL(`/data/tiles/${TERRAIN_LANDCOVER.archive}`, window.location.origin);
     map.addSource('complementary-landcover', {
       type: 'vector',
       url: `pmtiles://${archiveUrl.href}`,
-      attribution: complementaryLandcover.attribution
+      attribution: TERRAIN_LANDCOVER.attribution
     });
   }
   if (!map.getSource('complementary-urban')) {
@@ -625,11 +607,11 @@ function addComplementaryForest(map, tuning) {
   if (!COMPLEMENTARY_FOREST_ENABLED) return;
 
   if (!map.getSource('complementary-forest')) {
-    const archiveUrl = new URL(`/data/tiles/${complementaryForest.archive}`, window.location.origin);
+    const archiveUrl = new URL(`/data/tiles/${COMPLEMENTARY_FOREST.archive}`, window.location.origin);
     map.addSource('complementary-forest', {
       type: 'vector',
       url: `pmtiles://${archiveUrl.href}`,
-      attribution: complementaryForest.attribution
+      attribution: COMPLEMENTARY_FOREST.attribution
     });
   }
   if (map.getLayer('complementary-forest-fill')) return;
@@ -2303,7 +2285,7 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
       aria-pressed={landcoverVisible}
       onClick={() => setLandcoverVisible(visible => !visible)}
     >
-      Täydentävä maanpeite ({complementaryLandcover.label})
+      Täydentävä maanpeite ({TERRAIN_LANDCOVER.label})
     </button>
   );
 
