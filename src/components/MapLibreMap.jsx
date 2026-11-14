@@ -694,7 +694,7 @@ function addComplementaryForest(map, tuning) {
 }
 
 function applyTerrainTestTuning(map, mapTypeId, tuning) {
-  if (!SHOW_MAP_DEBUG || !tuning) return;
+  if (!tuning) return;
   const terrainVisible = mapTypeId === 'openfreemapTerrain';
   [
     ['terrain-test-contours-5m', tuning.contour5mMinZoom],
@@ -731,7 +731,6 @@ function applyTerrainTestTuning(map, mapTypeId, tuning) {
 }
 
 function addTerrainTestLayers(map, mapTypeId, tuning) {
-  if (!SHOW_MAP_DEBUG) return;
   const attribution = 'Maanmittauslaitos, CC BY 4.0';
   ['5m', '10m'].forEach(interval => {
     const sourceId = `terrain-test-contours-${interval}`;
