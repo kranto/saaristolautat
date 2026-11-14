@@ -84,7 +84,7 @@ const TERRAIN_TEST_DEFAULTS = {
   contourWidth: 0.8,
   hillshade: true,
   hillshadeMinZoom: 8,
-  hillshadeOpacity: 0.15
+  hillshadeOpacity: 0.2
 };
 const SIMPLE_LAND_COLOR = '#b8dfc2';
 const SIMPLE_LAND_DETAIL_COLOR = '#d4e8d8';
