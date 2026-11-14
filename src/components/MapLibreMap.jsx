@@ -24,6 +24,7 @@ const isLocalMapHost = hostname => (
   /^172\.(1[6-9]|2\d|3[01])\./.test(hostname)
 );
 const SHOW_MAP_DEBUG = typeof window !== 'undefined' && isLocalMapHost(window.location.hostname);
+const USE_REDUCED_TILE_CACHE = typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches;
 const TERRAIN_LANDCOVER = {
   archive: 'landcover-archipelago-sea-kmtk.pmtiles',
   attribution: 'Lähde: Maanmittauslaitos, Kansallinen maastotietokanta BETA (CC BY 4.0)',
@@ -744,7 +745,7 @@ function addTerrainTestLayers(map, mapTypeId, tuning) {
   });
   const beforeLayer = map.getStyle().layers.find(layer => layer['source-layer'] === 'transportation')?.id;
   if (!map.getSource(TERRAIN_TEST_HILLSHADE_ID)) {
-    const archiveUrl = new URL(`${TERRAIN_TEST_BASE_URL}/hillshade-8m-webp.pmtiles`, window.location.origin);
+    const archiveUrl = new URL(`${TERRAIN_TEST_BASE_URL}/hillshade-8m-webp-z12.pmtiles`, window.location.origin);
     map.addSource(TERRAIN_TEST_HILLSHADE_ID, {
       type: 'raster',
       url: `pmtiles://${archiveUrl.href}`,
@@ -758,7 +759,11 @@ function addTerrainTestLayers(map, mapTypeId, tuning) {
       type: 'raster',
       source: TERRAIN_TEST_HILLSHADE_ID,
       layout: { visibility: 'none' },
-      paint: { 'raster-opacity': tuning.hillshadeOpacity, 'raster-resampling': 'linear' }
+      paint: {
+        'raster-opacity': tuning.hillshadeOpacity,
+        'raster-resampling': 'linear',
+        'raster-fade-duration': 0
+      }
     }, beforeLayer);
   }
   ['5m', '10m'].forEach(interval => {
@@ -1512,6 +1517,7 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
       zoom: SCREENSHOT_MAP_VIEW?.zoom || MIN_ROUTE_RENDER_ZOOM,
       minZoom: 4,
       maxZoom: MAP_MAX_ZOOM,
+      maxTileCacheZoomLevels: USE_REDUCED_TILE_CACHE ? 1 : 5,
       attributionControl: false
     });
     mapRef.current = map;
