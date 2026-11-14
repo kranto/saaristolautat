@@ -55,6 +55,8 @@ const DISTANCE_SIGN_FULL_SIZE_ZOOM = 12;
 const DISTANCE_SIGN_MIN_TEXT_SIZE = 9.9;
 const DISTANCE_SIGN_MAX_TEXT_SIZE = 14.4;
 const DISTANCE_SIGN_MAX_ZOOM = 13;
+const MAP_MAX_ZOOM = 17;
+const LAYER_MAX_ZOOM = MAP_MAX_ZOOM + 1;
 const distanceSignTextSize = zoom => {
   const progress = Math.max(0, Math.min(1,
     (zoom - DISTANCE_SIGN_MIN_ZOOM) / (DISTANCE_SIGN_FULL_SIZE_ZOOM - DISTANCE_SIGN_MIN_ZOOM)));
@@ -74,16 +76,14 @@ const TERRAIN_TEST_STORAGE_KEY = 'saaristolautat.terrainTestTuning.v1';
 const TERRAIN_TEST_BASE_URL = '/data/raw/landcover/terrain-test';
 const TERRAIN_TEST_HILLSHADE_ID = 'terrain-test-hillshade';
 const TERRAIN_TEST_DEFAULTS = {
-  contours: '10m',
-  contourMinZoom: 9,
-  contourMaxZoom: 14,
+  contour5mMinZoom: 13,
+  contour10mMinZoom: 11,
   contourColor: '#765f42',
-  contourOpacity: 0.55,
+  contourOpacity: 0.45,
   contourWidth: 0.8,
   hillshade: true,
-  hillshadeMinZoom: 7,
-  hillshadeMaxZoom: 14,
-  hillshadeOpacity: 0.2
+  hillshadeMinZoom: 8,
+  hillshadeOpacity: 0.15
 };
 const SIMPLE_LAND_COLOR = '#b8dfc2';
 const SIMPLE_LAND_DETAIL_COLOR = '#d4e8d8';
@@ -139,14 +139,22 @@ function loadTerrainTestTuning() {
   if (!SHOW_MAP_DEBUG) return defaults;
   try {
     const stored = JSON.parse(window.localStorage.getItem(TERRAIN_TEST_STORAGE_KEY));
-    if (['off', '5m', '10m'].includes(stored?.contours)) defaults.contours = stored.contours;
     if (typeof stored?.hillshade === 'boolean') defaults.hillshade = stored.hillshade;
     if (/^#[0-9a-f]{6}$/i.test(stored?.contourColor)) defaults.contourColor = stored.contourColor;
-    ['contourMinZoom', 'contourMaxZoom', 'contourOpacity', 'contourWidth',
-      'hillshadeMinZoom', 'hillshadeMaxZoom', 'hillshadeOpacity'].forEach(key => {
+    ['contourOpacity', 'contourWidth', 'hillshadeOpacity'].forEach(key => {
       const value = Number(stored?.[key]);
       if (Number.isFinite(value)) defaults[key] = value;
     });
+    ['contour5mMinZoom', 'contour10mMinZoom', 'hillshadeMinZoom'].forEach(key => {
+      const value = Number(stored?.[key]);
+      if (Number.isFinite(value)) defaults[key] = Math.max(8, Math.min(MAP_MAX_ZOOM, value));
+    });
+    const legacyMinZoom = Number(stored?.contourMinZoom);
+    if (Number.isFinite(legacyMinZoom)) {
+      const clampedLegacyMinZoom = Math.max(8, Math.min(MAP_MAX_ZOOM, legacyMinZoom));
+      if (stored?.contours === '5m') defaults.contour5mMinZoom = clampedLegacyMinZoom;
+      if (stored?.contours === '10m') defaults.contour10mMinZoom = clampedLegacyMinZoom;
+    }
   } catch {
     // Ignore malformed localhost-only tuning values.
   }
@@ -687,17 +695,19 @@ function addComplementaryForest(map, tuning) {
 function applyTerrainTestTuning(map, mapTypeId, tuning) {
   if (!SHOW_MAP_DEBUG || !tuning) return;
   const terrainVisible = mapTypeId === 'openfreemapTerrain';
-  const contourLayer = tuning.contours === '5m' ? 'terrain-test-contours-5m' : 'terrain-test-contours-10m';
-  ['terrain-test-contours-5m', 'terrain-test-contours-10m'].forEach(layerId => {
+  [
+    ['terrain-test-contours-5m', tuning.contour5mMinZoom],
+    ['terrain-test-contours-10m', tuning.contour10mMinZoom]
+  ].forEach(([layerId, minimumZoom]) => {
     if (!map.getLayer(layerId)) return;
-    map.setLayoutProperty(
-      layerId,
-      'visibility',
-      terrainVisible && tuning.contours !== 'off' && layerId === contourLayer ? 'visible' : 'none'
-    );
-    map.setLayerZoomRange(layerId, tuning.contourMinZoom, tuning.contourMaxZoom);
+    map.setLayoutProperty(layerId, 'visibility', terrainVisible ? 'visible' : 'none');
+    map.setLayerZoomRange(layerId, minimumZoom - 1, LAYER_MAX_ZOOM);
     map.setPaintProperty(layerId, 'line-color', tuning.contourColor);
-    map.setPaintProperty(layerId, 'line-opacity', tuning.contourOpacity);
+    map.setPaintProperty(layerId, 'line-opacity', [
+      'interpolate', ['linear'], ['zoom'],
+      minimumZoom - 1, 0,
+      minimumZoom, tuning.contourOpacity
+    ]);
     map.setPaintProperty(layerId, 'line-width', tuning.contourWidth);
   });
   if (map.getLayer(TERRAIN_TEST_HILLSHADE_ID)) {
@@ -708,10 +718,14 @@ function applyTerrainTestTuning(map, mapTypeId, tuning) {
     );
     map.setLayerZoomRange(
       TERRAIN_TEST_HILLSHADE_ID,
-      tuning.hillshadeMinZoom,
-      tuning.hillshadeMaxZoom
+      tuning.hillshadeMinZoom - 1,
+      LAYER_MAX_ZOOM
     );
-    map.setPaintProperty(TERRAIN_TEST_HILLSHADE_ID, 'raster-opacity', tuning.hillshadeOpacity);
+    map.setPaintProperty(TERRAIN_TEST_HILLSHADE_ID, 'raster-opacity', [
+      'interpolate', ['linear'], ['zoom'],
+      tuning.hillshadeMinZoom - 1, 0,
+      tuning.hillshadeMinZoom, tuning.hillshadeOpacity
+    ]);
   }
 }
 
@@ -755,6 +769,9 @@ function addTerrainTestLayers(map, mapTypeId, tuning) {
       type: 'line',
       source: layerId,
       'source-layer': 'contours',
+      ...(interval === '5m' ? {
+        filter: ['!=', ['%', ['get', 'elevation'], 10], 0]
+      } : {}),
       layout: { visibility: 'none', 'line-cap': 'round', 'line-join': 'round' },
       paint: {
         'line-color': tuning.contourColor,
@@ -1494,7 +1511,7 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
       center: SCREENSHOT_MAP_VIEW?.center || [21.25, 60.15],
       zoom: SCREENSHOT_MAP_VIEW?.zoom || MIN_ROUTE_RENDER_ZOOM,
       minZoom: 4,
-      maxZoom: 17,
+      maxZoom: MAP_MAX_ZOOM,
       attributionControl: false
     });
     mapRef.current = map;
@@ -2514,17 +2531,6 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
       <summary>Korkeuskäyrät ja rinnevarjostus</summary>
       <div className="terrain-test-tuning__body">
         <label>
-          <span>Käyräväli</span>
-          <select
-            value={terrainTestTuning.contours}
-            onChange={event => setTerrainTestTuning(current => ({ ...current, contours: event.target.value }))}
-          >
-            <option value="off">Pois</option>
-            <option value="10m">10 m</option>
-            <option value="5m">5 m</option>
-          </select>
-        </label>
-        <label>
           <span>Käyrien väri</span>
           <input
             type="color"
@@ -2551,22 +2557,22 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
           <output>{terrainTestTuning.contourWidth.toFixed(2)} px</output>
         </label>
         <label>
-          <span>Käyrät zoomilta</span>
+          <span>5 m käyrät zoomilta</span>
           <input
-            type="range" min="7" max={terrainTestTuning.contourMaxZoom - 0.25} step="0.25"
-            value={terrainTestTuning.contourMinZoom}
-            onChange={event => setTerrainTestTuning(current => ({ ...current, contourMinZoom: Number(event.target.value) }))}
+            type="range" min="8" max={MAP_MAX_ZOOM} step="0.25"
+            value={terrainTestTuning.contour5mMinZoom}
+            onChange={event => setTerrainTestTuning(current => ({ ...current, contour5mMinZoom: Number(event.target.value) }))}
           />
-          <output>{terrainTestTuning.contourMinZoom.toFixed(2)}</output>
+          <output>{terrainTestTuning.contour5mMinZoom.toFixed(2)}</output>
         </label>
         <label>
-          <span>Käyrät zoomiin</span>
+          <span>10 m käyrät zoomilta</span>
           <input
-            type="range" min={terrainTestTuning.contourMinZoom + 0.25} max="18" step="0.25"
-            value={terrainTestTuning.contourMaxZoom}
-            onChange={event => setTerrainTestTuning(current => ({ ...current, contourMaxZoom: Number(event.target.value) }))}
+            type="range" min="8" max={MAP_MAX_ZOOM} step="0.25"
+            value={terrainTestTuning.contour10mMinZoom}
+            onChange={event => setTerrainTestTuning(current => ({ ...current, contour10mMinZoom: Number(event.target.value) }))}
           />
-          <output>{terrainTestTuning.contourMaxZoom.toFixed(2)}</output>
+          <output>{terrainTestTuning.contour10mMinZoom.toFixed(2)}</output>
         </label>
         <label className="terrain-test-tuning__check">
           <input
@@ -2588,20 +2594,11 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
         <label>
           <span>Varjostus zoomilta</span>
           <input
-            type="range" min="7" max={terrainTestTuning.hillshadeMaxZoom - 0.25} step="0.25"
+            type="range" min="8" max={MAP_MAX_ZOOM} step="0.25"
             value={terrainTestTuning.hillshadeMinZoom}
             onChange={event => setTerrainTestTuning(current => ({ ...current, hillshadeMinZoom: Number(event.target.value) }))}
           />
           <output>{terrainTestTuning.hillshadeMinZoom.toFixed(2)}</output>
-        </label>
-        <label>
-          <span>Varjostus zoomiin</span>
-          <input
-            type="range" min={terrainTestTuning.hillshadeMinZoom + 0.25} max="18" step="0.25"
-            value={terrainTestTuning.hillshadeMaxZoom}
-            onChange={event => setTerrainTestTuning(current => ({ ...current, hillshadeMaxZoom: Number(event.target.value) }))}
-          />
-          <output>{terrainTestTuning.hillshadeMaxZoom.toFixed(2)}</output>
         </label>
         <div className="terrain-test-tuning__actions">
           <button type="button" onClick={() => setTerrainTestTuning(defaultTerrainTestTuning())}>
