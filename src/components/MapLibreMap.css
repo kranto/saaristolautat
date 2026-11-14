@@ -39,6 +39,21 @@
 .landcover-tuning > button { margin: 7px 9px 9px; padding: 5px 8px; border: 1px solid #aaa; border-radius: 3px; background: #f7f7f3; color: #333; font: inherit; cursor: pointer; }
 .landcover-tuning > button:hover,
 .landcover-tuning > button:focus-visible { background: #ecece6; }
+.terrain-test-tuning { position: absolute; z-index: 4; top: 58px; left: 10px; width: 350px; max-height: calc(100% - 106px); box-sizing: border-box; overflow: auto; border: 1px solid rgba(0,0,0,.25); border-radius: 4px; background: rgba(255,255,255,.96); box-shadow: 0 1px 4px rgba(0,0,0,.15); color: #333; font: 12px/1.2 'Lato', sans-serif; }
+.terrain-test-tuning summary { padding: 7px 9px; cursor: pointer; font-weight: 700; user-select: none; }
+.terrain-test-tuning[open] summary { border-bottom: 1px solid rgba(0,0,0,.13); }
+.terrain-test-tuning__body { display: grid; gap: 5px; padding: 8px 9px 9px; }
+.terrain-test-tuning__body > label { display: grid; grid-template-columns: 125px minmax(90px, 1fr) 48px; gap: 8px; align-items: center; min-height: 25px; }
+.terrain-test-tuning__body > label > select { grid-column: 2 / 4; }
+.terrain-test-tuning__body input[type='range'] { width: 100%; min-width: 0; margin: 0; }
+.terrain-test-tuning__body input[type='color'] { width: 38px; height: 25px; padding: 1px; border: 1px solid #aaa; border-radius: 3px; background: #fff; cursor: pointer; }
+.terrain-test-tuning__body output { color: #555; font-variant-numeric: tabular-nums; text-align: right; }
+.terrain-test-tuning__body > .terrain-test-tuning__check { grid-template-columns: auto 1fr; margin-top: 4px; padding-top: 7px; border-top: 1px solid rgba(0,0,0,.12); }
+.terrain-test-tuning__check input { margin: 0; }
+.terrain-test-tuning__actions { display: flex; gap: 7px; margin-top: 5px; }
+.terrain-test-tuning__actions button { padding: 5px 8px; border: 1px solid #aaa; border-radius: 3px; background: #f7f7f3; color: #333; font: inherit; cursor: pointer; }
+.terrain-test-tuning__actions button:hover,
+.terrain-test-tuning__actions button:focus-visible { background: #ecece6; }
 @keyframes map-reset-attention {
   from { box-shadow: 0 0 0 2px rgba(0,0,0,.1), 0 0 0 0 rgba(59,132,223,.45); }
   to { box-shadow: 0 0 0 2px rgba(0,0,0,.1), 0 0 0 10px rgba(59,132,223,0); }
@@ -95,4 +110,5 @@
   .map-view__legend { left: 10px; bottom: 25px; width: 180px; padding: 12px; }
   .map-debug { bottom: 4px; max-width: calc(100% - 120px); font-size: 9px; }
   .landcover-tuning { right: 6px; width: min(320px, calc(100% - 12px)); }
+  .terrain-test-tuning { top: 50px; left: 6px; width: min(350px, calc(100% - 12px)); max-height: calc(100% - 100px); }
 }

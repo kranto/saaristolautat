@@ -17,7 +17,13 @@ const OPENFREEMAP_STYLE = 'https://tiles.openfreemap.org/styles/liberty';
 const RASTER_BASE_LAYERS = {
   OSM: 'base-osm'
 };
-const SHOW_MAP_DEBUG = typeof window !== 'undefined' && ['localhost', '127.0.0.1', '::1'].includes(window.location.hostname);
+const isLocalMapHost = hostname => (
+  ['localhost', '127.0.0.1', '::1'].includes(hostname) ||
+  /^10\./.test(hostname) ||
+  /^192\.168\./.test(hostname) ||
+  /^172\.(1[6-9]|2\d|3[01])\./.test(hostname)
+);
+const SHOW_MAP_DEBUG = typeof window !== 'undefined' && isLocalMapHost(window.location.hostname);
 const TERRAIN_LANDCOVER = {
   archive: 'landcover-archipelago-sea-kmtk.pmtiles',
   attribution: 'Lähde: Maanmittauslaitos, Kansallinen maastotietokanta BETA (CC BY 4.0)',
@@ -64,6 +70,21 @@ const DEVELOPED_AREA_FADE_ZOOM_END = 15;
 const SIMPLE_DEVELOPED_AREA_FADE_IN_ZOOM_START = 9.5;
 const SIMPLE_DEVELOPED_AREA_FADE_IN_ZOOM_END = LANDCOVER_OPACITY_CAP_ZOOM + 1;
 const LANDCOVER_TUNING_STORAGE_KEY = 'saaristolautat.landcoverTuning.v1';
+const TERRAIN_TEST_STORAGE_KEY = 'saaristolautat.terrainTestTuning.v1';
+const TERRAIN_TEST_BASE_URL = '/data/raw/landcover/terrain-test';
+const TERRAIN_TEST_HILLSHADE_ID = 'terrain-test-hillshade';
+const TERRAIN_TEST_DEFAULTS = {
+  contours: '10m',
+  contourMinZoom: 9,
+  contourMaxZoom: 14,
+  contourColor: '#765f42',
+  contourOpacity: 0.55,
+  contourWidth: 0.8,
+  hillshade: true,
+  hillshadeMinZoom: 7,
+  hillshadeMaxZoom: 14,
+  hillshadeOpacity: 0.2
+};
 const SIMPLE_LAND_COLOR = '#b8dfc2';
 const SIMPLE_LAND_DETAIL_COLOR = '#d4e8d8';
 const SIMPLE_WATER_COLOR = '#f3f7fd';
@@ -105,6 +126,29 @@ function loadLandcoverTuning() {
     });
   } catch {
     // Ignore malformed local tuning values and use the checked-in defaults.
+  }
+  return defaults;
+}
+
+function defaultTerrainTestTuning() {
+  return { ...TERRAIN_TEST_DEFAULTS };
+}
+
+function loadTerrainTestTuning() {
+  const defaults = defaultTerrainTestTuning();
+  if (!SHOW_MAP_DEBUG) return defaults;
+  try {
+    const stored = JSON.parse(window.localStorage.getItem(TERRAIN_TEST_STORAGE_KEY));
+    if (['off', '5m', '10m'].includes(stored?.contours)) defaults.contours = stored.contours;
+    if (typeof stored?.hillshade === 'boolean') defaults.hillshade = stored.hillshade;
+    if (/^#[0-9a-f]{6}$/i.test(stored?.contourColor)) defaults.contourColor = stored.contourColor;
+    ['contourMinZoom', 'contourMaxZoom', 'contourOpacity', 'contourWidth',
+      'hillshadeMinZoom', 'hillshadeMaxZoom', 'hillshadeOpacity'].forEach(key => {
+      const value = Number(stored?.[key]);
+      if (Number.isFinite(value)) defaults[key] = value;
+    });
+  } catch {
+    // Ignore malformed localhost-only tuning values.
   }
   return defaults;
 }
@@ -640,6 +684,88 @@ function addComplementaryForest(map, tuning) {
   }, beforeLayer);
 }
 
+function applyTerrainTestTuning(map, mapTypeId, tuning) {
+  if (!SHOW_MAP_DEBUG || !tuning) return;
+  const terrainVisible = mapTypeId === 'openfreemapTerrain';
+  const contourLayer = tuning.contours === '5m' ? 'terrain-test-contours-5m' : 'terrain-test-contours-10m';
+  ['terrain-test-contours-5m', 'terrain-test-contours-10m'].forEach(layerId => {
+    if (!map.getLayer(layerId)) return;
+    map.setLayoutProperty(
+      layerId,
+      'visibility',
+      terrainVisible && tuning.contours !== 'off' && layerId === contourLayer ? 'visible' : 'none'
+    );
+    map.setLayerZoomRange(layerId, tuning.contourMinZoom, tuning.contourMaxZoom);
+    map.setPaintProperty(layerId, 'line-color', tuning.contourColor);
+    map.setPaintProperty(layerId, 'line-opacity', tuning.contourOpacity);
+    map.setPaintProperty(layerId, 'line-width', tuning.contourWidth);
+  });
+  if (map.getLayer(TERRAIN_TEST_HILLSHADE_ID)) {
+    map.setLayoutProperty(
+      TERRAIN_TEST_HILLSHADE_ID,
+      'visibility',
+      terrainVisible && tuning.hillshade ? 'visible' : 'none'
+    );
+    map.setLayerZoomRange(
+      TERRAIN_TEST_HILLSHADE_ID,
+      tuning.hillshadeMinZoom,
+      tuning.hillshadeMaxZoom
+    );
+    map.setPaintProperty(TERRAIN_TEST_HILLSHADE_ID, 'raster-opacity', tuning.hillshadeOpacity);
+  }
+}
+
+function addTerrainTestLayers(map, mapTypeId, tuning) {
+  if (!SHOW_MAP_DEBUG) return;
+  const attribution = 'Maanmittauslaitos, CC BY 4.0';
+  ['5m', '10m'].forEach(interval => {
+    const sourceId = `terrain-test-contours-${interval}`;
+    if (map.getSource(sourceId)) return;
+    const archiveUrl = new URL(`${TERRAIN_TEST_BASE_URL}/contours-${interval}.pmtiles`, window.location.origin);
+    map.addSource(sourceId, {
+      type: 'vector',
+      url: `pmtiles://${archiveUrl.href}`,
+      attribution
+    });
+  });
+  const beforeLayer = map.getStyle().layers.find(layer => layer['source-layer'] === 'transportation')?.id;
+  if (!map.getSource(TERRAIN_TEST_HILLSHADE_ID)) {
+    const archiveUrl = new URL(`${TERRAIN_TEST_BASE_URL}/hillshade-8m-webp.pmtiles`, window.location.origin);
+    map.addSource(TERRAIN_TEST_HILLSHADE_ID, {
+      type: 'raster',
+      url: `pmtiles://${archiveUrl.href}`,
+      tileSize: 256,
+      attribution
+    });
+  }
+  if (!map.getLayer(TERRAIN_TEST_HILLSHADE_ID)) {
+    map.addLayer({
+      id: TERRAIN_TEST_HILLSHADE_ID,
+      type: 'raster',
+      source: TERRAIN_TEST_HILLSHADE_ID,
+      layout: { visibility: 'none' },
+      paint: { 'raster-opacity': tuning.hillshadeOpacity, 'raster-resampling': 'linear' }
+    }, beforeLayer);
+  }
+  ['5m', '10m'].forEach(interval => {
+    const layerId = `terrain-test-contours-${interval}`;
+    if (map.getLayer(layerId)) return;
+    map.addLayer({
+      id: layerId,
+      type: 'line',
+      source: layerId,
+      'source-layer': 'contours',
+      layout: { visibility: 'none', 'line-cap': 'round', 'line-join': 'round' },
+      paint: {
+        'line-color': tuning.contourColor,
+        'line-opacity': tuning.contourOpacity,
+        'line-width': tuning.contourWidth
+      }
+    }, beforeLayer);
+  });
+  applyTerrainTestTuning(map, mapTypeId, tuning);
+}
+
 function applyLandcoverTuning(map, tuning) {
   if (map.getLayer('complementary-forest-fill')) {
     map.setPaintProperty('complementary-forest-fill', 'fill-color', tuning.forest.color);
@@ -816,12 +942,13 @@ function addRasterBaseMaps(map) {
   if (!map.getLayer('base-osm')) map.addLayer({ id: 'base-osm', type: 'raster', source: 'osm-raster', layout: { visibility: 'none' } });
 }
 
-function setBaseMap(map, mapTypeId, tuning, landcoverVisible) {
+function setBaseMap(map, mapTypeId, tuning, landcoverVisible, terrainTestTuning) {
   Object.entries(RASTER_BASE_LAYERS).forEach(([type, layerId]) => {
     if (map.getLayer(layerId)) map.setLayoutProperty(layerId, 'visibility', mapTypeId === type ? 'visible' : 'none');
   });
   applyOpenFreeMapAppearance(map, mapTypeId, tuning);
   setComplementaryLandcoverVisibility(map, mapTypeId, landcoverVisible);
+  applyTerrainTestTuning(map, mapTypeId, terrainTestTuning);
 }
 
 function localizedName(item = {}, locale = 'fi') {
@@ -1345,6 +1472,7 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
   const layersRef = useRef(layers);
   const landcoverVisibleRef = useRef(true);
   const landcoverTuningRef = useRef(null);
+  const terrainTestTuningRef = useRef(null);
   layersRef.current = layers;
   const [status, setStatus] = useState('Ladataan karttaa…');
   const [selection, setSelection] = useState(null);
@@ -1353,7 +1481,9 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
   const [mapReady, setMapReady] = useState(false);
   const [landcoverVisible, setLandcoverVisible] = useState(true);
   const [landcoverTuning, setLandcoverTuning] = useState(loadLandcoverTuning);
+  const [terrainTestTuning, setTerrainTestTuning] = useState(loadTerrainTestTuning);
   landcoverTuningRef.current = landcoverTuning;
+  terrainTestTuningRef.current = terrainTestTuning;
 
   useEffect(() => {
     if (!mapContainer.current || mapRef.current) return undefined;
@@ -1656,7 +1786,16 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
       addComplementaryForest(map, landcoverTuningRef.current);
       addComplementaryLandcover(map, landcoverTuningRef.current);
       addRasterBaseMaps(map);
-      setBaseMap(map, mapTypeRef.current, landcoverTuningRef.current, landcoverVisibleRef.current);
+      if (mapTypeRef.current === 'openfreemapTerrain') {
+        addTerrainTestLayers(map, mapTypeRef.current, terrainTestTuningRef.current);
+      }
+      setBaseMap(
+        map,
+        mapTypeRef.current,
+        landcoverTuningRef.current,
+        landcoverVisibleRef.current,
+        terrainTestTuningRef.current
+      );
       addArchipelagoTarget(map);
       collapseAttribution();
       updateMapDebug();
@@ -2084,9 +2223,29 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
   }, [landcoverTuning]);
 
   useEffect(() => {
+    terrainTestTuningRef.current = terrainTestTuning;
+    if (SHOW_MAP_DEBUG) {
+      window.localStorage.setItem(TERRAIN_TEST_STORAGE_KEY, JSON.stringify(terrainTestTuning));
+    }
+    const map = mapRef.current;
+    if (map?.isStyleLoaded()) applyTerrainTestTuning(map, mapTypeRef.current, terrainTestTuning);
+  }, [terrainTestTuning]);
+
+  useEffect(() => {
     mapTypeRef.current = mapTypeId;
     const map = mapRef.current;
-    if (map) setBaseMap(map, mapTypeId, landcoverTuningRef.current, landcoverVisibleRef.current);
+    if (map) {
+      if (mapTypeId === 'openfreemapTerrain' && map.isStyleLoaded()) {
+        addTerrainTestLayers(map, mapTypeId, terrainTestTuningRef.current);
+      }
+      setBaseMap(
+        map,
+        mapTypeId,
+        landcoverTuningRef.current,
+        landcoverVisibleRef.current,
+        terrainTestTuningRef.current
+      );
+    }
   }, [mapTypeId]);
 
   useEffect(() => {
@@ -2350,12 +2509,116 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
     </details>
   );
 
+  const terrainTestPanel = terrainMapSelected && SHOW_MAP_DEBUG && (
+    <details className="terrain-test-tuning" open>
+      <summary>Korkeuskäyrät ja rinnevarjostus</summary>
+      <div className="terrain-test-tuning__body">
+        <label>
+          <span>Käyräväli</span>
+          <select
+            value={terrainTestTuning.contours}
+            onChange={event => setTerrainTestTuning(current => ({ ...current, contours: event.target.value }))}
+          >
+            <option value="off">Pois</option>
+            <option value="10m">10 m</option>
+            <option value="5m">5 m</option>
+          </select>
+        </label>
+        <label>
+          <span>Käyrien väri</span>
+          <input
+            type="color"
+            value={terrainTestTuning.contourColor}
+            onChange={event => setTerrainTestTuning(current => ({ ...current, contourColor: event.target.value }))}
+          />
+        </label>
+        <label>
+          <span>Käyrien peittävyys</span>
+          <input
+            type="range" min="0" max="1" step="0.05"
+            value={terrainTestTuning.contourOpacity}
+            onChange={event => setTerrainTestTuning(current => ({ ...current, contourOpacity: Number(event.target.value) }))}
+          />
+          <output>{Math.round(terrainTestTuning.contourOpacity * 100)}%</output>
+        </label>
+        <label>
+          <span>Viivan leveys</span>
+          <input
+            type="range" min="0.25" max="3" step="0.05"
+            value={terrainTestTuning.contourWidth}
+            onChange={event => setTerrainTestTuning(current => ({ ...current, contourWidth: Number(event.target.value) }))}
+          />
+          <output>{terrainTestTuning.contourWidth.toFixed(2)} px</output>
+        </label>
+        <label>
+          <span>Käyrät zoomilta</span>
+          <input
+            type="range" min="7" max={terrainTestTuning.contourMaxZoom - 0.25} step="0.25"
+            value={terrainTestTuning.contourMinZoom}
+            onChange={event => setTerrainTestTuning(current => ({ ...current, contourMinZoom: Number(event.target.value) }))}
+          />
+          <output>{terrainTestTuning.contourMinZoom.toFixed(2)}</output>
+        </label>
+        <label>
+          <span>Käyrät zoomiin</span>
+          <input
+            type="range" min={terrainTestTuning.contourMinZoom + 0.25} max="18" step="0.25"
+            value={terrainTestTuning.contourMaxZoom}
+            onChange={event => setTerrainTestTuning(current => ({ ...current, contourMaxZoom: Number(event.target.value) }))}
+          />
+          <output>{terrainTestTuning.contourMaxZoom.toFixed(2)}</output>
+        </label>
+        <label className="terrain-test-tuning__check">
+          <input
+            type="checkbox"
+            checked={terrainTestTuning.hillshade}
+            onChange={event => setTerrainTestTuning(current => ({ ...current, hillshade: event.target.checked }))}
+          />
+          <span>Rinnevarjostus 8 m</span>
+        </label>
+        <label>
+          <span>Varjostuksen peittävyys</span>
+          <input
+            type="range" min="0" max="1" step="0.05"
+            value={terrainTestTuning.hillshadeOpacity}
+            onChange={event => setTerrainTestTuning(current => ({ ...current, hillshadeOpacity: Number(event.target.value) }))}
+          />
+          <output>{Math.round(terrainTestTuning.hillshadeOpacity * 100)}%</output>
+        </label>
+        <label>
+          <span>Varjostus zoomilta</span>
+          <input
+            type="range" min="7" max={terrainTestTuning.hillshadeMaxZoom - 0.25} step="0.25"
+            value={terrainTestTuning.hillshadeMinZoom}
+            onChange={event => setTerrainTestTuning(current => ({ ...current, hillshadeMinZoom: Number(event.target.value) }))}
+          />
+          <output>{terrainTestTuning.hillshadeMinZoom.toFixed(2)}</output>
+        </label>
+        <label>
+          <span>Varjostus zoomiin</span>
+          <input
+            type="range" min={terrainTestTuning.hillshadeMinZoom + 0.25} max="18" step="0.25"
+            value={terrainTestTuning.hillshadeMaxZoom}
+            onChange={event => setTerrainTestTuning(current => ({ ...current, hillshadeMaxZoom: Number(event.target.value) }))}
+          />
+          <output>{terrainTestTuning.hillshadeMaxZoom.toFixed(2)}</output>
+        </label>
+        <div className="terrain-test-tuning__actions">
+          <button type="button" onClick={() => setTerrainTestTuning(defaultTerrainTestTuning())}>
+            Oletukset
+          </button>
+        </div>
+      </div>
+    </details>
+  );
+
   if (embedded) return (
     <>
       <div ref={mapContainer} id="map" className={`map maplibre-embedded ${mapReady ? 'maplibre-map-ready' : 'maplibre-map-loading'}`} aria-label="Saaristolauttojen kartta" />
       {resetButton}
       {landcoverToggle}
       {landcoverTuningPanel}
+      {terrainTestPanel}
       {debugElement}
     </>
   );
@@ -2366,6 +2629,7 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
       {resetButton}
       {landcoverToggle}
       {landcoverTuningPanel}
+      {terrainTestPanel}
       <header className="map-view__header">
         <div className="map-view__brand">
           <img src="/mstile-70x70.png" alt="" />
