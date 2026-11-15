@@ -24,6 +24,8 @@ const isLocalMapHost = hostname => (
   /^172\.(1[6-9]|2\d|3[01])\./.test(hostname)
 );
 const SHOW_MAP_DEBUG = typeof window !== 'undefined' && isLocalMapHost(window.location.hostname);
+const mapParameters = new URLSearchParams(window.location.search);
+const USE_LEGACY_UNMASKED_SHORE_DATA = SHOW_MAP_DEBUG && mapParameters.get('shoreMask') === '0';
 const USE_REDUCED_TILE_CACHE = typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches;
 const TERRAIN_LANDCOVER = {
   archive: 'landcover-archipelago-sea-kmtk.pmtiles',
@@ -35,10 +37,11 @@ const DEFAULT_URBAN_LANDCOVER = {
   attribution: 'Lähde: Maanmittauslaitos, Kansallinen maastotietokanta BETA (CC BY 4.0)'
 };
 const COMPLEMENTARY_FOREST = {
-  archive: 'landcover-archipelago-sea-syke-forest-smoothed.pmtiles',
+  archive: USE_LEGACY_UNMASKED_SHORE_DATA
+    ? 'landcover-archipelago-sea-syke-forest-smoothed.pmtiles'
+    : 'landcover-archipelago-sea-syke-forest-shore-masked.pmtiles',
   attribution: 'Lähde: Syke, Maanpeite 2 m 2022 (CC BY 4.0), kartografisesti pehmennetty'
 };
-const mapParameters = new URLSearchParams(window.location.search);
 const landcoverParameter = mapParameters.get('landcover');
 const COMPLEMENTARY_LANDCOVER_ENABLED = !SHOW_MAP_DEBUG || landcoverParameter !== '0';
 const COMPLEMENTARY_FOREST_ENABLED = COMPLEMENTARY_LANDCOVER_ENABLED;
@@ -76,6 +79,9 @@ const LANDCOVER_TUNING_STORAGE_KEY = 'saaristolautat.landcoverTuning.v1';
 const TERRAIN_TEST_STORAGE_KEY = 'saaristolautat.terrainTestTuning.v1';
 const TERRAIN_TEST_BASE_URL = '/data/raw/landcover/terrain-test';
 const TERRAIN_TEST_HILLSHADE_ID = 'terrain-test-hillshade';
+const TERRAIN_TEST_HILLSHADE_ARCHIVE = USE_LEGACY_UNMASKED_SHORE_DATA
+  ? 'hillshade-8m-webp-z12.pmtiles'
+  : 'hillshade-8m-webp-z12-shore-masked.pmtiles';
 const TERRAIN_TEST_DEFAULTS = {
   contour5mMinZoom: 13,
   contour10mMinZoom: 11,
@@ -767,7 +773,10 @@ function addTerrainTestLayers(map, mapTypeId, tuning, terrainOverlays) {
   });
   const beforeLayer = map.getStyle().layers.find(layer => layer['source-layer'] === 'transportation')?.id;
   if (!map.getSource(TERRAIN_TEST_HILLSHADE_ID)) {
-    const archiveUrl = new URL(`${TERRAIN_TEST_BASE_URL}/hillshade-8m-webp-z12.pmtiles`, window.location.origin);
+    const archiveUrl = new URL(
+      `${TERRAIN_TEST_BASE_URL}/${TERRAIN_TEST_HILLSHADE_ARCHIVE}`,
+      window.location.origin
+    );
     map.addSource(TERRAIN_TEST_HILLSHADE_ID, {
       type: 'raster',
       url: `pmtiles://${archiveUrl.href}`,
