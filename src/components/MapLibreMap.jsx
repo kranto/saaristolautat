@@ -2584,7 +2584,7 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
   );
 
   const terrainTestPanel = terrainMapSelected && SHOW_MAP_DEBUG && (
-    <details className="terrain-test-tuning" open>
+    <details className="terrain-test-tuning">
       <summary>Korkeuskäyrät ja rinnevarjostus</summary>
       <div className="terrain-test-tuning__body">
         <label>
