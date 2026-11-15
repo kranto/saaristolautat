@@ -31,6 +31,10 @@ const TERRAIN_LANDCOVER = {
   attribution: 'Lähde: Maanmittauslaitos, Kansallinen maastotietokanta BETA (CC BY 4.0)',
   label: 'KMTK'
 };
+const TERRAIN_LANDCOVER_OVERVIEW = {
+  archive: 'terrain-landcover-overview-r1.pmtiles',
+  attribution: 'Lähde: Maanmittauslaitos, KMTK BETA (CC BY 4.0) ja Syke, Maanpeite 2 m 2022 (CC BY 4.0)'
+};
 const DEFAULT_URBAN_LANDCOVER = {
   archive: 'terrain-landcover-detail-r1.pmtiles',
   attribution: 'Lähde: Maanmittauslaitos, Kansallinen maastotietokanta BETA (CC BY 4.0)'
@@ -65,6 +69,7 @@ const distanceSignTextSize = zoom => {
 };
 const LAND_DETAIL_ZOOM_START = 8;
 const LAND_DETAIL_ZOOM_END = 10;
+const LANDCOVER_VECTOR_ZOOM_START = 10;
 const LANDCOVER_OPACITY_CAP_ZOOM = 9.65;
 const LANDCOVER_OPACITY_CAP_RATIO = (LANDCOVER_OPACITY_CAP_ZOOM - LAND_DETAIL_ZOOM_START)
   / (LAND_DETAIL_ZOOM_END - LAND_DETAIL_ZOOM_START);
@@ -169,6 +174,12 @@ const landcoverFadeExpression = endOpacity => [
   'interpolate', ['linear'], ['zoom'],
   LAND_DETAIL_ZOOM_START, 0,
   LANDCOVER_OPACITY_CAP_ZOOM, endOpacity * LANDCOVER_OPACITY_CAP_RATIO
+];
+
+const landcoverOverviewOpacityExpression = [
+  'interpolate', ['linear'], ['zoom'],
+  LAND_DETAIL_ZOOM_START, 0,
+  LANDCOVER_OPACITY_CAP_ZOOM, 1
 ];
 
 const cappedOpacity = (overviewOpacity, detailOpacity) => (
@@ -619,6 +630,18 @@ function customizeBaseMap(map) {
 function addComplementaryLandcover(map, tuning) {
   if (!COMPLEMENTARY_LANDCOVER_ENABLED) return;
 
+  if (!map.getSource('complementary-landcover-overview')) {
+    const archiveUrl = new URL(
+      `/data/tiles/${TERRAIN_LANDCOVER_OVERVIEW.archive}`,
+      window.location.origin
+    );
+    map.addSource('complementary-landcover-overview', {
+      type: 'raster',
+      url: `pmtiles://${archiveUrl.href}`,
+      tileSize: 256,
+      attribution: TERRAIN_LANDCOVER_OVERVIEW.attribution
+    });
+  }
   if (!map.getSource('complementary-landcover')) {
     const archiveUrl = new URL(`/data/tiles/${TERRAIN_LANDCOVER.archive}`, window.location.origin);
     map.addSource('complementary-landcover', {
@@ -641,11 +664,24 @@ function addComplementaryLandcover(map, tuning) {
     layer['source-layer'] === 'building' || layer['source-layer'] === 'transportation'
   ))?.id;
   map.addLayer({
+    id: 'complementary-landcover-overview',
+    type: 'raster',
+    source: 'complementary-landcover-overview',
+    minzoom: LAND_DETAIL_ZOOM_START,
+    maxzoom: LANDCOVER_VECTOR_ZOOM_START,
+    layout: { visibility: 'none' },
+    paint: {
+      'raster-opacity': landcoverOverviewOpacityExpression,
+      'raster-fade-duration': 0,
+      'raster-resampling': 'linear'
+    }
+  }, beforeLayer);
+  map.addLayer({
     id: 'complementary-landcover-fill',
     type: 'fill',
     source: 'complementary-landcover',
     'source-layer': 'landcover',
-    minzoom: LAND_DETAIL_ZOOM_START,
+    minzoom: LANDCOVER_VECTOR_ZOOM_START,
     layout: { visibility: 'none' },
     paint: {
       'fill-color': complementaryLandcoverColorExpression(tuning),
@@ -688,7 +724,7 @@ function addComplementaryForest(map, tuning) {
     type: 'fill',
     source: 'complementary-forest',
     'source-layer': 'landcover',
-    minzoom: LAND_DETAIL_ZOOM_START,
+    minzoom: LANDCOVER_VECTOR_ZOOM_START,
     paint: {
       'fill-color': tuning.forest.color,
       'fill-opacity': landcoverFadeExpression(tuning.forest.opacity)
@@ -917,7 +953,11 @@ function applyLandcoverTuning(map, tuning) {
 
 function setComplementaryLandcoverVisibility(map, mapTypeId, landcoverVisible) {
   const terrainVisible = mapTypeId === 'openfreemapTerrain' && landcoverVisible;
-  ['complementary-forest-fill', 'complementary-landcover-fill'].forEach(layerId => {
+  [
+    'complementary-landcover-overview',
+    'complementary-forest-fill',
+    'complementary-landcover-fill'
+  ].forEach(layerId => {
     if (map.getLayer(layerId)) {
       map.setLayoutProperty(layerId, 'visibility', terrainVisible ? 'visible' : 'none');
     }
