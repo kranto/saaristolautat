@@ -25,21 +25,18 @@ const isLocalMapHost = hostname => (
 );
 const SHOW_MAP_DEBUG = typeof window !== 'undefined' && isLocalMapHost(window.location.hostname);
 const mapParameters = new URLSearchParams(window.location.search);
-const USE_LEGACY_UNMASKED_SHORE_DATA = SHOW_MAP_DEBUG && mapParameters.get('shoreMask') === '0';
 const USE_REDUCED_TILE_CACHE = typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches;
 const TERRAIN_LANDCOVER = {
-  archive: 'landcover-archipelago-sea-kmtk.pmtiles',
+  archive: 'terrain-landcover-r1.pmtiles',
   attribution: 'Lähde: Maanmittauslaitos, Kansallinen maastotietokanta BETA (CC BY 4.0)',
   label: 'KMTK'
 };
 const DEFAULT_URBAN_LANDCOVER = {
-  archive: 'landcover-archipelago-sea-kmtk-urban.pmtiles',
+  archive: 'terrain-landcover-detail-r1.pmtiles',
   attribution: 'Lähde: Maanmittauslaitos, Kansallinen maastotietokanta BETA (CC BY 4.0)'
 };
 const COMPLEMENTARY_FOREST = {
-  archive: USE_LEGACY_UNMASKED_SHORE_DATA
-    ? 'landcover-archipelago-sea-syke-forest-smoothed.pmtiles'
-    : 'landcover-archipelago-sea-syke-forest-shore-masked.pmtiles',
+  archive: 'terrain-landcover-fill-r1.pmtiles',
   attribution: 'Lähde: Syke, Maanpeite 2 m 2022 (CC BY 4.0), kartografisesti pehmennetty'
 };
 const landcoverParameter = mapParameters.get('landcover');
@@ -79,9 +76,7 @@ const LANDCOVER_TUNING_STORAGE_KEY = 'saaristolautat.landcoverTuning.v1';
 const TERRAIN_TEST_STORAGE_KEY = 'saaristolautat.terrainTestTuning.v1';
 const TERRAIN_TEST_BASE_URL = '/data/raw/landcover/terrain-test';
 const TERRAIN_TEST_HILLSHADE_ID = 'terrain-test-hillshade';
-const TERRAIN_TEST_HILLSHADE_ARCHIVE = USE_LEGACY_UNMASKED_SHORE_DATA
-  ? 'hillshade-8m-webp-z12.pmtiles'
-  : 'hillshade-8m-webp-z12-shore-masked.pmtiles';
+const TERRAIN_TEST_HILLSHADE_ARCHIVE = 'terrain-hillshade-r1.pmtiles';
 const TERRAIN_TEST_DEFAULTS = {
   contour5mMinZoom: 13,
   contour10mMinZoom: 11,
@@ -764,7 +759,10 @@ function addTerrainTestLayers(map, mapTypeId, tuning, terrainOverlays) {
   ['5m', '10m'].forEach(interval => {
     const sourceId = `terrain-test-contours-${interval}`;
     if (map.getSource(sourceId)) return;
-    const archiveUrl = new URL(`${TERRAIN_TEST_BASE_URL}/contours-${interval}.pmtiles`, window.location.origin);
+    const archiveUrl = new URL(
+      `${TERRAIN_TEST_BASE_URL}/terrain-contour-${interval}-r1.pmtiles`,
+      window.location.origin
+    );
     map.addSource(sourceId, {
       type: 'vector',
       url: `pmtiles://${archiveUrl.href}`,
