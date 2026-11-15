@@ -92,8 +92,8 @@ const SIMPLE_LAND_COLOR = '#b8dfc2';
 const SIMPLE_LAND_DETAIL_COLOR = '#d4e8d8';
 const SIMPLE_WATER_COLOR = '#f3f7fd';
 const LANDCOVER_TUNING_DEFAULTS = {
-  forest: { label: 'Metsä', color: '#72c10b', opacity: 0.65 },
-  farmland: { label: 'Pelto', color: '#f7e469', opacity: 1 },
+  forest: { label: 'Metsä', color: '#72c10b', opacity: 0.45 },
+  farmland: { label: 'Pelto', color: '#f7e469', opacity: 0.8 },
   rock: { label: 'Avokallio', color: '#d9d8cf', opacity: 1 },
   open: { label: 'Avoin maa', color: '#c9d4b1', opacity: 1 },
   wetland: { label: 'Kosteikko', color: '#8497d2', opacity: 0.65 },
