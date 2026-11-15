@@ -11,4 +11,8 @@ export function setLayer(layer, isActive) {
 
 export function selectMapType(mapTypeId) {
   return {type: "MAP_TYPE_SELECTED", payload: mapTypeId};
-} 
+}
+
+export function setTerrainOverlay(overlay, isActive) {
+  return {type: "TERRAIN_OVERLAY_SET", payload: {[overlay]: isActive}};
+}

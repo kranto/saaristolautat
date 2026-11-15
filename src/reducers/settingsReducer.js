@@ -22,7 +22,15 @@ if (locales.indexOf(initialSettings.locale) < 0) {
   initialSettings.locale = "en"
 }
 
-initialSettings = {...initialSettings, isFullScreen: false};
+const savedTerrainOverlays = initialSettings.terrainOverlays || {};
+initialSettings = {
+  ...initialSettings,
+  terrainOverlays: {
+    contours: savedTerrainOverlays.contours === true,
+    hillshade: savedTerrainOverlays.hillshade === true,
+  },
+  isFullScreen: false
+};
 
 // Migrate saved settings for retired map types to the default base map.
 if (!["openfreemap", "openfreemapTerrain", "OSM"].includes(initialSettings.mapTypeId)) {
@@ -40,7 +48,7 @@ export default function reducer(state = initialSettings, action) {
 }
 
 function persistSettingChange(action, state) {
-  if (!["LOCALE_SET", "LAYER_SET", "MAP_TYPE_SELECTED"].includes(action.type)) return;
+  if (!["LOCALE_SET", "LAYER_SET", "MAP_TYPE_SELECTED", "TERRAIN_OVERLAY_SET"].includes(action.type)) return;
   const saved = getFromLocalStorage(SETTINGS_STORAGE_KEY) || {};
   let nextSettings = saved;
   if (action.type === "LOCALE_SET") {
@@ -49,6 +57,8 @@ function persistSettingChange(action, state) {
     nextSettings = { ...saved, layers: { ...(saved.layers || state.layers), ...action.payload } };
   } else if (action.type === "MAP_TYPE_SELECTED") {
     nextSettings = { ...saved, mapTypeId: state.mapTypeId };
+  } else if (action.type === "TERRAIN_OVERLAY_SET") {
+    nextSettings = { ...saved, terrainOverlays: state.terrainOverlays };
   }
   setToLocalStorage(SETTINGS_STORAGE_KEY, nextSettings);
 }
@@ -64,6 +74,8 @@ function handleAction(state, action) {
       return { ...state, layers: layers };
     case "MAP_TYPE_SELECTED":
       return { ...state, mapTypeId: action.payload };
+    case "TERRAIN_OVERLAY_SET":
+      return { ...state, terrainOverlays: { ...state.terrainOverlays, ...action.payload } };
     default:
       return state;
   }

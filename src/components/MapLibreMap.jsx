@@ -695,15 +695,16 @@ function addComplementaryForest(map, tuning) {
   }, beforeLayer);
 }
 
-function applyTerrainTestTuning(map, mapTypeId, tuning) {
+function applyTerrainTestTuning(map, mapTypeId, tuning, terrainOverlays) {
   if (!tuning) return;
   const terrainVisible = mapTypeId === 'openfreemapTerrain';
+  const contoursVisible = terrainVisible && terrainOverlays?.contours;
   [
     ['terrain-test-contours-5m', tuning.contour5mMinZoom],
     ['terrain-test-contours-10m', tuning.contour10mMinZoom]
   ].forEach(([layerId, minimumZoom]) => {
     if (!map.getLayer(layerId)) return;
-    map.setLayoutProperty(layerId, 'visibility', terrainVisible ? 'visible' : 'none');
+    map.setLayoutProperty(layerId, 'visibility', contoursVisible ? 'visible' : 'none');
     map.setLayerZoomRange(layerId, minimumZoom - 1, LAYER_MAX_ZOOM);
     map.setPaintProperty(layerId, 'line-color', tuning.contourColor);
     map.setPaintProperty(layerId, 'line-opacity', [
@@ -719,7 +720,7 @@ function applyTerrainTestTuning(map, mapTypeId, tuning) {
   });
   const indexContourLayerId = 'terrain-test-contours-20m';
   if (map.getLayer(indexContourLayerId)) {
-    map.setLayoutProperty(indexContourLayerId, 'visibility', terrainVisible ? 'visible' : 'none');
+    map.setLayoutProperty(indexContourLayerId, 'visibility', contoursVisible ? 'visible' : 'none');
     map.setLayerZoomRange(indexContourLayerId, tuning.contour10mMinZoom - 1, LAYER_MAX_ZOOM);
     map.setPaintProperty(indexContourLayerId, 'line-color', tuning.contourColor);
     map.setPaintProperty(indexContourLayerId, 'line-opacity', [
@@ -737,7 +738,7 @@ function applyTerrainTestTuning(map, mapTypeId, tuning) {
     map.setLayoutProperty(
       TERRAIN_TEST_HILLSHADE_ID,
       'visibility',
-      terrainVisible && tuning.hillshade ? 'visible' : 'none'
+      terrainVisible && terrainOverlays?.hillshade && tuning.hillshade ? 'visible' : 'none'
     );
     map.setLayerZoomRange(
       TERRAIN_TEST_HILLSHADE_ID,
@@ -752,7 +753,7 @@ function applyTerrainTestTuning(map, mapTypeId, tuning) {
   }
 }
 
-function addTerrainTestLayers(map, mapTypeId, tuning) {
+function addTerrainTestLayers(map, mapTypeId, tuning, terrainOverlays) {
   const attribution = 'Maanmittauslaitos, CC BY 4.0';
   ['5m', '10m'].forEach(interval => {
     const sourceId = `terrain-test-contours-${interval}`;
@@ -821,7 +822,7 @@ function addTerrainTestLayers(map, mapTypeId, tuning) {
       }
     }, beforeLayer);
   }
-  applyTerrainTestTuning(map, mapTypeId, tuning);
+  applyTerrainTestTuning(map, mapTypeId, tuning, terrainOverlays);
 }
 
 function applyLandcoverTuning(map, tuning) {
@@ -1000,13 +1001,13 @@ function addRasterBaseMaps(map) {
   if (!map.getLayer('base-osm')) map.addLayer({ id: 'base-osm', type: 'raster', source: 'osm-raster', layout: { visibility: 'none' } });
 }
 
-function setBaseMap(map, mapTypeId, tuning, landcoverVisible, terrainTestTuning) {
+function setBaseMap(map, mapTypeId, tuning, landcoverVisible, terrainTestTuning, terrainOverlays) {
   Object.entries(RASTER_BASE_LAYERS).forEach(([type, layerId]) => {
     if (map.getLayer(layerId)) map.setLayoutProperty(layerId, 'visibility', mapTypeId === type ? 'visible' : 'none');
   });
   applyOpenFreeMapAppearance(map, mapTypeId, tuning);
   setComplementaryLandcoverVisibility(map, mapTypeId, landcoverVisible);
-  applyTerrainTestTuning(map, mapTypeId, terrainTestTuning);
+  applyTerrainTestTuning(map, mapTypeId, terrainTestTuning, terrainOverlays);
 }
 
 function localizedName(item = {}, locale = 'fi') {
@@ -1515,7 +1516,7 @@ function createDistanceSignMarkers(map, sourceData) {
   });
 }
 
-function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale, mapTypeId, infoContent, infoContent2 }) {
+function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale, mapTypeId, terrainOverlays, infoContent, infoContent2 }) {
   const mapContainer = useRef(null);
   const mapRef = useRef(null);
   const hoverPopupRef = useRef(null);
@@ -1531,7 +1532,9 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
   const landcoverVisibleRef = useRef(true);
   const landcoverTuningRef = useRef(null);
   const terrainTestTuningRef = useRef(null);
+  const terrainOverlaysRef = useRef(terrainOverlays);
   layersRef.current = layers;
+  terrainOverlaysRef.current = terrainOverlays;
   const [status, setStatus] = useState('Ladataan karttaa…');
   const [selection, setSelection] = useState(null);
   const [mapDebug, setMapDebug] = useState(null);
@@ -1846,14 +1849,15 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
       addComplementaryLandcover(map, landcoverTuningRef.current);
       addRasterBaseMaps(map);
       if (mapTypeRef.current === 'openfreemapTerrain') {
-        addTerrainTestLayers(map, mapTypeRef.current, terrainTestTuningRef.current);
+        addTerrainTestLayers(map, mapTypeRef.current, terrainTestTuningRef.current, terrainOverlaysRef.current);
       }
       setBaseMap(
         map,
         mapTypeRef.current,
         landcoverTuningRef.current,
         landcoverVisibleRef.current,
-        terrainTestTuningRef.current
+        terrainTestTuningRef.current,
+        terrainOverlaysRef.current
       );
       addArchipelagoTarget(map);
       collapseAttribution();
@@ -2287,22 +2291,33 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
       window.localStorage.setItem(TERRAIN_TEST_STORAGE_KEY, JSON.stringify(terrainTestTuning));
     }
     const map = mapRef.current;
-    if (map?.isStyleLoaded()) applyTerrainTestTuning(map, mapTypeRef.current, terrainTestTuning);
+    if (map?.isStyleLoaded()) {
+      applyTerrainTestTuning(map, mapTypeRef.current, terrainTestTuning, terrainOverlaysRef.current);
+    }
   }, [terrainTestTuning]);
+
+  useEffect(() => {
+    terrainOverlaysRef.current = terrainOverlays;
+    const map = mapRef.current;
+    if (map?.isStyleLoaded()) {
+      applyTerrainTestTuning(map, mapTypeRef.current, terrainTestTuningRef.current, terrainOverlays);
+    }
+  }, [terrainOverlays]);
 
   useEffect(() => {
     mapTypeRef.current = mapTypeId;
     const map = mapRef.current;
     if (map) {
       if (mapTypeId === 'openfreemapTerrain' && map.isStyleLoaded()) {
-        addTerrainTestLayers(map, mapTypeId, terrainTestTuningRef.current);
+        addTerrainTestLayers(map, mapTypeId, terrainTestTuningRef.current, terrainOverlaysRef.current);
       }
       setBaseMap(
         map,
         mapTypeId,
         landcoverTuningRef.current,
         landcoverVisibleRef.current,
-        terrainTestTuningRef.current
+        terrainTestTuningRef.current,
+        terrainOverlaysRef.current
       );
     }
   }, [mapTypeId]);
@@ -2713,6 +2728,7 @@ const mapStateToProps = state => ({
   layers: state.settings.layers,
   locale: state.settings.locale,
   mapTypeId: state.settings.mapTypeId,
+  terrainOverlays: state.settings.terrainOverlays,
   infoContent: state.selection.infoContent,
   infoContent2: state.selection.infoContent2
 });

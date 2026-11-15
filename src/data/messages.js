@@ -109,6 +109,8 @@ const messagesRaw = { // FI SV EN
     mapTypes: {
         openfreemap: ["OpenFreeMap", "OpenFreeMap", "OpenFreeMap"],
         openfreemapTerrain: ["OpenFreeMap maasto", "OpenFreeMap terräng", "OpenFreeMap terrain"],
+        contours: ["Korkeuskäyrät", "Höjdkurvor", "Contour lines"],
+        hillshade: ["Rinnevarjostus", "Terrängskuggning", "Hillshade"],
         OSM: ["OpenStreetMap", "OpenStreetMap", "OpenStreetMap"],
     },
     mapLayers: {
