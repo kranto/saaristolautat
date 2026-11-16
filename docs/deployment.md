@@ -212,15 +212,22 @@ tiedostonimet normaalisti huolehtivat uuden version lataamisesta.
 
 ## Saaristodatan päivitys
 
+KMTK-, Syke-, korkeuskäyrä- ja rinnevarjostusaineistojen täydellinen
+rakennus-, maskaus- ja julkaisuohje on viereisen `saaristodata`-repon
+`docs/terrain-data-pipeline.md`-tiedostossa.
+
 `saaristodata` on oma Git-reponsa. Sen tavallinen työnkulku on:
 
 1. Tee ja tarkista datamuutokset paikallisesti.
 2. Tarkista sovellus hostin kehityspalvelimella tai paikallisissa konteissa.
 3. Commitoi ja pushaa muutos `saaristodata`-repoon.
-4. Vedä muutos Hetznerille.
-5. Tarkista testi- ja tuotanto-osoitteet.
+4. Siirrä Gitistä ohitetut PMTiles-tiedostot väliaikaisella `.new`-nimellä,
+   tarkista SHA-256 ja vaihda ne atomisesti lopulliselle nimelle.
+5. Vedä Git-muutos Hetznerille.
+6. Tarkista testi- ja tuotanto-osoitteet.
 
-Hetznerillä riittää:
+Gitissä olevat skripti-, raportti- ja manifestimuutokset vedetään Hetznerillä
+näin:
 
 ```sh
 cd /home/islanti/services/saaristodata
@@ -231,6 +238,12 @@ git pull --ff-only
 Docker-buildia tai konttien uudelleenkäynnistystä ei tarvita, koska hakemisto
 on bind mountattu suoraan molempiin web-kontteihin. Nykyisessä setupissa sama
 pull päivittää testin ja tuotannon datan samanaikaisesti.
+
+Suuret PMTiles-binäärit eivät kuulu Git-repoon, joten pelkkä `git pull` ei
+päivitä niitä. Älä korvaa aktiivista arkistoa kesken siirron: käytä aina
+`.new`-tiedostoa, tarkista paikallisen ja etätiedoston SHA-256 ja tee lopuksi
+saman tiedostojärjestelmän sisäinen `mv`. Jos GitHubin SSH-pull epäonnistuu
+satunnaisesti, yritä SSH:lla uudelleen ennen muun siirtotavan harkitsemista.
 
 Dataa palvellaan viiden minuutin selain- ja välityspalvelinvälimuistilla.
 Tuore tiedosto voidaan tarkistaa välimuistin ohittavalla kyselyparametrilla:
