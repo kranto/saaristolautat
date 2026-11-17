@@ -20,7 +20,7 @@ class Banner extends Component {
             <div
               className="modal-body"
               style={{
-                backgroundImage: "url('img/banner-map.png')",
+                backgroundImage: "url('img/banner-map.png?v=1')",
                 backgroundPosition: "center",
                 backgroundRepeat: "no-repeat",
                 backgroundSize: "cover"
