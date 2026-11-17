@@ -97,6 +97,10 @@ const TERRAIN_TEST_DEFAULTS = {
 const SIMPLE_LAND_COLOR = '#b8dfc2';
 const SIMPLE_LAND_DETAIL_COLOR = '#d4e8d8';
 const SIMPLE_WATER_COLOR = '#f3f7fd';
+const SIMPLE_PIER_COLOR = '#aebfb4';
+const SIMPLE_PIER_OUTLINE_COLOR = '#879a8e';
+const TERRAIN_PIER_COLOR = '#c6c7c3';
+const TERRAIN_PIER_OUTLINE_COLOR = '#aeb0ac';
 const LANDCOVER_TUNING_DEFAULTS = {
   forest: { label: 'Metsä', color: '#72c10b', opacity: 0.45 },
   farmland: { label: 'Pelto', color: '#f7e469', opacity: 0.8 },
@@ -437,6 +441,54 @@ function customizeBaseMap(map) {
     filter: ['match', ['get', 'class'], ['commercial', 'industrial', 'retail'], true, false],
     paint: { 'fill-color': '#e6c49d', 'fill-opacity': 0 }
   }, firstLanduseLayer);
+
+  const roadAreaPattern = map.getLayer('road_area_pattern');
+  if (roadAreaPattern && !map.getLayer('pier-area-fill')) {
+    const styleLayers = map.getStyle().layers;
+    const patternIndex = styleLayers.findIndex(layer => layer.id === 'road_area_pattern');
+    const roadAreaPatternStyle = styleLayers[patternIndex];
+    const nextLayerId = styleLayers[patternIndex + 1]?.id;
+    const polygonFilter = [
+      'match',
+      ['geometry-type'],
+      ['MultiPolygon', 'Polygon'],
+      true,
+      false
+    ];
+    const pierAreaFilter = [
+      'any',
+      ['==', ['get', 'class'], 'pier'],
+      [
+        'all',
+        ['==', ['get', 'class'], 'path'],
+        ['==', ['get', 'subclass'], 'platform']
+      ]
+    ];
+
+    map.setFilter('road_area_pattern', [
+      'all',
+      map.getFilter('road_area_pattern') || polygonFilter,
+      ['!', pierAreaFilter]
+    ]);
+    map.addLayer({
+      id: 'pier-area-fill',
+      type: 'fill',
+      source: roadAreaPatternStyle.source,
+      'source-layer': roadAreaPatternStyle['source-layer'],
+      minzoom: roadAreaPatternStyle.minzoom,
+      maxzoom: roadAreaPatternStyle.maxzoom,
+      filter: [
+        'all',
+        polygonFilter,
+        pierAreaFilter
+      ],
+      paint: {
+        'fill-antialias': true,
+        'fill-color': TERRAIN_PIER_COLOR,
+        'fill-outline-color': TERRAIN_PIER_OUTLINE_COLOR
+      }
+    }, nextLayerId);
+  }
 
   map.getStyle().layers.forEach(layer => {
     const sourceLayer = layer['source-layer'];
@@ -975,6 +1027,14 @@ function applyOpenFreeMapAppearance(map, mapTypeId, tuning) {
   const style = map.getStyle();
   if (!style?.layers) return;
   const terrain = mapTypeId === 'openfreemapTerrain';
+  if (map.getLayer('pier-area-fill')) {
+    map.setPaintProperty('pier-area-fill', 'fill-color', terrain ? TERRAIN_PIER_COLOR : SIMPLE_PIER_COLOR);
+    map.setPaintProperty(
+      'pier-area-fill',
+      'fill-outline-color',
+      terrain ? TERRAIN_PIER_OUTLINE_COLOR : SIMPLE_PIER_OUTLINE_COLOR
+    );
+  }
   style.layers.forEach(layer => {
     const sourceLayer = layer['source-layer'];
 
