@@ -198,6 +198,16 @@ div#infopagecontent {
   margin-bottom: 30px;
 }
 
+.install-info__button {
+  min-height: 44px;
+  margin: 8px 0 16px;
+  padding: 10px 18px;
+}
+
+.install-info__status {
+  font-weight: bold;
+}
+
 #marinetrafficbutton {
   width: 100%;
 }

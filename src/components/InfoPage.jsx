@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import { L2 } from '../lib/localizer';
 import { showLivePage, closeInfoPage } from '../lib/navigation';
 import FModal from './FModal';
+import InstallInfo from './InstallInfo';
 import { setLayer } from '../actions/settingsActions';
 
 const locales = ["fi", "sv", "en"];
@@ -43,6 +44,7 @@ class InfoPage extends Component {
 
     return (
       <div>
+        {page === "install" ? <InstallInfo locale={lang} /> : null}
         {page === "gettingthere" ?
           <div className="infosection">
             <h2>{L2("menu.gettingthere")}</h2>

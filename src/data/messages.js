@@ -95,6 +95,7 @@ const messagesRaw = { // FI SV EN
         finlandferriesinfo: ["Manner-Suomen lautat", "Färjor i Fastlandsfinland", "Ferries in mainland Finland"],
         live: ["Live-näkymä", "Live-vy", "Live view"],
         linksinfo: ["Linkkejä", "Länkar", "Links"],
+        install: ["Asenna sovellus", "Installera appen", "Install the app"],
         appinfo: ["Tietoja sovelluksesta", "Om appen", "About the app"]
     },
     infopage: {

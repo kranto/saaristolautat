@@ -7,7 +7,7 @@ import { menuItemClicked } from '../lib/navigation';
 
 class Menu extends Component {
 
-  menuItems = ["gettingthere", "alandferriesinfo", "finlandferriesinfo", "live", "linksinfo", "appinfo"];
+  menuItems = ["gettingthere", "alandferriesinfo", "finlandferriesinfo", "live", "linksinfo", "install", "appinfo"];
 
   componentDidUpdate() {
     if (!this.props.open) ReactDOM.findDOMNode(this).scrollTop = 0;
