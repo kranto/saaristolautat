@@ -4,13 +4,33 @@ import { L, L2 } from '../lib/localizer';
 
 function OfflineStatus({ offline, savedAt, loadFailed, locale }) {
   const [now, setNow] = useState(Date.now());
+  const [disconnected, setDisconnected] = useState(false);
+  useEffect(() => {
+    let disconnectTimer;
+    const onOffline = () => {
+      window.clearTimeout(disconnectTimer);
+      disconnectTimer = window.setTimeout(() => setDisconnected(!navigator.onLine), 3000);
+    };
+    const onOnline = () => {
+      window.clearTimeout(disconnectTimer);
+      setDisconnected(false);
+    };
+    if (!navigator.onLine) onOffline();
+    window.addEventListener('offline', onOffline);
+    window.addEventListener('online', onOnline);
+    return () => {
+      window.clearTimeout(disconnectTimer);
+      window.removeEventListener('offline', onOffline);
+      window.removeEventListener('online', onOnline);
+    };
+  }, []);
   useEffect(() => {
     if (!offline) return undefined;
     const timer = window.setInterval(() => setNow(Date.now()), 60000);
     return () => window.clearInterval(timer);
   }, [offline]);
   const days = savedAt ? Math.floor(Math.max(0, now - savedAt) / 86400000) : 0;
-  if (!offline && !loadFailed) return null;
+  if (!offline && !loadFailed && !disconnected) return null;
   const message = loadFailed
     ? L2('offline.unavailable')
     : days < 1 ? L2('offline.active')
