@@ -371,6 +371,7 @@ div#infopagecontent {
 }
 
 .topbarbutton {
+  position: relative;
   float: left;
   max-height: 46px; 
   border: none;
@@ -443,23 +444,19 @@ div#infopagecontent {
   }
   .topbarbutton .description {
     display: block;
-    position: fixed;
-    top: 60px;
+    position: absolute;
+    top: 58px;
     left: 30px;
     padding: 5px;
     background-color: rgba(0,0,0,.7);
     color: white;
     border-radius: 0px 7px 7px 7px;
-    transition: opacity 500ms linear;
-    transition-delay: 1000ms;
   }
   .topbarbutton.search .description {
-    top: 60px;
-    left: 85px;
+    left: 30px;
     display: block;
   }
   .topbarbutton.right .description {
-    top: 60px;
     left: initial;
     padding: 5px;
     right: 30px;
@@ -491,9 +488,7 @@ div#infopagecontent {
     display: none;
   }
   .topbarbutton .description.hide {
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 500ms linear;
+    display: none;
   }
 }
 
