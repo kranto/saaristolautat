@@ -3,6 +3,7 @@ import { readdir, readFile, writeFile } from 'node:fs/promises';
 const assets = (await readdir('build/assets')).map(name => `/assets/${name}`);
 const precache = [
   '/index.html',
+  '/timetable.html',
   ...assets,
   '/css/bootstrap.min.css',
   '/css/font-awesome-animation.min.css',

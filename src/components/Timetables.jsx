@@ -38,6 +38,13 @@ class Timetables extends Component {
     event.stopPropagation();
   }
 
+  touchTimetable(image) {
+    navigator.serviceWorker?.controller?.postMessage({
+      type: 'TIMETABLE_OPENED',
+      url: `/data/timetables_jpg/${encodeURIComponent(image)}`
+    });
+  }
+
   getHeader() {
     if (!this.props.timetableid || !this.props.routeid) return "";
     const route = this.props.data.routes[this.props.routeid];
@@ -83,11 +90,12 @@ class Timetables extends Component {
     );
 
     const tableItems = tables.map(table => {
-      const images = LP(table, "images").map(image =>
+      const images = table.active && LP(table, "images").map(image =>
         <div className="timetablelink" key={image}>
           <a href={"timetable.html?t=" + encodeURIComponent(image)} target="timetable">
             <div>
-              <img alt="timetable" className="timetable" src={"data/timetables_jpg/" + image} />
+              <img alt="timetable" className="timetable" src={`/data/timetables_jpg/${encodeURIComponent(image)}`}
+                onLoad={() => this.touchTimetable(image)} />
             </div>
           </a>
         </div>
