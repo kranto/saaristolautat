@@ -286,7 +286,6 @@ div#infopagecontent {
 .map {
   height: 100%;
   width: 100%; 
-  transform: scale(1); 
   position: absolute; 
   left: -0px; 
   top: -0px; 
@@ -333,18 +332,8 @@ div#infopagecontent {
   width: 100%;
   background-color: white;
   border-bottom: solid #aaa 1px;
+  box-shadow: 0 5px 12px rgba(0, 0, 0, .22);
   z-index: 110;
-}
-
-#topbar::after {
-  content: '';
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  height: 14px;
-  background: linear-gradient(to bottom, rgba(0, 0, 0, .22), transparent);
-  pointer-events: none;
 }
 
 .offline-status {
