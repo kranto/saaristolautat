@@ -68,9 +68,15 @@ const messagesRaw = { // FI SV EN
         title: ["Saaristolautat.fi", "Saaristolautat.fi", "Saaristolautat.fi"]
     },
     offline: {
+        active: ["Offline-tila", "Offlineläge", "Offline mode"],
+        shortDays: ["{0} pv", "{0} d", "{0} d"],
         oneDay: ["Offline-tiedot ladattu 1 päivä sitten", "Offlinedata hämtades för 1 dag sedan", "Offline data loaded 1 day ago"],
         days: ["Offline-tiedot ladattu {0} päivää sitten", "Offlinedata hämtades för {0} dagar sedan", "Offline data loaded {0} days ago"],
         unavailable: ["Tietoja ei voitu ladata. Yhdistä verkkoon ja yritä uudelleen.", "Uppgifterna kunde inte hämtas. Anslut till internet och försök igen.", "Data could not be loaded. Connect to the internet and try again."]
+    },
+    timetable: {
+        offlineUnavailable: ["Aikataulukuvaa ei voi ladata ilman verkkoyhteyttä.", "Tidtabellsbilden kan inte hämtas utan internetanslutning.", "The timetable image cannot be loaded without an internet connection."],
+        unavailable: ["Aikataulukuvaa ei voitu ladata.", "Tidtabellsbilden kunde inte hämtas.", "The timetable image could not be loaded."]
     },
     loader: {
         main: ["Turun saariston ja Ahvenanmaan lauttareitit", "Skärgårdsfärjorna i Skärgårdshavet", "Ferry routes in the Finnish archipelago"],

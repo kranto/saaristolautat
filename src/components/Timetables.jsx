@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, useEffect, useState } from 'react';
 import { L2 as L, LP } from '../lib/localizer';
 import { connect } from 'react-redux';
 import { filterTimetables } from '../lib/datarenderer';
@@ -13,6 +13,28 @@ function renderDate(date, lang) {
 function renderDates(fromD, toD, lang) {
   if (fromD && fromD === toD) return renderDate(fromD, lang);
   return renderDate(fromD, lang) + " - " + renderDate(toD, lang);
+}
+
+function TimetableImage({ image, onLoad }) {
+  const [failed, setFailed] = useState(false);
+  useEffect(() => {
+    const retry = () => setFailed(false);
+    window.addEventListener('online', retry);
+    return () => window.removeEventListener('online', retry);
+  }, []);
+
+  if (failed) {
+    return <div className="timetable-image-unavailable" role="status">
+      {L(navigator.onLine ? 'timetable.unavailable' : 'timetable.offlineUnavailable')}
+    </div>;
+  }
+
+  return <a href={"timetable.html?t=" + encodeURIComponent(image)} target="timetable">
+    <div>
+      <img alt="timetable" className="timetable" src={`/data/timetables_jpg/${encodeURIComponent(image)}`}
+        onLoad={onLoad} onError={() => setFailed(true)} />
+    </div>
+  </a>;
 }
 
 class Timetables extends Component {
@@ -92,12 +114,7 @@ class Timetables extends Component {
     const tableItems = tables.map(table => {
       const images = table.active && LP(table, "images").map(image =>
         <div className="timetablelink" key={image}>
-          <a href={"timetable.html?t=" + encodeURIComponent(image)} target="timetable">
-            <div>
-              <img alt="timetable" className="timetable" src={`/data/timetables_jpg/${encodeURIComponent(image)}`}
-                onLoad={() => this.touchTimetable(image)} />
-            </div>
-          </a>
+          <TimetableImage image={image} onLoad={() => this.touchTimetable(image)} />
         </div>
       );
       return (
@@ -109,9 +126,9 @@ class Timetables extends Component {
           key={table.panelid}
         >
           {images}
-          <div className="alert alert-info center">
+          {navigator.onLine && <div className="alert alert-info center">
             {L('openzoomable')}
-          </div>
+          </div>}
         </div>);
     }
     );

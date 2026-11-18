@@ -13,7 +13,6 @@ import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import {toggleMenu, toggleSearch, toggleSettings} from '../lib/uicontrol';
 import { phases } from '../lib/constants';
 import SearchPanel from './SearchPanel';
-import OfflineStatus from './OfflineStatus';
 
 const $ = window.$;
 
@@ -157,7 +156,6 @@ class Wrapper extends Component {
           onSearchButtonClicked={toggleSearch} searchOpen={this.props.uiState.searchOpen}
           menuOpen={this.props.uiState.menuOpen} settingsOpen={this.props.uiState.settingsOpen}
           introduction={this.props.uiState.phase === phases.INTRODUCTION}/>
-        <OfflineStatus />
         <Menu open={this.props.uiState.menuOpen}/>
         <SearchPanel open={this.props.uiState.searchOpen}/>
         <Settings open={this.props.uiState.settingsOpen}/>

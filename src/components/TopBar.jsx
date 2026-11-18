@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import {L2} from '../lib/localizer';
+import OfflineStatus from './OfflineStatus';
 
 export default class TopBar extends Component {
 
@@ -18,6 +19,7 @@ export default class TopBar extends Component {
         <div id="topbartitle">
           {L2("application.title")}
         </div>
+        <OfflineStatus />
         <button type="button" className={"topbarbutton right" + (this.props.settingsOpen ? " active" : "")} 
           onClick={this.props.onSettingsButtonClicked}>
           <span className={descriptionClasses}>{L2("topbar.settings")}</span><i className="fa fa-sliders" aria-hidden="true"></i>
