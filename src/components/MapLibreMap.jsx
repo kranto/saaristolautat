@@ -14,6 +14,37 @@ const pmtilesProtocol = new Protocol();
 maplibregl.addProtocol('pmtiles', pmtilesProtocol.tile);
 
 const OPENFREEMAP_STYLE = 'https://tiles.openfreemap.org/styles/liberty';
+const OFFLINE_MAX_ZOOM = 10.99;
+// The app's customized OpenFreeMap Liberty basemap at zoom 8, with a grayer land background.
+// Keep these bounds aligned with the 2986 × 1679 px image.
+const OFFLINE_STYLE = {
+  version: 8,
+  name: 'Saaristolautat offline',
+  metadata: { saaristolautatOffline: true },
+  sources: {
+    'offline-basemap': {
+      type: 'image',
+      url: '/img/offline-basemap.webp',
+      coordinates: [
+        [17.498473793924973, 61.20080936851039],
+        [25.701526206074135, 61.20080936851039],
+        [25.701526206074135, 58.89913217801342],
+        [17.498473793924973, 58.89913217801342]
+      ]
+    },
+    'offline-basemap-attribution': {
+      type: 'geojson',
+      data: { type: 'FeatureCollection', features: [] },
+      attribution: '<a href="https://openfreemap.org/">OpenFreeMap</a> <a href="https://openmaptiles.org/">© OpenMapTiles</a> Data from <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    }
+  },
+  layers: [
+    { id: 'offline-water', type: 'background', paint: { 'background-color': '#f3f7fd' } },
+    { id: 'offline-basemap', type: 'raster', source: 'offline-basemap', paint: { 'raster-fade-duration': 0 } },
+    { id: 'offline-basemap-attribution', type: 'circle', source: 'offline-basemap-attribution' }
+  ]
+};
+const isOfflineMap = map => Boolean(map?.getStyle()?.metadata?.saaristolautatOffline);
 const RASTER_BASE_LAYERS = {
   OSM: 'base-osm'
 };
@@ -1551,6 +1582,7 @@ function flattenMapData(collections, data, locale) {
 
 function applyLayerSettings(map, layers = {}) {
   if (!map) return;
+  const liveActive = layers.live && !isOfflineMap(map);
   const styleLayers = map.getStyle()?.layers;
   if (!styleLayers) return;
   const groups = {
@@ -1583,10 +1615,10 @@ function applyLayerSettings(map, layers = {}) {
     if (!map.getLayer(id)) return;
     if (!opacityIndex.has(id)) opacityIndex.set(id, map.getPaintProperty(id, 'line-opacity') ?? 1);
     const opacity = opacityIndex.get(id);
-    map.setPaintProperty(id, 'line-opacity', layers.live ? ['*', opacity, 0.2] : opacity);
+    map.setPaintProperty(id, 'line-opacity', liveActive ? ['*', opacity, 0.2] : opacity);
   });
   styleLayerIds.filter(id => id.startsWith('cable-ferry-rings-')).forEach(id => {
-    if (map.getLayer(id)) map.setPaintProperty(id, 'icon-opacity', layers.live ? 0.2 : 1);
+    if (map.getLayer(id)) map.setPaintProperty(id, 'icon-opacity', liveActive ? 0.2 : 1);
   });
 }
 
@@ -1623,7 +1655,7 @@ function createDistanceSignMarkers(map, sourceData) {
   });
 }
 
-function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale, mapTypeId, terrainOverlays, infoContent, infoContent2 }) {
+function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale, mapTypeId, terrainOverlays, infoContent, infoContent2, offline }) {
   const mapContainer = useRef(null);
   const mapRef = useRef(null);
   const hoverPopupRef = useRef(null);
@@ -1658,11 +1690,11 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
     if (SCREENSHOT_MAP_VIEW) document.getElementById('loader')?.style.setProperty('display', 'none');
     const map = new maplibregl.Map({
       container: mapContainer.current,
-      style: OPENFREEMAP_STYLE,
+      style: navigator.onLine ? OPENFREEMAP_STYLE : OFFLINE_STYLE,
       center: SCREENSHOT_MAP_VIEW?.center || [21.25, 60.15],
       zoom: SCREENSHOT_MAP_VIEW?.zoom || MIN_ROUTE_RENDER_ZOOM,
       minZoom: 4,
-      maxZoom: MAP_MAX_ZOOM,
+      maxZoom: navigator.onLine ? MAP_MAX_ZOOM : OFFLINE_MAX_ZOOM,
       maxTileCacheZoomLevels: USE_REDUCED_TILE_CACHE ? 1 : 5,
       attributionControl: false
     });
@@ -1950,29 +1982,36 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
         startupTimer = window.setTimeout(startIntroduction, 500);
       }
     };
-    map.on('load', () => {
-      customizeBaseMap(map);
-      addComplementaryForest(map, landcoverTuningRef.current);
-      addComplementaryLandcover(map, landcoverTuningRef.current);
-      addRasterBaseMaps(map);
-      if (mapTypeRef.current === 'openfreemapTerrain') {
-        addTerrainTestLayers(map, mapTypeRef.current, terrainTestTuningRef.current, terrainOverlaysRef.current);
+    const configureStyle = () => {
+      if (map.getSource('archipelago-target')) return;
+      if (!isOfflineMap(map)) {
+        customizeBaseMap(map);
+        addComplementaryForest(map, landcoverTuningRef.current);
+        addComplementaryLandcover(map, landcoverTuningRef.current);
+        addRasterBaseMaps(map);
+        if (mapTypeRef.current === 'openfreemapTerrain') {
+          addTerrainTestLayers(map, mapTypeRef.current, terrainTestTuningRef.current, terrainOverlaysRef.current);
+        }
+        setBaseMap(
+          map,
+          mapTypeRef.current,
+          landcoverTuningRef.current,
+          landcoverVisibleRef.current,
+          terrainTestTuningRef.current,
+          terrainOverlaysRef.current
+        );
       }
-      setBaseMap(
-        map,
-        mapTypeRef.current,
-        landcoverTuningRef.current,
-        landcoverVisibleRef.current,
-        terrainTestTuningRef.current,
-        terrainOverlaysRef.current
-      );
       addArchipelagoTarget(map);
-      collapseAttribution();
-      updateMapDebug();
-      updateResetVisibility();
       ensureLocationLayers();
       showLatestPosition();
+      collapseAttribution();
       setStatus('Kartta valmis');
+    };
+    map.on('style.load', configureStyle);
+    map.once('load', () => {
+      configureStyle();
+      updateMapDebug();
+      updateResetVisibility();
       revealMap = () => {
         if (!map.getSource('saaristolautat')) {
           map.once('idle', revealMap);
@@ -2001,6 +2040,7 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
       window.clearTimeout(introductionTimer);
       if (revealFrame) window.cancelAnimationFrame(revealFrame);
       if (revealMap) map.off('idle', revealMap);
+      map.off('style.load', configureStyle);
       if (bannerElement && onBannerHidden) bannerElement.off('hidden.bs.modal', onBannerHidden);
       map.off('moveend', onMoveEnd);
       map.off('dragstart', stopLocationTracking);
@@ -2023,10 +2063,57 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
 
   useEffect(() => {
     const map = mapRef.current;
+    if (offline && map && !isOfflineMap(map)) {
+      map.setMaxZoom(OFFLINE_MAX_ZOOM);
+      map.setStyle(OFFLINE_STYLE);
+    } else if (!offline && data?.piers && map && isOfflineMap(map)) {
+      map.setMaxZoom(MAP_MAX_ZOOM);
+      map.setStyle(OPENFREEMAP_STYLE);
+    }
+  }, [offline, data]);
+
+  useEffect(() => {
+    const map = mapRef.current;
     if (!map || !data?.piers || !geojson?.length) return undefined;
     const sourceData = flattenMapData(geojson, data, locale);
     sourceDataRef.current = sourceData;
     mapDataReady();
+
+    let offlineLabels = [];
+    const updateOfflineLabels = () => {
+      if (!isOfflineMap(map)) {
+        offlineLabels.forEach(({ marker }) => marker.remove());
+        offlineLabels = [];
+        return;
+      }
+      if (!offlineLabels.length) {
+        offlineLabels = sourceData.features.filter(feature =>
+          feature.geometry?.type === 'Point' &&
+          ((feature.properties.kind === 'place' && ['province', 'mun1', 'mun2', 'island1'].includes(feature.properties.subtype)) ||
+            (feature.properties.kind === 'pier' && feature.properties.subtype === '1')) &&
+          feature.properties.labelMinZoom < 24
+        ).map(feature => {
+          const label = document.createElement('span');
+          label.className = feature.properties.kind === 'pier' ? 'offline-map-label offline-map-label--pier' : 'offline-map-label';
+          label.style.setProperty('--offline-label-x', `${feature.properties.labelOffset[0]}em`);
+          label.style.setProperty('--offline-label-y', `${feature.properties.labelOffset[1]}em`);
+          const element = document.createElement('div');
+          element.style.pointerEvents = 'none';
+          element.appendChild(label);
+          const marker = new maplibregl.Marker({ element, anchor: feature.properties.labelTextAnchor })
+            .setLngLat(feature.geometry.coordinates)
+            .addTo(map);
+          return { marker, label, properties: feature.properties };
+        });
+      }
+      const zoom = map.getZoom();
+      offlineLabels.forEach(({ label, properties }) => {
+        const maxZoom = properties.kind === 'place' && properties.subtype === 'island1' && properties.labelMaxZoom >= 0
+          ? OFFLINE_MAX_ZOOM : properties.labelMaxZoom;
+        label.style.display = zoom >= properties.labelMinZoom && zoom <= maxZoom ? '' : 'none';
+        label.textContent = zoom >= properties.longNameMinZoom ? properties.longName : properties.name;
+      });
+    };
 
     const removeDistanceSigns = () => {
       distanceSignMarkersRef.current.forEach(({ marker }) => marker.remove());
@@ -2062,7 +2149,7 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
         map.addLayer({
           id: `custom-roads-${range}`, type: 'line', source: 'saaristolautat',
           filter: ['all', ['==', ['get', 'kind'], 'road'], ['==', ['get', 'objectMinZoom'], minZoom], ['==', ['get', 'objectMaxZoom'], maxZoom]],
-          minzoom: minZoom, maxzoom: maxZoom + 1,
+          minzoom: minZoom, maxzoom: isOfflineMap(map) ? OFFLINE_MAX_ZOOM + 1 : maxZoom + 1,
           paint: { 'line-color': '#8a7d6a', 'line-width': 1, 'line-opacity': 1 }
         });
       });
@@ -2229,7 +2316,8 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
             paint: { 'circle-radius': pierStyle.radius, 'circle-color': '#e00000', 'circle-opacity': pierStyle.opacity }
           });
         });
-        [...new Set(items.map(feature => feature.properties.labelMinZoom))].filter(zoom => zoom < 24).forEach(zoom => map.addLayer({
+        if (!isOfflineMap(map)) {
+          [...new Set(items.map(feature => feature.properties.labelMinZoom))].filter(zoom => zoom < 24).forEach(zoom => map.addLayer({
           id: `pier-labels-${pierStyle.type}-${zoom}`, type: 'symbol', source: 'saaristolautat', minzoom: zoom,
           filter: ['all', ['==', ['get', 'kind'], 'pier'], ['==', ['get', 'subtype'], pierStyle.type], ['==', ['get', 'labelMinZoom'], zoom]],
           layout: {
@@ -2240,15 +2328,17 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
             'text-allow-overlap': true, 'text-ignore-placement': true
           },
           paint: { 'text-color': '#002080', 'text-opacity': 0.9, 'text-halo-color': 'rgba(255,255,255,0.95)', 'text-halo-width': 1.8, 'text-halo-blur': 0.2 }
-        }));
+          }));
+        }
       });
 
-      [
+      if (!isOfflineMap(map)) {
+        [
         { type: 'province', em: 2, font: 'Noto Sans Bold', color: '#202030', opacity: 0.6 },
         { type: 'mun1', em: 1.8, font: 'Noto Sans Bold', color: '#202030', opacity: 0.6 },
         { type: 'mun2', em: 1.4, font: 'Noto Sans Bold', color: '#202030', opacity: 0.6 },
         { type: 'island1', em: 1, font: 'Noto Sans Regular', color: '#101010', opacity: 0.8 }
-      ].forEach(placeStyle => {
+        ].forEach(placeStyle => {
         const ranges = [...new Set(sourceData.features.filter(feature => feature.properties.kind === 'place' && feature.properties.subtype === placeStyle.type)
           .map(feature => `${feature.properties.labelMinZoom},${feature.properties.labelMaxZoom},${feature.properties.longNameMinZoom}`))];
         ranges.forEach(range => {
@@ -2263,7 +2353,8 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
             paint: { 'text-color': placeStyle.color, 'text-opacity': placeStyle.opacity, 'text-halo-color': 'rgba(255,255,255,0.95)', 'text-halo-width': 1.8, 'text-halo-blur': 0.2 }
           });
         });
-      });
+        });
+      }
       const routeLayers = routeHitLayers.map(layer => layer.id);
 
       routeLayers.forEach(layer => {
@@ -2355,13 +2446,19 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
     map.on('styledata', ensureLayers);
     map.on('idle', ensureLayers);
     map.on('zoom', updateDistanceSigns);
+    map.on('styledata', updateOfflineLabels);
+    map.on('zoom', updateOfflineLabels);
+    updateOfflineLabels();
     if (map.isStyleLoaded()) addLayers();
-    else map.once('load', addLayers);
+    else map.once('style.load', addLayers);
     return () => {
       map.off('styledata', ensureLayers);
       map.off('idle', ensureLayers);
-      map.off('load', addLayers);
+      map.off('style.load', addLayers);
       map.off('zoom', updateDistanceSigns);
+      map.off('styledata', updateOfflineLabels);
+      map.off('zoom', updateOfflineLabels);
+      offlineLabels.forEach(({ marker }) => marker.remove());
       removeDistanceSigns();
     };
   }, [data, dispatch, geojson, locale]);
@@ -2387,7 +2484,7 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
       window.localStorage.setItem(LANDCOVER_TUNING_STORAGE_KEY, JSON.stringify(landcoverTuning));
     }
     const map = mapRef.current;
-    if (map?.isStyleLoaded()) {
+    if (map?.isStyleLoaded() && !isOfflineMap(map)) {
       applyOpenFreeMapAppearance(map, mapTypeRef.current, landcoverTuning);
     }
   }, [landcoverTuning]);
@@ -2398,7 +2495,7 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
       window.localStorage.setItem(TERRAIN_TEST_STORAGE_KEY, JSON.stringify(terrainTestTuning));
     }
     const map = mapRef.current;
-    if (map?.isStyleLoaded()) {
+    if (map?.isStyleLoaded() && !isOfflineMap(map)) {
       applyTerrainTestTuning(map, mapTypeRef.current, terrainTestTuning, terrainOverlaysRef.current);
     }
   }, [terrainTestTuning]);
@@ -2406,7 +2503,7 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
   useEffect(() => {
     terrainOverlaysRef.current = terrainOverlays;
     const map = mapRef.current;
-    if (map?.isStyleLoaded()) {
+    if (map?.isStyleLoaded() && !isOfflineMap(map)) {
       applyTerrainTestTuning(map, mapTypeRef.current, terrainTestTuningRef.current, terrainOverlays);
     }
   }, [terrainOverlays]);
@@ -2414,7 +2511,7 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
   useEffect(() => {
     mapTypeRef.current = mapTypeId;
     const map = mapRef.current;
-    if (map) {
+    if (map && !isOfflineMap(map)) {
       if (mapTypeId === 'openfreemapTerrain' && map.isStyleLoaded()) {
         addTerrainTestLayers(map, mapTypeId, terrainTestTuningRef.current, terrainOverlaysRef.current);
       }
@@ -2570,11 +2667,11 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
 
     const onMoveEnd = () => updateLiveIndicator(map, liveFeaturesRef.current, dispatch);
     const start = () => {
-      ensureLiveLayers();
-      if (!layers.live) {
+      if (offline || !layers.live) {
         clearLiveData();
         return;
       }
+      ensureLiveLayers();
       dispatch({ type: 'UPDATE_INDICATOR_MSG', payload: 'live.loading' });
       const applyDimming = () => {
         if (!cancelled) applyLayerSettings(map, { ...layers, live: true });
@@ -2586,17 +2683,17 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
       interval = window.setInterval(loadLiveData, 10000);
       map.on('moveend', onMoveEnd);
     };
-    if (map.getSource('saaristolautat') || map.isStyleLoaded()) start();
-    else map.once('load', start);
+    if (map.getSource('saaristolautat')) start();
+    else map.once('idle', start);
 
     return () => {
       cancelled = true;
       if (interval) window.clearInterval(interval);
       if (dimmingTimeout) window.clearTimeout(dimmingTimeout);
-      map.off('load', start);
+      map.off('idle', start);
       map.off('moveend', onMoveEnd);
     };
-  }, [data, dispatch, layers.live]);
+  }, [data, dispatch, layers.live, offline]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -2837,6 +2934,7 @@ const mapStateToProps = state => ({
   mapTypeId: state.settings.mapTypeId,
   terrainOverlays: state.settings.terrainOverlays,
   infoContent: state.selection.infoContent,
-  infoContent2: state.selection.infoContent2
+  infoContent2: state.selection.infoContent2,
+  offline: state.data.offline
 });
 export default connect(mapStateToProps)(MapLibreMap);

@@ -6,3 +6,10 @@ import { initFullscreen } from './lib/fullscreen';
 
 ReactDOM.render(<App />, document.getElementById('app'));
 initFullscreen(document.getElementById('wrapper'));
+
+if (import.meta.env.PROD && 'serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register(`/service-worker.js?v=${import.meta.env.VITE_APP_VERSION}`)
+      .catch(error => console.warn('Offline support unavailable', error));
+  });
+}

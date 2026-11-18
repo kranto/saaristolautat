@@ -61,9 +61,9 @@ export default class InstallInfo extends Component {
           </>
         )}
         <p>{message([
-          'Kartta ja ajantasaiset tiedot tarvitsevat edelleen internetyhteyden.',
-          'Kartan och aktuella uppgifter kräver fortfarande internetanslutning.',
-          'The map and current information still require an internet connection.'
+          'Aiemmin ladatut reittitiedot ja yksinkertainen kartta toimivat myös ilman verkkoyhteyttä. Live-tiedot tarvitsevat internetyhteyden.',
+          'Tidigare hämtade ruttuppgifter och en enkel karta fungerar även utan internetanslutning. Liveuppgifter kräver internetanslutning.',
+          'Previously loaded route information and a simple map also work offline. Live information requires an internet connection.'
         ], locale)}</p>
       </div>
     );

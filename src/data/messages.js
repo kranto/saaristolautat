@@ -67,6 +67,11 @@ const messagesRaw = { // FI SV EN
     application: {
         title: ["Saaristolautat.fi", "Saaristolautat.fi", "Saaristolautat.fi"]
     },
+    offline: {
+        oneDay: ["Offline-tiedot ladattu 1 päivä sitten", "Offlinedata hämtades för 1 dag sedan", "Offline data loaded 1 day ago"],
+        days: ["Offline-tiedot ladattu {0} päivää sitten", "Offlinedata hämtades för {0} dagar sedan", "Offline data loaded {0} days ago"],
+        unavailable: ["Tietoja ei voitu ladata. Yhdistä verkkoon ja yritä uudelleen.", "Uppgifterna kunde inte hämtas. Anslut till internet och försök igen.", "Data could not be loaded. Connect to the internet and try again."]
+    },
     loader: {
         main: ["Turun saariston ja Ahvenanmaan lauttareitit", "Skärgårdsfärjorna i Skärgårdshavet", "Ferry routes in the Finnish archipelago"],
         islands: ["40000 saarta<br/>50 lauttaa<br/>200 laituria", "40000 öar<br/>50 färjor<br/>200 bryggor", "40000 islands<br/>50 ferries<br/>200 ferry landings"],

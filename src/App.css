@@ -332,6 +332,20 @@ div#infopagecontent {
   box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
 
+.offline-status {
+  position: fixed;
+  top: 50px;
+  left: 50%;
+  z-index: 111;
+  transform: translateX(-50%);
+  max-width: calc(100% - 24px);
+  padding: 7px 12px;
+  border-radius: 0 0 8px 8px;
+  background: #fff0bd;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, .18);
+  text-align: center;
+}
+
 #topbartitle {
   font-size: 22px;
   font-weight: 600;

@@ -1,6 +1,8 @@
 .map-view { position: fixed; inset: 0; overflow: hidden; background: #f1fafb; font-family: 'Lato', sans-serif; color: #24342f; }
 .map-view__canvas { position: absolute; inset: 0; }
 .maplibre-embedded { position: absolute; inset: 0; width: 100%; height: 100%; }
+.offline-map-label { display: block; padding: 1px 3px; transform: translate(var(--offline-label-x), var(--offline-label-y)); color: #263a4a; font: 700 12px/1.2 'Lato', sans-serif; text-align: left; white-space: pre-line; text-shadow: 0 1px #fff, 1px 0 #fff, -1px 0 #fff, 0 -1px #fff; pointer-events: none; }
+.offline-map-label--pier { color: #002080; font-size: 11px; }
 .distance-sign-marker { pointer-events: none; }
 .distance-sign-marker__label {
   box-sizing: border-box;
