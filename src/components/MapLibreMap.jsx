@@ -1794,11 +1794,31 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
   const [mapDebug, setMapDebug] = useState(null);
   const [showReset, setShowReset] = useState(false);
   const [mapReady, setMapReady] = useState(false);
+  const [disconnected, setDisconnected] = useState(() => !navigator.onLine);
   const [landcoverVisible, setLandcoverVisible] = useState(true);
   const [landcoverTuning, setLandcoverTuning] = useState(loadLandcoverTuning);
   const [terrainTestTuning, setTerrainTestTuning] = useState(loadTerrainTestTuning);
   landcoverTuningRef.current = landcoverTuning;
   terrainTestTuningRef.current = terrainTestTuning;
+
+  useEffect(() => {
+    let disconnectTimer;
+    const onOffline = () => {
+      window.clearTimeout(disconnectTimer);
+      disconnectTimer = window.setTimeout(() => setDisconnected(!navigator.onLine), 3000);
+    };
+    const onOnline = () => {
+      window.clearTimeout(disconnectTimer);
+      setDisconnected(false);
+    };
+    window.addEventListener('offline', onOffline);
+    window.addEventListener('online', onOnline);
+    return () => {
+      window.clearTimeout(disconnectTimer);
+      window.removeEventListener('offline', onOffline);
+      window.removeEventListener('online', onOnline);
+    };
+  }, []);
 
   useEffect(() => {
     if (!mapContainer.current || mapRef.current) return undefined;
@@ -2202,14 +2222,15 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
 
   useEffect(() => {
     const map = mapRef.current;
-    if (offline && map && !isOfflineMap(map)) {
+    const useOfflineMap = offline || disconnected;
+    if (useOfflineMap && map && !isOfflineMap(map)) {
       map.setMaxZoom(OFFLINE_MAX_ZOOM);
       map.setStyle(OFFLINE_STYLE);
-    } else if (!offline && data?.piers && map && isOfflineMap(map)) {
+    } else if (!useOfflineMap && data?.piers && map && isOfflineMap(map)) {
       map.setMaxZoom(MAP_MAX_ZOOM);
       map.setStyle(OPENFREEMAP_STYLE);
     }
-  }, [offline, data]);
+  }, [offline, disconnected, data]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -2219,6 +2240,23 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
     mapDataReady();
 
     let offlineLabels = [];
+    const offlinePlaceStyles = {
+      province: { em: 2, color: '#202030', opacity: 0.6, weight: 700 },
+      mun1: { em: 1.8, color: '#202030', opacity: 0.6, weight: 700 },
+      mun2: { em: 1.4, color: '#202030', opacity: 0.6, weight: 700 },
+      island1: { em: 1, color: '#101010', opacity: 0.8, weight: 400 }
+    };
+    const offlinePierStyles = {
+      '1': { em: 1.2, weight: 700 }, '2': { em: 1.1, weight: 700 },
+      '3': { em: 1.1, weight: 400 }, '4': { em: 1, weight: 400 },
+      '5': { em: 1, weight: 400 }
+    };
+    const interactionListeners = [];
+    let interactionsRegistered = false;
+    const onMapInteraction = (...args) => {
+      map.on(...args);
+      interactionListeners.push(args);
+    };
     const updateOfflineLabels = () => {
       if (!isOfflineMap(map)) {
         offlineLabels.forEach(({ marker }) => marker.remove());
@@ -2228,8 +2266,8 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
       if (!offlineLabels.length) {
         offlineLabels = sourceData.features.filter(feature =>
           feature.geometry?.type === 'Point' &&
-          ((feature.properties.kind === 'place' && ['province', 'mun1', 'mun2', 'island1'].includes(feature.properties.subtype)) ||
-            (feature.properties.kind === 'pier' && feature.properties.subtype === '1')) &&
+          ((feature.properties.kind === 'place' && offlinePlaceStyles[feature.properties.subtype]) ||
+            (feature.properties.kind === 'pier' && offlinePierStyles[feature.properties.subtype])) &&
           feature.properties.labelMinZoom < 24
         ).map(feature => {
           const label = document.createElement('span');
@@ -2247,10 +2285,15 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
       }
       const zoom = map.getZoom();
       offlineLabels.forEach(({ label, properties }) => {
-        const maxZoom = properties.kind === 'place' && properties.subtype === 'island1' && properties.labelMaxZoom >= 0
-          ? OFFLINE_MAX_ZOOM : properties.labelMaxZoom;
-        label.style.display = zoom >= properties.labelMinZoom && zoom <= maxZoom ? '' : 'none';
-        label.textContent = zoom >= properties.longNameMinZoom ? properties.longName : properties.name;
+        const style = properties.kind === 'pier'
+          ? offlinePierStyles[properties.subtype] : offlinePlaceStyles[properties.subtype];
+        label.style.display = zoom >= properties.labelMinZoom && zoom < properties.labelMaxZoom + 1 ? '' : 'none';
+        label.style.fontSize = `${style.em * (Math.max(4, Math.min(18, zoom)) + 2)}px`;
+        label.style.fontWeight = style.weight;
+        label.style.color = properties.kind === 'pier' ? '#002080' : style.color;
+        label.style.opacity = properties.kind === 'pier' ? 0.9 : style.opacity;
+        label.textContent = properties.kind === 'pier' || zoom >= properties.longNameMinZoom
+          ? properties.longName : properties.name;
       });
     };
 
@@ -2275,6 +2318,9 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
         map.getSource('saaristolautat').setData(sourceData);
         applyLayerSettings(map, layersRef.current);
         raiseLiveLayers(map);
+        registerInteractions(map.getStyle().layers.filter(layer =>
+          layer.id.endsWith('-hit') || layer.id.startsWith('cable-ferry-routes-hit-')
+        ).map(layer => layer.id));
         return;
       }
       map.addSource('saaristolautat', { type: 'geojson', data: sourceData, generateId: true });
@@ -2494,10 +2540,21 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
         });
         });
       }
-      const routeLayers = routeHitLayers.map(layer => layer.id);
+      registerInteractions(routeHitLayers.map(layer => layer.id));
 
+      const routeCount = sourceData.features.filter(feature => feature.properties.kind === 'route').length;
+      const pierCount = sourceData.features.filter(feature => feature.properties.kind === 'pier').length;
+      const placeCount = sourceData.features.filter(feature => feature.properties.kind === 'place').length;
+      setStatus(`${routeCount} reittiosuutta · ${pierCount} laituria · ${placeCount} paikannimeä`);
+      applyLayerSettings(map, layersRef.current);
+      raiseLiveLayers(map);
+    }
+
+    function registerInteractions(routeLayers) {
+      if (interactionsRegistered) return;
+      interactionsRegistered = true;
       routeLayers.forEach(layer => {
-        map.on('mouseenter', layer, event => {
+        onMapInteraction('mouseenter', layer, event => {
           const allHoveredFeatures = prioritizeRouteFeatures(map.queryRenderedFeatures(event.point, { layers: routeLayers }));
           const feature = allHoveredFeatures[0];
           if (!feature) return;
@@ -2515,11 +2572,11 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
             .setHTML(names.map(name => `<strong>${name}</strong>`).join('<br>'))
             .addTo(map);
         });
-        map.on('mousemove', layer, event => hoverPopupRef.current?.setLngLat(event.lngLat));
-        map.on('mouseleave', layer, () => clearRouteHover(map, hoverPopupRef));
+        onMapInteraction('mousemove', layer, event => hoverPopupRef.current?.setLngLat(event.lngLat));
+        onMapInteraction('mouseleave', layer, () => clearRouteHover(map, hoverPopupRef));
       });
 
-      map.on('click', event => {
+      onMapInteraction('click', event => {
         const allClickedFeatures = prioritizeRouteFeatures(map.queryRenderedFeatures(event.point, { layers: routeLayers }));
         const feature = allClickedFeatures[0];
         if (feature) {
@@ -2570,13 +2627,6 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
         window.history.pushState({ route: null, timetable: null }, null, null);
         dispatch({ type: 'INFOCONTENT_UNSELECTED', payload: null });
       });
-
-      const routeCount = sourceData.features.filter(feature => feature.properties.kind === 'route').length;
-      const pierCount = sourceData.features.filter(feature => feature.properties.kind === 'pier').length;
-      const placeCount = sourceData.features.filter(feature => feature.properties.kind === 'place').length;
-      setStatus(`${routeCount} reittiosuutta · ${pierCount} laituria · ${placeCount} paikannimeä`);
-      applyLayerSettings(map, layersRef.current);
-      raiseLiveLayers(map);
     }
 
     const ensureLayers = () => {
@@ -2597,6 +2647,7 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
       map.off('zoom', updateDistanceSigns);
       map.off('styledata', updateOfflineLabels);
       map.off('zoom', updateOfflineLabels);
+      interactionListeners.forEach(args => map.off(...args));
       offlineLabels.forEach(({ marker }) => marker.remove());
       removeDistanceSigns();
     };
