@@ -45,6 +45,100 @@ const OFFLINE_STYLE = {
   ]
 };
 const isOfflineMap = map => Boolean(map?.getStyle()?.metadata?.saaristolautatOffline);
+const TILE_FALLBACK_SOURCE = 'missing-tile-basemap';
+const TILE_FALLBACK_LAYER = 'missing-tile-basemap-layer';
+
+function createMissingTileBasemap(map) {
+  const image = new Image();
+  const failedTiles = new Map();
+  let canvas;
+  let context;
+  let removed = false;
+  let waitingForIdle = false;
+  let drawFrame;
+  const [northWest, northEast, , southWest] = OFFLINE_STYLE.sources['offline-basemap'].coordinates;
+  const west = maplibregl.MercatorCoordinate.fromLngLat(northWest);
+  const east = maplibregl.MercatorCoordinate.fromLngLat(northEast);
+  const south = maplibregl.MercatorCoordinate.fromLngLat(southWest);
+  const tileKey = tile => `${tile.z}/${tile.x}/${tile.y}`;
+
+  function draw() {
+    if (removed || !image.complete || !image.naturalWidth || isOfflineMap(map)) return;
+    if (!map.isStyleLoaded()) {
+      if (!waitingForIdle) {
+        waitingForIdle = true;
+        map.once('idle', () => { waitingForIdle = false; scheduleDraw(); });
+      }
+      return;
+    }
+    if (!failedTiles.size && !canvas) return;
+    if (!canvas) {
+      canvas = document.createElement('canvas');
+      canvas.width = image.naturalWidth;
+      canvas.height = image.naturalHeight;
+      context = canvas.getContext('2d');
+    }
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    for (const tile of failedTiles.values()) {
+      const scale = 2 ** tile.z;
+      const left = Math.max(0, Math.floor((tile.x / scale - west.x) / (east.x - west.x) * canvas.width));
+      const right = Math.min(canvas.width, Math.ceil(((tile.x + 1) / scale - west.x) / (east.x - west.x) * canvas.width));
+      const top = Math.max(0, Math.floor((tile.y / scale - west.y) / (south.y - west.y) * canvas.height));
+      const bottom = Math.min(canvas.height, Math.ceil(((tile.y + 1) / scale - west.y) / (south.y - west.y) * canvas.height));
+      if (right > left && bottom > top) {
+        context.drawImage(image, left, top, right - left, bottom - top, left, top, right - left, bottom - top);
+      }
+    }
+    if (!map.getSource(TILE_FALLBACK_SOURCE)) {
+      map.addSource(TILE_FALLBACK_SOURCE, {
+        type: 'canvas', canvas, animate: false,
+        coordinates: OFFLINE_STYLE.sources['offline-basemap'].coordinates
+      });
+    }
+    if (!map.getLayer(TILE_FALLBACK_LAYER)) {
+      const firstMapLayer = map.getStyle().layers.find(layer => layer.type !== 'background')?.id;
+      map.addLayer({
+        id: TILE_FALLBACK_LAYER, type: 'raster', source: TILE_FALLBACK_SOURCE,
+        paint: { 'raster-fade-duration': 0 }
+      }, firstMapLayer);
+    }
+    const source = map.getSource(TILE_FALLBACK_SOURCE);
+    source.play();
+    source.pause();
+    map.triggerRepaint();
+  }
+
+  function scheduleDraw() {
+    if (removed || drawFrame) return;
+    drawFrame = window.requestAnimationFrame(() => {
+      drawFrame = undefined;
+      draw();
+    });
+  }
+
+  image.onload = scheduleDraw;
+  image.src = OFFLINE_STYLE.sources['offline-basemap'].url;
+  return {
+    onError(event) {
+      const tile = event.sourceId === 'openmaptiles' && event.tile?.tileID?.canonical;
+      if (!tile || isOfflineMap(map)) return;
+      failedTiles.set(tileKey(tile), tile);
+      scheduleDraw();
+    },
+    onSourceData(event) {
+      const tile = event.sourceId === 'openmaptiles' && event.tile?.tileID?.canonical;
+      if (tile && failedTiles.delete(tileKey(tile))) scheduleDraw();
+    },
+    onStyleLoad() {
+      if (isOfflineMap(map)) failedTiles.clear();
+      else if (failedTiles.size) scheduleDraw();
+    },
+    remove() {
+      removed = true;
+      if (drawFrame) window.cancelAnimationFrame(drawFrame);
+    }
+  };
+}
 const RASTER_BASE_LAYERS = {
   OSM: 'base-osm'
 };
@@ -1698,6 +1792,7 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
       maxTileCacheZoomLevels: USE_REDUCED_TILE_CACHE ? 1 : 5,
       attributionControl: false
     });
+    const missingTileBasemap = createMissingTileBasemap(map);
     mapRef.current = map;
     map.once('load', () => {
       window.requestAnimationFrame(() => {
@@ -1983,6 +2078,7 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
       }
     };
     const configureStyle = () => {
+      missingTileBasemap.onStyleLoad();
       if (map.getSource('archipelago-target')) return;
       if (!isOfflineMap(map)) {
         customizeBaseMap(map);
@@ -2008,6 +2104,7 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
       setStatus('Kartta valmis');
     };
     map.on('style.load', configureStyle);
+    map.on('sourcedata', missingTileBasemap.onSourceData);
     map.once('load', () => {
       configureStyle();
       updateMapDebug();
@@ -2026,6 +2123,7 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
       map.triggerRepaint();
     });
     map.on('error', event => {
+      missingTileBasemap.onError(event);
       console.error('MapLibre error', event.error);
       setStatus('Karttapohjan lataus epäonnistui');
     });
@@ -2041,6 +2139,8 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
       if (revealFrame) window.cancelAnimationFrame(revealFrame);
       if (revealMap) map.off('idle', revealMap);
       map.off('style.load', configureStyle);
+      map.off('sourcedata', missingTileBasemap.onSourceData);
+      missingTileBasemap.remove();
       if (bannerElement && onBannerHidden) bannerElement.off('hidden.bs.modal', onBannerHidden);
       map.off('moveend', onMoveEnd);
       map.off('dragstart', stopLocationTracking);

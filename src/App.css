@@ -336,6 +336,17 @@ div#infopagecontent {
   z-index: 110;
 }
 
+#topbar::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  height: 14px;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, .22), transparent);
+  pointer-events: none;
+}
+
 .offline-status {
   position: absolute;
   top: 0;
