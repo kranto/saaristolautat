@@ -1679,7 +1679,6 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
   const [mapDebug, setMapDebug] = useState(null);
   const [showReset, setShowReset] = useState(false);
   const [mapReady, setMapReady] = useState(false);
-  const [disconnected, setDisconnected] = useState(() => !navigator.onLine);
   const [landcoverVisible, setLandcoverVisible] = useState(true);
   const [landcoverTuning, setLandcoverTuning] = useState(loadLandcoverTuning);
   const [terrainTestTuning, setTerrainTestTuning] = useState(loadTerrainTestTuning);
@@ -1687,21 +1686,11 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
   terrainTestTuningRef.current = terrainTestTuning;
 
   useEffect(() => {
-    let disconnectTimer;
-    const onOffline = () => {
-      window.clearTimeout(disconnectTimer);
-      disconnectTimer = window.setTimeout(() => setDisconnected(!navigator.onLine), 3000);
-    };
     const onOnline = () => {
-      window.clearTimeout(disconnectTimer);
-      setDisconnected(false);
       dispatch({ type: 'MAP_OFFLINE_CHANGED', payload: false });
     };
-    window.addEventListener('offline', onOffline);
     window.addEventListener('online', onOnline);
     return () => {
-      window.clearTimeout(disconnectTimer);
-      window.removeEventListener('offline', onOffline);
       window.removeEventListener('online', onOnline);
     };
   }, [dispatch]);
@@ -2098,15 +2087,15 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
 
   useEffect(() => {
     const map = mapRef.current;
-    const useOfflineMap = offline || disconnected || mapOffline;
+    const useOfflineMap = mapOffline || (!mapReady && (offline || !navigator.onLine));
     if (useOfflineMap && map && !isOfflineMap(map)) {
       map.setMaxZoom(OFFLINE_MAX_ZOOM);
       map.setStyle(OFFLINE_STYLE);
-    } else if (!useOfflineMap && data?.piers && map && isOfflineMap(map)) {
+    } else if (!useOfflineMap && navigator.onLine && !offline && data?.piers && map && isOfflineMap(map)) {
       map.setMaxZoom(MAP_MAX_ZOOM);
       map.setStyle(OPENFREEMAP_STYLE);
     }
-  }, [offline, disconnected, mapOffline, data]);
+  }, [offline, mapOffline, mapReady, data]);
 
   useEffect(() => {
     const map = mapRef.current;
