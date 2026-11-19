@@ -1,27 +1,51 @@
-import React, { Component } from 'react'
+import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
-import { L2 } from '../lib/localizer';
+import { L } from '../lib/localizer';
 import { phases } from '../lib/constants';
 
-class LiveIndicator extends Component {
+function LiveIndicator({ live, phase, locale, offline, mapOffline, loadFailed }) {
+  const [disconnected, setDisconnected] = useState(false);
 
-  render() {
-    const msg = this.props.live.msg && this.props.phase >= phases.NORMAL_USE ? L2(this.props.live.msg) : "";
-    const showMsg = msg || L2("live.closing");
-    return (
-      <div id="liveind" className={msg ? "visible" : "hidden"}>
-        <span id="liveindtxt">{showMsg}</span>
-      </div>
-    );
-  }
+  useEffect(() => {
+    let disconnectTimer;
+    const onOffline = () => {
+      window.clearTimeout(disconnectTimer);
+      disconnectTimer = window.setTimeout(() => setDisconnected(!navigator.onLine), 3000);
+    };
+    const onOnline = () => {
+      window.clearTimeout(disconnectTimer);
+      setDisconnected(false);
+    };
+    if (!navigator.onLine) onOffline();
+    window.addEventListener('offline', onOffline);
+    window.addEventListener('online', onOnline);
+    return () => {
+      window.clearTimeout(disconnectTimer);
+      window.removeEventListener('offline', onOffline);
+      window.removeEventListener('online', onOnline);
+    };
+  }, []);
+
+  const offlineMessage = phase >= phases.LOADER_CLOSED && (offline || mapOffline || loadFailed || disconnected)
+    ? L(locale, 'offline.noConnection')
+    : '';
+  const liveMessage = live.msg && phase >= phases.NORMAL_USE ? L(locale, live.msg) : '';
+  const message = offlineMessage || liveMessage;
+
+  return (
+    <div id="liveind" className={message ? 'visible' : 'hidden'} role="status">
+      <span id="liveindtxt">{message}</span>
+    </div>
+  );
 }
 
-const mapStateToProps = (state) => {
-  return {
-    locale: state.settings.locale,
-    live: state.live,
-    phase: state.uiState.phase
-  };
-};
+const mapStateToProps = state => ({
+  locale: state.settings.locale,
+  live: state.live,
+  phase: state.uiState.phase,
+  offline: state.data.offline,
+  mapOffline: state.uiState.mapOffline,
+  loadFailed: state.data.loadFailed
+});
 
 export default connect(mapStateToProps)(LiveIndicator);

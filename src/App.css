@@ -337,28 +337,6 @@ div#infopagecontent {
   z-index: 110;
 }
 
-.offline-status {
-  position: absolute;
-  top: 0;
-  right: 200px;
-  height: 49px;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  color: #666;
-  font-size: 12px;
-  white-space: nowrap;
-  z-index: 1;
-}
-
-@media screen and (max-width: 650px) {
-  .offline-status { right: 58px; }
-}
-
-@media screen and (max-height: 500px) {
-  .offline-status { height: 39px; }
-}
-
 #topbartitle {
   font-size: 22px;
   font-weight: 600;
@@ -1177,17 +1155,19 @@ h4 {
 #liveind {
   display: block;
   position: relative;
-  left: -200px;
+  width: max-content;
+  max-width: calc(100vw - 10px);
+  transform: translateX(calc(-100% - 10px));
   background: rgba(0,0,0,.5);
   border-radius: 5px;
   padding: 5px;
   color: white;
-  transition: left 400ms ease-in;
+  transition: transform 400ms ease-in;
 }
 
 #liveind.visible {
-  left: 0px;
-  transition: left 800ms ease-out;
+  transform: translateX(0);
+  transition: transform 800ms ease-out;
 }
 
 .location-button {
