@@ -5,6 +5,8 @@ export default function reducer(state = {
   settingsOpen: false,
   searchOpen: false,
   mapOffline: false,
+  mapFallbackAvailable: false,
+  mapFallbackDismissed: false,
   phase: phases.LOADER_OPEN
 }, action) {
   switch (action.type) {
@@ -19,7 +21,18 @@ export default function reducer(state = {
     case "PHASE_CHANGED":
       return { ...state, phase: Math.max(state.phase, action.payload)}; 
     case "MAP_OFFLINE_CHANGED":
-      return state.mapOffline === action.payload ? state : { ...state, mapOffline: action.payload };
+      return state.mapOffline === action.payload && !state.mapFallbackAvailable
+        ? state : { ...state, mapOffline: action.payload, mapFallbackAvailable: false };
+    case "MAP_BASE_LOAD_FAILED":
+      return state.mapFallbackAvailable || state.mapFallbackDismissed
+        ? state : { ...state, mapFallbackAvailable: true };
+    case "MAP_FALLBACK_DISMISSED":
+      return { ...state, mapFallbackAvailable: false, mapFallbackDismissed: true };
+    case "MAP_FALLBACK_REARM":
+      return state.mapFallbackDismissed ? { ...state, mapFallbackDismissed: false } : state;
+    case "MAP_FALLBACK_RESET":
+      return state.mapFallbackAvailable || state.mapFallbackDismissed
+        ? { ...state, mapFallbackAvailable: false, mapFallbackDismissed: false } : state;
     default:
       return state;
   }

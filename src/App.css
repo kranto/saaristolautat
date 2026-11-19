@@ -1170,6 +1170,22 @@ h4 {
   transition: transform 800ms ease-out;
 }
 
+.map-fallback-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 5px;
+}
+
+.map-fallback-actions button {
+  padding: 3px 7px;
+  border: 0;
+  border-radius: 3px;
+  background: white;
+  color: #222;
+  cursor: pointer;
+}
+
 .location-button {
   margin-bottom: 15px;
   margin-right: 10px;

@@ -69,6 +69,9 @@ const messagesRaw = { // FI SV EN
     },
     offline: {
         noConnection: ["Ei verkkoyhteyttä", "Ingen internetanslutning", "No internet connection"],
+        mapLoadFailed: ["Karttapohjan lataus epäonnistui", "Kartbakgrunden kunde inte laddas", "Map background could not be loaded"],
+        switchMap: ["Vaihda offline-karttaan", "Byt till offlinekarta", "Switch to offline map"],
+        keepMap: ["Jatka nykyisellä kartalla", "Fortsätt med nuvarande karta", "Keep current map"],
         active: ["Offline-tila", "Offlineläge", "Offline mode"],
         map: ["Offline-kartta käytössä", "Offlinekarta används", "Offline map in use"],
         unavailable: ["Tietoja ei voitu ladata. Yhdistä verkkoon ja yritä uudelleen.", "Uppgifterna kunde inte hämtas. Anslut till internet och försök igen.", "Data could not be loaded. Connect to the internet and try again."]

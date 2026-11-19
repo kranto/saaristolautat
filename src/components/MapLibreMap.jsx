@@ -1658,6 +1658,7 @@ function createDistanceSignMarkers(map, sourceData) {
 function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale, mapTypeId, terrainOverlays, infoContent, infoContent2, offline, mapOffline }) {
   const mapContainer = useRef(null);
   const mapRef = useRef(null);
+  const mapReadyRef = useRef(false);
   const hoverPopupRef = useRef(null);
   const pierPopupRef = useRef(null);
   const pierPopupIdRef = useRef(null);
@@ -1688,6 +1689,7 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
   useEffect(() => {
     const onOnline = () => {
       dispatch({ type: 'MAP_OFFLINE_CHANGED', payload: false });
+      dispatch({ type: 'MAP_FALLBACK_RESET' });
     };
     window.addEventListener('online', onOnline);
     return () => {
@@ -1938,6 +1940,8 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
       updateMapDebug();
       updateResetVisibility();
     };
+    const onMoveStart = () => dispatch({ type: 'MAP_FALLBACK_REARM' });
+    map.on('movestart', onMoveStart);
     map.on('moveend', onMoveEnd);
     let resizeFrame;
     const resizeMap = () => {
@@ -2000,6 +2004,7 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
       if (mapRevealed || !map.getSource('saaristolautat')) return;
       mapRevealed = true;
       revealFrame = window.requestAnimationFrame(() => {
+        mapReadyRef.current = true;
         setMapReady(true);
         if (embedded) finishStartup();
       });
@@ -2050,7 +2055,7 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
       if (isOfflineMap(map)) return;
       const baseSource = mapTypeRef.current === 'OSM' ? 'osm-raster' : 'openmaptiles';
       if (event.sourceId === baseSource || !map.getSource('openmaptiles')) {
-        dispatch({ type: 'MAP_OFFLINE_CHANGED', payload: true });
+        dispatch({ type: mapReadyRef.current ? 'MAP_BASE_LOAD_FAILED' : 'MAP_OFFLINE_CHANGED', payload: true });
       }
     });
     return () => {
@@ -2067,6 +2072,7 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
       map.off('style.load', configureStyle);
       if (bannerElement && onBannerHidden) bannerElement.off('hidden.bs.modal', onBannerHidden);
       map.off('moveend', onMoveEnd);
+      map.off('movestart', onMoveStart);
       map.off('dragstart', stopLocationTracking);
       locationButton.removeEventListener('click', onLocationButtonClick);
       document.removeEventListener('visibilitychange', onLocationVisibilityChange);
@@ -2082,6 +2088,7 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
       unregisterMapView();
       map.remove();
       mapRef.current = null;
+      mapReadyRef.current = false;
     };
   }, [dispatch, embedded]);
 
