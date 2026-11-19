@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { L, L2 } from '../lib/localizer';
 
-function OfflineStatus({ offline, savedAt, loadFailed, locale }) {
+function OfflineStatus({ offline, mapOffline, savedAt, loadFailed, locale }) {
   const [now, setNow] = useState(Date.now());
   const [disconnected, setDisconnected] = useState(false);
   useEffect(() => {
@@ -30,9 +30,10 @@ function OfflineStatus({ offline, savedAt, loadFailed, locale }) {
     return () => window.clearInterval(timer);
   }, [offline]);
   const days = savedAt ? Math.floor(Math.max(0, now - savedAt) / 86400000) : 0;
-  if (!offline && !loadFailed && !disconnected) return null;
+  if (!offline && !mapOffline && !loadFailed && !disconnected) return null;
   const message = loadFailed
     ? L2('offline.unavailable')
+    : mapOffline && !offline && !disconnected ? L2('offline.map')
     : days < 1 ? L2('offline.active')
       : L(locale, [days === 1 ? 'offline.oneDay' : 'offline.days', days]);
   return (
@@ -48,6 +49,7 @@ function OfflineStatus({ offline, savedAt, loadFailed, locale }) {
 export default connect(state => ({
   locale: state.settings.locale,
   offline: state.data.offline,
+  mapOffline: state.uiState.mapOffline,
   savedAt: state.data.savedAt,
   loadFailed: state.data.loadFailed
 }))(OfflineStatus);

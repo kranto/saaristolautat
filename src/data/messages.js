@@ -69,6 +69,7 @@ const messagesRaw = { // FI SV EN
     },
     offline: {
         active: ["Offline-tila", "Offlineläge", "Offline mode"],
+        map: ["Offline-kartta käytössä", "Offlinekarta används", "Offline map in use"],
         shortDays: ["{0} pv", "{0} d", "{0} d"],
         oneDay: ["Offline-tiedot ladattu 1 päivä sitten", "Offlinedata hämtades för 1 dag sedan", "Offline data loaded 1 day ago"],
         days: ["Offline-tiedot ladattu {0} päivää sitten", "Offlinedata hämtades för {0} dagar sedan", "Offline data loaded {0} days ago"],

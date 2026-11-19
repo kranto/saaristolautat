@@ -4,6 +4,7 @@ export default function reducer(state = {
   menuOpen: false,
   settingsOpen: false,
   searchOpen: false,
+  mapOffline: false,
   phase: phases.LOADER_OPEN
 }, action) {
   switch (action.type) {
@@ -17,6 +18,8 @@ export default function reducer(state = {
       return { ...state, menuOpen: false, settingsOpen: false, searchOpen: false };
     case "PHASE_CHANGED":
       return { ...state, phase: Math.max(state.phase, action.payload)}; 
+    case "MAP_OFFLINE_CHANGED":
+      return state.mapOffline === action.payload ? state : { ...state, mapOffline: action.payload };
     default:
       return state;
   }
