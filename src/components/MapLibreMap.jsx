@@ -1707,9 +1707,14 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
       zoom: SCREENSHOT_MAP_VIEW?.zoom || MIN_ROUTE_RENDER_ZOOM,
       minZoom: 4,
       maxZoom: navigator.onLine ? MAP_MAX_ZOOM : OFFLINE_MAX_ZOOM,
+      dragRotate: false,
+      pitchWithRotate: false,
+      touchPitch: false,
       maxTileCacheZoomLevels: USE_REDUCED_TILE_CACHE ? 1 : 5,
       attributionControl: false
     });
+    map.touchZoomRotate.disableRotation();
+    map.keyboard.disableRotation();
     mapRef.current = map;
     map.once('load', () => {
       window.requestAnimationFrame(() => {
@@ -1774,7 +1779,7 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
       pierPopupRef.current = null;
       pierPopupIdRef.current = null;
     });
-    map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'bottom-right');
+    map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'bottom-right');
     map.addControl(new maplibregl.ScaleControl({ maxWidth: 120, unit: 'metric' }), 'bottom-left');
     map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-left');
 
