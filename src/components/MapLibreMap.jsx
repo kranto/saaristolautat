@@ -14,7 +14,11 @@ const pmtilesProtocol = new Protocol();
 maplibregl.addProtocol('pmtiles', pmtilesProtocol.tile);
 
 const OPENFREEMAP_STYLE = 'https://tiles.openfreemap.org/styles/liberty';
+const MAP_MIN_ZOOM = 4;
 const OFFLINE_MAX_ZOOM = 10.99;
+const OFFLINE_START_CENTER = [21.6, 60.05];
+const OFFLINE_START_HOLD_MS = 1700;
+const OFFLINE_START_ZOOM_DURATION_MS = 900;
 // The app's customized OpenFreeMap Liberty basemap at zoom 8, with a grayer land background.
 // Keep these bounds aligned with the 2986 × 1679 px image.
 const OFFLINE_STYLE = {
@@ -44,10 +48,6 @@ const OFFLINE_STYLE = {
     { id: 'offline-basemap-attribution', type: 'circle', source: 'offline-basemap-attribution' }
   ]
 };
-const OFFLINE_BASEMAP_BOUNDS = [
-  OFFLINE_STYLE.sources['offline-basemap'].coordinates[3],
-  OFFLINE_STYLE.sources['offline-basemap'].coordinates[1]
-];
 const isOfflineMap = map => Boolean(map?.getStyle()?.metadata?.saaristolautatOffline);
 const RASTER_BASE_LAYERS = {
   OSM: 'base-osm'
@@ -1663,7 +1663,6 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
   const mapContainer = useRef(null);
   const mapRef = useRef(null);
   const mapReadyRef = useRef(false);
-  const offlineStartupZoomProbeRef = useRef(false);
   const hoverPopupRef = useRef(null);
   const pierPopupRef = useRef(null);
   const pierPopupIdRef = useRef(null);
@@ -1705,13 +1704,14 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
   useEffect(() => {
     if (!mapContainer.current || mapRef.current) return undefined;
     if (SCREENSHOT_MAP_VIEW) document.getElementById('loader')?.style.setProperty('display', 'none');
+    const initiallyOffline = !navigator.onLine;
     const map = new maplibregl.Map({
       container: mapContainer.current,
-      style: navigator.onLine ? OPENFREEMAP_STYLE : OFFLINE_STYLE,
-      center: SCREENSHOT_MAP_VIEW?.center || [21.25, 60.15],
-      zoom: SCREENSHOT_MAP_VIEW?.zoom || MIN_ROUTE_RENDER_ZOOM,
-      minZoom: 4,
-      maxZoom: navigator.onLine ? MAP_MAX_ZOOM : OFFLINE_MAX_ZOOM,
+      style: initiallyOffline ? OFFLINE_STYLE : OPENFREEMAP_STYLE,
+      center: SCREENSHOT_MAP_VIEW?.center || (initiallyOffline ? OFFLINE_START_CENTER : [21.25, 60.15]),
+      zoom: SCREENSHOT_MAP_VIEW?.zoom || (initiallyOffline ? MAP_MIN_ZOOM : MIN_ROUTE_RENDER_ZOOM),
+      minZoom: MAP_MIN_ZOOM,
+      maxZoom: initiallyOffline ? OFFLINE_MAX_ZOOM : MAP_MAX_ZOOM,
       dragRotate: false,
       pitchWithRotate: false,
       touchPitch: false,
@@ -1724,7 +1724,7 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
     map.once('load', () => {
       window.requestAnimationFrame(() => {
         map.resize();
-        if (!SCREENSHOT_MAP_VIEW) fitRouteArea(map);
+        if (!SCREENSHOT_MAP_VIEW && !isOfflineMap(map)) fitRouteArea(map);
       });
     });
     const unregisterMapNavigation = registerMapNavigation(id => {
@@ -1975,8 +1975,6 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
     let introductionTimer;
     let revealFrame;
     let startupZoomTimer;
-    let onFullMapIdle;
-    let onStartMapIdle;
     let revealMap;
     let bannerElement;
     let onBannerHidden;
@@ -2017,31 +2015,18 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
       if (mapRevealed || !map.getSource('saaristolautat')) return;
       mapRevealed = true;
       revealFrame = window.requestAnimationFrame(() => {
+        const offlineStartup = isOfflineMap(map) && !SCREENSHOT_MAP_VIEW;
+        if (offlineStartup) map.jumpTo({ center: OFFLINE_START_CENTER, zoom: MAP_MIN_ZOOM });
         mapReadyRef.current = true;
         setMapReady(true);
-        if (!isOfflineMap(map) || SCREENSHOT_MAP_VIEW) {
-          if (embedded) finishStartup();
-          return;
-        }
-
-        // Experiment: render the whole offline image and place labels once before the normal start view.
-        const startView = { center: map.getCenter(), zoom: map.getZoom() };
-        const fullView = map.cameraForBounds(OFFLINE_BASEMAP_BOUNDS, { padding: 80 });
-        if (!fullView) {
-          if (embedded) finishStartup();
-          return;
-        }
-        onStartMapIdle = () => { if (embedded) finishStartup(); };
-        onFullMapIdle = () => {
+        if (embedded) finishStartup();
+        if (offlineStartup) {
           startupZoomTimer = window.setTimeout(() => {
-            offlineStartupZoomProbeRef.current = false;
-            map.jumpTo(startView);
-            map.once('idle', onStartMapIdle);
-          }, 150);
-        };
-        offlineStartupZoomProbeRef.current = true;
-        map.jumpTo(fullView);
-        map.once('idle', onFullMapIdle);
+            if (isOfflineMap(map)) {
+              fitRouteArea(map, { duration: OFFLINE_START_ZOOM_DURATION_MS });
+            }
+          }, OFFLINE_START_HOLD_MS);
+        }
       });
     };
     const configureStyle = () => {
@@ -2103,11 +2088,8 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
       window.clearTimeout(startupTimer);
       window.clearTimeout(introductionTimer);
       window.clearTimeout(startupZoomTimer);
-      offlineStartupZoomProbeRef.current = false;
       if (revealFrame) window.cancelAnimationFrame(revealFrame);
       if (revealMap) map.off('idle', revealMap);
-      if (onFullMapIdle) map.off('idle', onFullMapIdle);
-      if (onStartMapIdle) map.off('idle', onStartMapIdle);
       map.off('style.load', configureStyle);
       if (bannerElement && onBannerHidden) bannerElement.off('hidden.bs.modal', onBannerHidden);
       map.off('moveend', onMoveEnd);
@@ -2198,8 +2180,7 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
       offlineLabels.forEach(({ label, properties }) => {
         const style = properties.kind === 'pier'
           ? offlinePierStyles[properties.subtype] : offlinePlaceStyles[properties.subtype];
-        const visible = zoom >= properties.labelMinZoom && zoom < properties.labelMaxZoom + 1;
-        label.style.display = visible || (offlineStartupZoomProbeRef.current && properties.kind === 'place') ? '' : 'none';
+        label.style.display = zoom >= properties.labelMinZoom && zoom < properties.labelMaxZoom + 1 ? '' : 'none';
         label.style.fontSize = `${style.em * (Math.max(4, Math.min(18, zoom)) + 2)}px`;
         label.style.fontWeight = style.weight;
         label.style.color = properties.kind === 'pier' ? '#002080' : style.color;
