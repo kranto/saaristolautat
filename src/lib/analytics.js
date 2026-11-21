@@ -105,3 +105,20 @@ export function trackEvent(path, title) {
   });
   loadScript();
 }
+
+export function initSettingsAnalytics(store) {
+  let previous = store.getState().settings;
+  trackEvent(`client/map/initial/${previous.mapTypeId}`, `Kartta käynnistettäessä: ${previous.mapTypeId}`);
+  trackEvent(`client/language/initial/${previous.locale}`, `Kieli käynnistettäessä: ${previous.locale}`);
+
+  store.subscribe(() => {
+    const current = store.getState().settings;
+    if (current.mapTypeId !== previous.mapTypeId) {
+      trackEvent(`client/map/change/${current.mapTypeId}`, `Kartta vaihdettu: ${current.mapTypeId}`);
+    }
+    if (current.locale !== previous.locale) {
+      trackEvent(`client/language/change/${current.locale}`, `Kieli vaihdettu: ${current.locale}`);
+    }
+    previous = current;
+  });
+}

@@ -3,9 +3,11 @@ import ReactDOM from 'react-dom';
 import App from './App';
 import './lib/dataloader';
 import { initFullscreen } from './lib/fullscreen';
-import { initAnalytics } from './lib/analytics';
+import store from './store';
+import { initAnalytics, initSettingsAnalytics } from './lib/analytics';
 
 initAnalytics();
+initSettingsAnalytics(store);
 ReactDOM.render(<App />, document.getElementById('app'));
 initFullscreen(document.getElementById('wrapper'));
 
