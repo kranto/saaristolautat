@@ -2,6 +2,7 @@ import store from '../store';
 import { getMapView, panToMapObject } from './mapnavigation';
 import { hideMenuAndSettings } from './uicontrol';
 import { shortName, description } from './datautils';
+import { trackEvent } from './analytics';
 
 const { history, location, $ } = window;
 let hashRetry;
@@ -22,6 +23,9 @@ window.onhashchange = () => {
   var hash = location.hash.substring(1);
   if (data.routes[hash]) {
     var newState = { route: hash, timetable: null };
+    if (new URLSearchParams(location.search).get('source') === 'landing') {
+      trackEvent(`route/landing/${hash}`, `Reitti avattu laskeutumissivulta: ${hash}`);
+    }
     history.replaceState(newState, null, window.location.pathname);
     navigateTo(newState, true);
   } else if (data.piers[hash]) {
@@ -56,6 +60,7 @@ export function menuItemClicked(infoPage) {
 }
 
 export function onTimetableButtonClicked(href, route, timetable) {
+  trackEvent(`timetable/${route}/${timetable}`, `Aikataulu avattu: ${route} / ${timetable}`);
   if (href) {
     window.open(href, "info");
   } else {
@@ -78,7 +83,8 @@ export function closeInfoPage() {
   history.go(-history.state.depth);
 }
 
-export function selectRoute(route, panTo=true) {
+export function selectRoute(route, panTo=true, source='other') {
+  trackEvent(`route/${source}/${route}`, `Reitti avattu (${source}): ${route}`);
   history.pushState({ route: route, timetable: null }, null, null);
   navigateTo(history.state, panTo);
 }

@@ -8,6 +8,7 @@ import './MapLibreMap.css';
 import { phases } from '../lib/constants';
 import { mapDataReady, registerMapNavigation, registerMapPierTooltip, registerMapView } from '../lib/mapnavigation';
 import { hideMenuAndSettings } from '../lib/uicontrol';
+import { trackEvent } from '../lib/analytics';
 
 maplibregl.setWorkerUrl(maplibreWorkerUrl);
 const pmtilesProtocol = new Protocol();
@@ -1668,6 +1669,7 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
   const pierPopupIdRef = useRef(null);
   const hasSelectionRef = useRef(false);
   const liveFeaturesRef = useRef([]);
+  const liveUsageTrackedRef = useRef(false);
   const sourceDataRef = useRef(null);
   const distanceSignMarkersRef = useRef([]);
   const stopLocationTrackingRef = useRef(() => {});
@@ -2485,6 +2487,7 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
           setSelection({ name: names.join(' / ') });
           if (feature.properties.subtype === 'longdistance') {
             const routeIds = refs.map(ref => Number(ref.replace('longdistance-route-', ''))).filter(Number.isFinite);
+            routeIds.forEach(routeId => trackEvent(`route/map/${routeId}`, `Reitti avattu kartalta: ${routeId}`));
             const targets = routeIds.map(id => data.lauttaRoutes?.find(route => route.id === id)).filter(Boolean).map(route => {
               const operator = data.lauttaOperators?.[route.operators?.[0]];
               return {
@@ -2498,6 +2501,7 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
             window.history.pushState({ route: routeIds, timetable: null }, null, null);
             dispatch({ type: 'INFOCONTENT2_SELECTED', payload: targets });
           } else if (refs.length === 1) {
+            trackEvent(`route/map/${refs[0]}`, `Reitti avattu kartalta: ${refs[0]}`);
             window.history.pushState({ route: refs[0], timetable: null }, null, null);
             dispatch({ type: 'INFOCONTENT_SELECTED', payload: refs[0] });
           }
@@ -2739,6 +2743,10 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
           features: rendered.map(({ feature, hull }) => vesselHullFeature(feature, hull)).filter(Boolean)
         });
         map.getSource('live-history').setData(history);
+        if (!liveUsageTrackedRef.current) {
+          liveUsageTrackedRef.current = true;
+          trackEvent('live/use', 'Live-seuranta käytössä');
+        }
         updateLiveIndicator(map, displayedFeatures, dispatch);
       } catch (error) {
         if (!cancelled) {

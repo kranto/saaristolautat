@@ -353,7 +353,7 @@ function routeCards(entries, lang, text, routeMetadata) {
         </dl>
         <div class="route-actions">
           <a href="${info.path}">${text.openRoute}</a>
-          <a class="map-link" href="/#${encodeURIComponent(info.id)}">${text.openMap}: ${escapeHtml(info.name)}</a>
+          <a class="map-link" href="/?source=landing#${encodeURIComponent(info.id)}">${text.openMap}: ${escapeHtml(info.name)}</a>
         </div>
       </article>`;
   }).join('');
@@ -429,6 +429,7 @@ ${alternates}
     <link rel="icon" href="/favicon.ico" />
     <link rel="stylesheet" href="/seo.css" />
     <script type="application/ld+json">${structuredData}</script>
+    <script defer src="/js/goatcounter-pageview.js"></script>
   </head>`;
 }
 
@@ -588,7 +589,7 @@ ${head}
       <div class="intro route-intro">
         <h1>${escapeHtml(title)}</h1>
         <p>${escapeHtml(page.detailIntro(info.primaryName, info.primaryEndpoints))}</p>
-        <p><a class="primary" href="/#${encodeURIComponent(info.id)}">${page.openMap}: ${escapeHtml(info.primaryName)}</a></p>
+        <p><a class="primary" href="/?source=landing#${encodeURIComponent(info.id)}">${page.openMap}: ${escapeHtml(info.primaryName)}</a></p>
         <p class="notice">${escapeHtml(page.notice)}</p>
       </div>
       <article class="route route-detail">

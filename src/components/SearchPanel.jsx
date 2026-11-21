@@ -29,7 +29,7 @@ class SearchPanel extends Component {
 
   onResultClicked(item) {
     hideMenuAndSettings();
-    selectRoute(item.route.id, true);
+    selectRoute(item.route.id, true, 'search');
     if (item.pier) panToMapObject(item.pier.id);
   }
 
