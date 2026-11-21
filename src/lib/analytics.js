@@ -1,6 +1,7 @@
 const ENDPOINT = 'https://saaristolautat.goatcounter.com/count';
 const SCRIPT_URL = 'https://gc.zgo.at/count.js';
 const MAX_QUEUE_LENGTH = 100;
+const APP_VERSION = import.meta.env?.VITE_APP_VERSION || 'development';
 
 const queue = [];
 let loading = false;
@@ -14,6 +15,12 @@ function environment() {
 
 function safeSegment(value) {
   return encodeURIComponent(String(value ?? '').trim()).replaceAll('%2F', '-');
+}
+
+function usageMode() {
+  const standalone = window.matchMedia?.('(display-mode: standalone)').matches ||
+    window.navigator.standalone === true;
+  return standalone ? 'installed' : 'browser';
 }
 
 function send(item) {
@@ -68,6 +75,17 @@ export function initAnalytics() {
     path: `/${currentEnvironment}${window.location.pathname}`,
     title: document.title,
     referrer: document.referrer,
+  });
+  enqueue({
+    path: `${currentEnvironment}/client/version/${safeSegment(APP_VERSION)}`,
+    title: `Sovellusversio: ${APP_VERSION}`,
+    event: true,
+  });
+  const mode = usageMode();
+  enqueue({
+    path: `${currentEnvironment}/client/mode/${mode}`,
+    title: mode === 'installed' ? 'Asennettu sovellus' : 'Selainkäyttö',
+    event: true,
   });
   loadScript();
   window.addEventListener('online', () => {
