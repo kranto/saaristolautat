@@ -94,22 +94,30 @@ export function initAnalytics() {
   });
 }
 
-export function trackEvent(path, title) {
+function trackEventWithSession(path, title, countEveryTime) {
   const currentEnvironment = environment();
   if (!currentEnvironment) return;
   enqueue({
     path: `${currentEnvironment}/${path.split('/').map(safeSegment).join('/')}`,
     title,
     event: true,
-    no_session: true,
+    ...(countEveryTime ? { no_session: true } : {}),
   });
   loadScript();
 }
 
+export function trackEvent(path, title) {
+  trackEventWithSession(path, title, true);
+}
+
+export function trackSessionEvent(path, title) {
+  trackEventWithSession(path, title, false);
+}
+
 export function initSettingsAnalytics(store) {
   let previous = store.getState().settings;
-  trackEvent(`client/map/initial/${previous.mapTypeId}`, `Kartta käynnistettäessä: ${previous.mapTypeId}`);
-  trackEvent(`client/language/initial/${previous.locale}`, `Kieli käynnistettäessä: ${previous.locale}`);
+  trackSessionEvent(`client/map/initial/${previous.mapTypeId}`, `Kartta käynnistettäessä: ${previous.mapTypeId}`);
+  trackSessionEvent(`client/language/initial/${previous.locale}`, `Kieli käynnistettäessä: ${previous.locale}`);
 
   store.subscribe(() => {
     const current = store.getState().settings;
