@@ -1669,7 +1669,6 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
   const pierPopupIdRef = useRef(null);
   const hasSelectionRef = useRef(false);
   const liveFeaturesRef = useRef([]);
-  const liveUsageTrackedRef = useRef(false);
   const sourceDataRef = useRef(null);
   const distanceSignMarkersRef = useRef([]);
   const stopLocationTrackingRef = useRef(() => {});
@@ -2743,10 +2742,6 @@ function MapLibreMap({ data, geojson, dispatch, embedded = false, layers, locale
           features: rendered.map(({ feature, hull }) => vesselHullFeature(feature, hull)).filter(Boolean)
         });
         map.getSource('live-history').setData(history);
-        if (!liveUsageTrackedRef.current) {
-          liveUsageTrackedRef.current = true;
-          trackEvent('live/use', 'Live-seuranta käytössä');
-        }
         updateLiveIndicator(map, displayedFeatures, dispatch);
       } catch (error) {
         if (!cancelled) {

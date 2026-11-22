@@ -124,16 +124,14 @@ function umamiEvent(path) {
   if (segments[0] === 'timetable' && segments.length >= 3) {
     return { name: 'timetable-open', data: { route: segments[1], timetable: segments.slice(2).join('/') } };
   }
-  if (segments[0] === 'live' && segments[1] === 'use') {
-    return { name: 'live-use' };
+  if (segments[0] === 'live' && ['on', 'off'].includes(segments[1])) {
+    return { name: 'live', data: { state: segments[1] } };
   }
   if (segments[0] === 'client' && segments.length >= 3) {
     const [, setting, action, ...valueParts] = segments;
     const value = valueParts.join('/');
     if (setting === 'map') return { name: `map-${action}`, data: { map: value } };
     if (setting === 'language') return { name: `language-${action}`, data: { language: value } };
-    if (setting === 'version') return { name: 'client-version', data: { version: [action, ...valueParts].join('/') } };
-    if (setting === 'mode') return { name: 'usage-mode', data: { mode: [action, ...valueParts].join('/') } };
   }
   return { name: 'interaction', data: { path } };
 }
@@ -151,14 +149,12 @@ export function initAnalytics() {
     title: `Sovellusversio: ${APP_VERSION}`,
     event: true,
   });
-  enqueueUmami({ name: 'client-version', data: { version: APP_VERSION } });
   const mode = usageMode();
   enqueueGoatCounter({
     path: `${currentEnvironment}/client/mode/${mode}`,
     title: mode === 'installed' ? 'Asennettu sovellus' : 'Selainkäyttö',
     event: true,
   });
-  enqueueUmami({ name: 'usage-mode', data: { mode } });
   loadGoatCounterScript();
   loadUmamiScript();
   window.addEventListener('online', () => {
@@ -169,7 +165,7 @@ export function initAnalytics() {
   });
 }
 
-function trackEventWithSession(path, title, countEveryTime) {
+function trackGoatCounterEvent(path, title, countEveryTime) {
   const currentEnvironment = environment();
   if (!currentEnvironment) return;
   enqueueGoatCounter({
@@ -178,8 +174,13 @@ function trackEventWithSession(path, title, countEveryTime) {
     event: true,
     ...(countEveryTime ? { no_session: true } : {}),
   });
-  enqueueUmami(umamiEvent(path));
   loadGoatCounterScript();
+}
+
+function trackEventWithSession(path, title, countEveryTime) {
+  if (!environment()) return;
+  trackGoatCounterEvent(path, title, countEveryTime);
+  enqueueUmami(umamiEvent(path));
   loadUmamiScript();
 }
 
@@ -187,14 +188,24 @@ export function trackEvent(path, title) {
   trackEventWithSession(path, title, true);
 }
 
-export function trackSessionEvent(path, title) {
-  trackEventWithSession(path, title, false);
-}
-
 export function initSettingsAnalytics(store) {
   let previous = store.getState().settings;
-  trackSessionEvent(`client/map/initial/${previous.mapTypeId}`, `Kartta käynnistettäessä: ${previous.mapTypeId}`);
-  trackSessionEvent(`client/language/initial/${previous.locale}`, `Kieli käynnistettäessä: ${previous.locale}`);
+  const mode = usageMode();
+  const live = previous.layers.live ? 'on' : 'off';
+  trackGoatCounterEvent(`client/map/initial/${previous.mapTypeId}`, `Kartta käynnistettäessä: ${previous.mapTypeId}`, false);
+  trackGoatCounterEvent(`client/language/initial/${previous.locale}`, `Kieli käynnistettäessä: ${previous.locale}`, false);
+  trackGoatCounterEvent(`client/live/initial/${live}`, `Live-seuranta käynnistettäessä: ${live}`, false);
+  enqueueUmami({
+    name: 'app-start',
+    data: {
+      version: APP_VERSION,
+      usageMode: mode,
+      language: previous.locale,
+      map: previous.mapTypeId,
+      live,
+    },
+  });
+  loadUmamiScript();
 
   store.subscribe(() => {
     const current = store.getState().settings;
@@ -203,6 +214,10 @@ export function initSettingsAnalytics(store) {
     }
     if (current.locale !== previous.locale) {
       trackEvent(`client/language/change/${current.locale}`, `Kieli vaihdettu: ${current.locale}`);
+    }
+    if (current.layers.live !== previous.layers.live) {
+      const state = current.layers.live ? 'on' : 'off';
+      trackEvent(`live/${state}`, `Live-seuranta: ${state}`);
     }
     previous = current;
   });
