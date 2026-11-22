@@ -14,4 +14,10 @@
   script.src = 'https://gc.zgo.at/count.js';
   script.dataset.goatcounter = 'https://saaristolautat.goatcounter.com/count';
   document.head.appendChild(script);
+
+  var umamiScript = document.createElement('script');
+  umamiScript.defer = true;
+  umamiScript.src = '__UMAMI_SCRIPT_URL__';
+  umamiScript.dataset.websiteId = '__UMAMI_WEBSITE_ID__';
+  document.head.appendChild(umamiScript);
 }());

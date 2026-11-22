@@ -42,6 +42,26 @@ ne reittidatan muuttuessa:
 npm run seo:update
 ```
 
+## Käyttötilastot
+
+GoatCounter ja Umami toimivat rinnakkain testi- ja tuotantodomaineissa. Umami
+kerää sivulatausten lisäksi rakenteiset tapahtumat reittien ja aikataulujen
+avaamisesta, live-seurannasta sekä kartta- ja kielivalinnoista. Localhostia ei
+tilastoida.
+
+Pilvi-Umami on oletus. Myöhemmin itse hostattuun Umamiin voidaan vaihtaa ilman
+sovelluskoodin muutosta asettamalla palvelimen `.env`-tiedostoon uuden Umamin
+skriptiosoite ja sivustotunnus:
+
+```dotenv
+UMAMI_SCRIPT_URL=https://analytics.saaristolautat.fi/script.js
+UMAMI_WEBSITE_ID=<itse-hostatun-Umamin-sivustotunnus>
+```
+
+Arvot välitetään Docker-rakennukseen sekä karttasovellukselle että staattisille
+reittisivuille. Muutoksen jälkeen testi- ja tuotantokuvat on rakennettava
+uudelleen.
+
 ## Julkaiseminen
 
 Sovellus ajetaan kontitettuna Hetznerillä. Domainhotellin webhotellia tai

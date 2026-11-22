@@ -18,4 +18,5 @@ fi
 VITE_APP_VERSION=$(date +'%Y%m%d%H%M%S')
 export VITE_APP_VERSION
 vite build
+node scripts/write-analytics-config.mjs
 node scripts/write-service-worker.mjs

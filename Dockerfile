@@ -6,7 +6,11 @@ RUN npm ci
 
 COPY . .
 ARG APP_ENV=production
+ARG UMAMI_SCRIPT_URL=https://cloud.umami.is/script.js
+ARG UMAMI_WEBSITE_ID=6d0b3cd2-13e7-4bb4-9bb0-99b9e57ad936
 ENV VITE_APP_ENV=${APP_ENV}
+ENV VITE_UMAMI_SCRIPT_URL=${UMAMI_SCRIPT_URL}
+ENV VITE_UMAMI_WEBSITE_ID=${UMAMI_WEBSITE_ID}
 RUN npm run build
 
 FROM nginx:1.28-alpine

@@ -1,11 +1,16 @@
-const ENDPOINT = 'https://saaristolautat.goatcounter.com/count';
-const SCRIPT_URL = 'https://gc.zgo.at/count.js';
+const GOATCOUNTER_ENDPOINT = 'https://saaristolautat.goatcounter.com/count';
+const GOATCOUNTER_SCRIPT_URL = 'https://gc.zgo.at/count.js';
+const UMAMI_SCRIPT_URL = import.meta.env?.VITE_UMAMI_SCRIPT_URL || 'https://cloud.umami.is/script.js';
+const UMAMI_WEBSITE_ID = import.meta.env?.VITE_UMAMI_WEBSITE_ID || '6d0b3cd2-13e7-4bb4-9bb0-99b9e57ad936';
 const MAX_QUEUE_LENGTH = 100;
 const APP_VERSION = import.meta.env?.VITE_APP_VERSION || 'development';
 
-const queue = [];
-let loading = false;
-let loaded = false;
+const goatCounterQueue = [];
+const umamiQueue = [];
+let goatCounterLoading = false;
+let goatCounterLoaded = false;
+let umamiLoading = false;
+let umamiLoaded = false;
 
 function environment() {
   if (window.location.hostname === 'test.saaristolautat.fi') return 'test';
@@ -23,87 +28,159 @@ function usageMode() {
   return standalone ? 'installed' : 'browser';
 }
 
-function send(item) {
-  if (!loaded || !window.goatcounter?.count || !navigator.onLine) return false;
+function sendGoatCounter(item) {
+  if (!goatCounterLoaded || !window.goatcounter?.count || !navigator.onLine) return false;
   try {
     window.goatcounter.count(item);
     return true;
   } catch (error) {
-    console.warn('Analytics event could not be sent', error);
+    console.warn('GoatCounter event could not be sent', error);
     return false;
   }
 }
 
-function flushQueue() {
-  if (!loaded || !navigator.onLine) return;
-  while (queue.length > 0) {
-    if (!send(queue[0])) return;
-    queue.shift();
+function flushGoatCounterQueue() {
+  if (!goatCounterLoaded || !navigator.onLine) return;
+  while (goatCounterQueue.length > 0) {
+    if (!sendGoatCounter(goatCounterQueue[0])) return;
+    goatCounterQueue.shift();
   }
 }
 
-function enqueue(item) {
-  if (send(item)) return;
-  if (queue.length === MAX_QUEUE_LENGTH) queue.shift();
-  queue.push(item);
+function enqueueGoatCounter(item) {
+  if (sendGoatCounter(item)) return;
+  if (goatCounterQueue.length === MAX_QUEUE_LENGTH) goatCounterQueue.shift();
+  goatCounterQueue.push(item);
 }
 
-function loadScript() {
-  if (!environment() || loading || loaded || !navigator.onLine) return;
-  loading = true;
+function loadGoatCounterScript() {
+  if (!environment() || goatCounterLoading || goatCounterLoaded || !navigator.onLine) return;
+  goatCounterLoading = true;
   window.goatcounter = { no_onload: true, no_events: true };
   const script = document.createElement('script');
   script.async = true;
-  script.src = SCRIPT_URL;
-  script.dataset.goatcounter = ENDPOINT;
+  script.src = GOATCOUNTER_SCRIPT_URL;
+  script.dataset.goatcounter = GOATCOUNTER_ENDPOINT;
   script.dataset.goatcounterSettings = JSON.stringify({ no_onload: true, no_events: true });
   script.addEventListener('load', () => {
-    loading = false;
-    loaded = true;
-    flushQueue();
+    goatCounterLoading = false;
+    goatCounterLoaded = true;
+    flushGoatCounterQueue();
   });
   script.addEventListener('error', () => {
-    loading = false;
+    goatCounterLoading = false;
   });
   document.head.appendChild(script);
+}
+
+function sendUmami(item) {
+  if (!umamiLoaded || !window.umami?.track || !navigator.onLine) return false;
+  try {
+    window.umami.track(item.name, item.data);
+    return true;
+  } catch (error) {
+    console.warn('Umami event could not be sent', error);
+    return false;
+  }
+}
+
+function flushUmamiQueue() {
+  if (!umamiLoaded || !navigator.onLine) return;
+  while (umamiQueue.length > 0) {
+    if (!sendUmami(umamiQueue[0])) return;
+    umamiQueue.shift();
+  }
+}
+
+function enqueueUmami(item) {
+  if (!item || sendUmami(item)) return;
+  if (umamiQueue.length === MAX_QUEUE_LENGTH) umamiQueue.shift();
+  umamiQueue.push(item);
+}
+
+function loadUmamiScript() {
+  if (!environment() || !UMAMI_SCRIPT_URL || !UMAMI_WEBSITE_ID || umamiLoading || umamiLoaded || !navigator.onLine) return;
+  umamiLoading = true;
+  const script = document.createElement('script');
+  script.defer = true;
+  script.src = UMAMI_SCRIPT_URL;
+  script.dataset.websiteId = UMAMI_WEBSITE_ID;
+  script.addEventListener('load', () => {
+    umamiLoading = false;
+    umamiLoaded = true;
+    flushUmamiQueue();
+  });
+  script.addEventListener('error', () => {
+    umamiLoading = false;
+  });
+  document.head.appendChild(script);
+}
+
+function umamiEvent(path) {
+  const segments = path.split('/');
+  if (segments[0] === 'route' && segments.length >= 3) {
+    return { name: 'route-open', data: { source: segments[1], route: segments.slice(2).join('/') } };
+  }
+  if (segments[0] === 'timetable' && segments.length >= 3) {
+    return { name: 'timetable-open', data: { route: segments[1], timetable: segments.slice(2).join('/') } };
+  }
+  if (segments[0] === 'live' && segments[1] === 'use') {
+    return { name: 'live-use' };
+  }
+  if (segments[0] === 'client' && segments.length >= 3) {
+    const [, setting, action, ...valueParts] = segments;
+    const value = valueParts.join('/');
+    if (setting === 'map') return { name: `map-${action}`, data: { map: value } };
+    if (setting === 'language') return { name: `language-${action}`, data: { language: value } };
+    if (setting === 'version') return { name: 'client-version', data: { version: [action, ...valueParts].join('/') } };
+    if (setting === 'mode') return { name: 'usage-mode', data: { mode: [action, ...valueParts].join('/') } };
+  }
+  return { name: 'interaction', data: { path } };
 }
 
 export function initAnalytics() {
   const currentEnvironment = environment();
   if (!currentEnvironment) return;
-  enqueue({
+  enqueueGoatCounter({
     path: `/${currentEnvironment}${window.location.pathname}`,
     title: document.title,
     referrer: document.referrer,
   });
-  enqueue({
+  enqueueGoatCounter({
     path: `${currentEnvironment}/client/version/${safeSegment(APP_VERSION)}`,
     title: `Sovellusversio: ${APP_VERSION}`,
     event: true,
   });
+  enqueueUmami({ name: 'client-version', data: { version: APP_VERSION } });
   const mode = usageMode();
-  enqueue({
+  enqueueGoatCounter({
     path: `${currentEnvironment}/client/mode/${mode}`,
     title: mode === 'installed' ? 'Asennettu sovellus' : 'Selainkäyttö',
     event: true,
   });
-  loadScript();
+  enqueueUmami({ name: 'usage-mode', data: { mode } });
+  loadGoatCounterScript();
+  loadUmamiScript();
   window.addEventListener('online', () => {
-    loadScript();
-    flushQueue();
+    loadGoatCounterScript();
+    loadUmamiScript();
+    flushGoatCounterQueue();
+    flushUmamiQueue();
   });
 }
 
 function trackEventWithSession(path, title, countEveryTime) {
   const currentEnvironment = environment();
   if (!currentEnvironment) return;
-  enqueue({
+  enqueueGoatCounter({
     path: `${currentEnvironment}/${path.split('/').map(safeSegment).join('/')}`,
     title,
     event: true,
     ...(countEveryTime ? { no_session: true } : {}),
   });
-  loadScript();
+  enqueueUmami(umamiEvent(path));
+  loadGoatCounterScript();
+  loadUmamiScript();
 }
 
 export function trackEvent(path, title) {

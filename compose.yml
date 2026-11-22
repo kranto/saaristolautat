@@ -6,6 +6,8 @@ services:
       context: .
       args:
         APP_ENV: production
+        UMAMI_SCRIPT_URL: ${UMAMI_SCRIPT_URL:-https://cloud.umami.is/script.js}
+        UMAMI_WEBSITE_ID: ${UMAMI_WEBSITE_ID:-6d0b3cd2-13e7-4bb4-9bb0-99b9e57ad936}
     image: saaristolautat-site:production
     restart: unless-stopped
     volumes:
@@ -19,6 +21,8 @@ services:
       context: .
       args:
         APP_ENV: test
+        UMAMI_SCRIPT_URL: ${UMAMI_SCRIPT_URL:-https://cloud.umami.is/script.js}
+        UMAMI_WEBSITE_ID: ${UMAMI_WEBSITE_ID:-6d0b3cd2-13e7-4bb4-9bb0-99b9e57ad936}
     image: saaristolautat-site:test
     restart: unless-stopped
     volumes:
