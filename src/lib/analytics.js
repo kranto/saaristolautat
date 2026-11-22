@@ -124,14 +124,12 @@ function umamiEvent(path) {
   if (segments[0] === 'timetable' && segments.length >= 3) {
     return { name: 'timetable-open', data: { route: segments[1], timetable: segments.slice(2).join('/') } };
   }
-  if (segments[0] === 'live' && ['on', 'off'].includes(segments[1])) {
-    return { name: 'live', data: { state: segments[1] } };
-  }
   if (segments[0] === 'client' && segments.length >= 3) {
     const [, setting, action, ...valueParts] = segments;
     const value = valueParts.join('/');
     if (setting === 'map') return { name: `map-${action}`, data: { map: value } };
     if (setting === 'language') return { name: `language-${action}`, data: { language: value } };
+    if (setting === 'live') return { name: `live-${action}`, data: { live: value } };
   }
   return { name: 'interaction', data: { path } };
 }
@@ -217,7 +215,7 @@ export function initSettingsAnalytics(store) {
     }
     if (current.layers.live !== previous.layers.live) {
       const state = current.layers.live ? 'on' : 'off';
-      trackEvent(`live/${state}`, `Live-seuranta: ${state}`);
+      trackEvent(`client/live/change/${state}`, `Live-seuranta vaihdettu: ${state}`);
     }
     previous = current;
   });
