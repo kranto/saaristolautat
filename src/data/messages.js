@@ -138,7 +138,8 @@ const messagesRaw = { // FI SV EN
         live: ["Live", "Live", "Live"],
     },
     search: {
-        placeholder: ["Hae reittejä, laitureita ja aluksia", "Sök rutter, bryggor och fartyg", "Search routes, ferry landings and vessels"]
+        placeholder: ["Hae reittejä, laitureita ja aluksia", "Sök rutter, bryggor och fartyg", "Search routes, ferry landings and vessels"],
+        recentRoutes: ["Viimeisimmät reitit", "Senaste rutterna", "Recent routes"]
     }
 };
 

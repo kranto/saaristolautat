@@ -3,6 +3,7 @@ import { getMapView, panToMapObject } from './mapnavigation';
 import { hideMenuAndSettings } from './uicontrol';
 import { shortName, description } from './datautils';
 import { trackEvent } from './analytics';
+import { rememberRoute } from './recentRoutes';
 
 const { history, location, $ } = window;
 let hashRetry;
@@ -23,6 +24,7 @@ window.onhashchange = () => {
   var hash = location.hash.substring(1);
   if (data.routes[hash]) {
     var newState = { route: hash, timetable: null };
+    rememberRoute('route', hash);
     if (new URLSearchParams(location.search).get('source') === 'landing') {
       trackEvent(`route/landing/${hash}`, `Reitti avattu laskeutumissivulta: ${hash}`);
     }
@@ -84,6 +86,8 @@ export function closeInfoPage() {
 }
 
 export function selectRoute(route, panTo=true, source='other') {
+  if (Array.isArray(route)) route.forEach(id => rememberRoute('longdistance', id));
+  else rememberRoute('route', route);
   trackEvent(`route/${source}/${route}`, `Reitti avattu (${source}): ${route}`);
   history.pushState({ route: route, timetable: null }, null, null);
   navigateTo(history.state, panTo);

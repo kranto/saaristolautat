@@ -547,6 +547,15 @@ div#infopagecontent {
   background-color: #f8f8f8;
 }
 
+.recentroutesheading {
+  margin: 15px 5px 0;
+  font-weight: bold;
+}
+
+#recentroutes .searchhitgroup {
+  margin-top: 5px;
+}
+
 .searchhitgroup.pier:before {
   font-family: FontAwesome;
   content: "\f13d";
