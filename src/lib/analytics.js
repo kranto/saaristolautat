@@ -201,6 +201,7 @@ export function initSettingsAnalytics(store) {
       language: previous.locale,
       map: previous.mapTypeId,
       live,
+      'first-visit': window.__SAARISTOLAUTAT_FIRST_VISIT__ === true,
     },
   });
   loadUmamiScript();

@@ -5,6 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <meta name="HandheldFriendly" content="true" />
 
+    <script>
+      try {
+        window.__SAARISTOLAUTAT_FIRST_VISIT__ = window.localStorage.length === 0;
+      } catch {
+        window.__SAARISTOLAUTAT_FIRST_VISIT__ = false;
+      }
+    </script>
+
     <title>Saaristolautat.fi</title>
     <meta name="description" content="Turun saariston, Ahvenanmaan ja lähialueiden lauttareitit, laiturit, alukset ja aikataulut yhdellä kartalla." />
     <meta name="robots" content="index, follow, max-image-preview:large" />
